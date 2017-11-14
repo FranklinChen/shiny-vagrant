@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/artful64"
 
   # Using 'vagrant plugin install vagrant-disksize'
-  config.disksize.size = '50GB'
+#  config.disksize.size = '50GB'
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
-  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 3838, host: 8080, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -78,10 +78,15 @@ Vagrant.configure("2") do |config|
     #R -e "install.packages('RCurl',repos='https://cran.ma.imperial.ac.uk/')" 
     R -e "install.packages('rmarkdown', repos='http://cran.rstudio.com/')"
     R -e "install.packages('DT',repos='https://cran.rstudio.com/')"
-    #R -e "install.packages('xml2',repos='https://cran.ma.imperial.ac.uk/')" 
-    #R -e "install.packages('dplyr',repos='https://cran.ma.imperial.ac.uk/')" 
     R -e "install.packages('devtools',repos='https://cran.ma.imperial.ac.uk/')" 
     R -e "devtools::install_github('rstudio/DT@feature/editor')"
     R -e "install.packages('shinycssloaders',repos='https://cran.ma.imperial.ac.uk/')"
+
+    R -e "install.packages('ngram',repos='https://cran.ma.imperial.ac.uk/')" 
+    R -e "install.packages('xml2',repos='https://cran.ma.imperial.ac.uk/')" 
+    R -e "install.packages('dplyr',repos='https://cran.ma.imperial.ac.uk/')" 
+    R -e "install.packages('doParallel',repos='https://cran.ma.imperial.ac.uk/')" 
+ 
+    cp -r /vagrant/shiny-server/* /srv/shiny-server
   SHELL
 end

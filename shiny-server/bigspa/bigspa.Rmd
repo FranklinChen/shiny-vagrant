@@ -1,0 +1,187 @@
+---
+title: "Sentence Prediction Accuracy (SPA)"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+- This page displays sentence prediction accuracy scores for adult and child utterances in typologically different corpora.  Scroll down for more information.  Click [here](../toolkit/) to return to toolkit page.
+
+```{r setup, include=FALSE}
+require(stringr)
+
+library(shinycssloaders)
+require(ggplot2)
+ignore = "-----"
+results = read.csv("storage/bigspa.csv",stringsAsFactors=F)
+#write.csv(results3,"allresults.csv")
+results$X=NULL
+results$corpus=as.character(results$corpus)
+results$corpus=str_replace(results$corpus,"_Utterance.csv","")
+#results$testRole = factor(results$testRole)
+corlist = sort(unique(results$corpus))
+#activecorlist = unique(results$corpus[str_detect(results$corpus,"^([^_]+_[^_]+)_Utterance.rds")])
+#activecorlist = list.files("/media/big/childes/corpus/childes/basharcsv","*.csv")
+actualcorlist = list.files("/media/big/childes/corpus/childes/storage/actualcsv","*.csv")
+activecorlist = c('Celtic_Welsh_CIG1_Utterance.csv','Chinese_Mandarin_TCCM_Utterance.csv','Dutch_Groningen_Matthijs_Utterance.csv','EastAsian_Indonesian_Jakarta_Utterance.csv','EastAsian_Korean_Ryu_Utterance.csv','Eng-UK_Thomas_Utterance.csv','German_Leo_ALL_Utterance.csv','Japanese_MiiPro_Nanami_Utterance.csv','Other_Basque_Soto_Utterance.csv','Other_Farsi_Family_Utterance.csv','Other_Hebrew_BermanLong_Utterance.csv','Other_Sesotho_Demuth_Utterance.csv','Romance_Italian_Calambrone_Utterance.csv','Romance_Portuguese_Santos_Utterance.csv','Scandinavian_Danish_Plunkett_Utterance.csv','Scandinavian_Swedish_Lund_Utterance.csv','Slavic_Croatian_Kovacevic_Utterance.csv','Slavic_Serbian_SCECL_Utterance.csv')
+activecorlist=str_replace(activecorlist,"_Utterance.csv","")
+activecorlist=as.character(activecorlist)
+diverse18 = activecorlist
+modeltypes = unique(results$modelname)
+results$corpus=factor(results$corpus)
+#ggplot(results,aes(x=corpus,y=SPA,group=modelname,shape=modelname,colour=modelname,label=numTrain))+geom_point()+geom_line()+facet_wrap(~ testRole,ncol=1) + coord_flip() + ylim(0,100) + geom_text(aes(x=corpus,y=100),colour="black")+theme_bw()
+```
+
+```{r, echo=FALSE}
+
+shinyApp(
+  ui =  fluidPage(
+    mainPanel(
+      textOutput("text1")
+      ,fluidRow(
+        column(2
+        ,selectInput("preset", "Presets:", 
+            choices = c("Diverse","> 100000","> 50000","Empty"), width='100%'))
+        ,column(4
+        ,selectInput("oneCorpus", "Corpus:", 
+                             choices = corlist, width='100%'))
+        ,column(2,h1("     "),actionButton("add", "Add Corpus"))
+      ,column(2,h1("     "),actionButton("remove", "Remove Corpus"))
+      
+    )
+    ,plotOutput("plot",height="1000px")
+    ,fluidRow(column(4
+    ,selectInput("xdim", "Learner1:",choices = modeltypes,selected="AdjLearner"))
+    ,column(4
+    ,selectInput("ydim", "Learner2:",choices = modeltypes,selected="ProminenceLearner"))
+    ,column(4
+    ,selectInput("accscore", "Accuracy:",choices = c("SPA","WAC"),selected="SPA")))
+    ,plotOutput("scatterplot",height = "800px")
+    ,downloadButton('downloadData', 'Download')
+    )
+  ),
+  server = function(input, output, session) {
+    values <- reactiveValues()
+#    source('shared2.R', local=TRUE)
+    #values$updateFilter = FALSE
+ #   values$updateFilter = TRUE
+#    dd <- readFileDir("Eng-NA","Bates","Free20")
+    values$whole=results
+    values$text1 = ""
+    values$activecorlist = activecorlist
+    values$selectdf = results[results$corpus %in% activecorlist,]
+    values$height = 800
+#    values$updateFilter = TRUE
+#    values$recodeUI = NULL
+#    values$table<-preread
+     output$plot<-renderPlot({
+       if (length(values$selectdf$corpus) > 1){
+       values$selectdf$corpus=factor(values$selectdf$corpus)
+       fontsize = 800/(40+nlevels(values$selectdf$corpus))
+
+#       values$text1 = paste(capture.output(print(unique(values$selectdf$corpus))),collapse=",") 
+       values$selectdf$modelname=factor(values$selectdf$modelname,levels=c("ChanceLearner","BigramLearner","TrigramLearner", "AdjLearner", "ProminenceLearner","AdjPromLearner" ))
+     p = ggplot(values$selectdf,aes(x=corpus,y=SPA,group=modelname,shape=modelname,colour=modelname,label=numTrain))
+     p=p+geom_point()
+     p=p+geom_line()
+     p=p+facet_wrap(~ testRole,ncol=1) 
+     p=p + coord_flip() + ylim(0,100) 
+    p=p+theme_bw()
+    p=p+theme(text = element_text(size=fontsize))
+     p=p + geom_text(aes(x=corpus,y=90),colour="black",size=fontsize*5/14)
+     p
+      }
+       })
+     
+     output$text1 <- renderText({ values$text1 })
+     
+     output$scatterplot<-renderPlot({
+        if (length(values$selectdf$corpus) > 1){
+        adult = values$selectdf[values$selectdf$testRole == "Adult",]
+        res = adult[adult$modelname %in% input$xdim,]
+        res$xdim = res[,input$accscore] 
+        res$ydim = adult[adult$modelname %in% input$ydim,input$accscore]
+        res$corpus=factor(res$corpus)
+        res$num = as.character(as.integer(res$corpus))
+        res$NumCorpus = paste(res$num,res$corpus,sep=" ")
+        res = res[order(as.integer(res$corpus)),]
+        rmax = max(adult[input$accscore])+5
+        rmin = min(adult[input$accscore])-5
+        res$NumCorpus = factor(res$NumCorpus)
+        p = ggplot(res,aes(x=xdim,y=ydim,label=num,colour=NumCorpus))
+        p = p +geom_text()+ ylim(rmin,rmax)+ xlim(rmin,rmax)
+        p = p+theme_bw()
+        if (nlevels(res$NumCorpus) < 40){
+        p = p + theme(legend.position=c(0, 1),legend.justification=c(0,1))
+        }else{
+         p = p + theme(legend.position="bottom")
+        }
+        p = p +ylab(input$ydim)+xlab(input$xdim)
+        p = p + geom_smooth(method='lm',formula=y~x,colour="grey",se=F,linetype="dashed")
+#        p = p  + geom_abline(intercept = 0,slope=1,linetype="dashed")
+        p
+        }
+      })
+     
+     observeEvent(input$preset, {
+       if (input$preset == "Diverse"){
+         values$activecorlist = diverse18
+         values$selectdf = results[results$corpus %in% values$activecorlist,]
+       }
+       if (input$preset == "> 100000"){
+         values$selectdf = results[results$numTrain > 100000,]
+         values$activecorlist = unique(values$selectdf$corpus)
+       }
+       if (input$preset == "> 50000"){
+         values$selectdf = results[results$numTrain > 50000,]
+         values$activecorlist = unique(values$selectdf$corpus)
+       }
+       if (input$preset == "Empty"){
+#         values$selectdf = results[1,]
+         values$activecorlist = c()
+       }
+    })
+     
+     observeEvent(input$add, {
+      values$activecorlist = union(values$activecorlist,c(input$oneCorpus))
+      values$selectdf = results[results$corpus %in% values$activecorlist,]
+    })
+     
+     observeEvent(input$remove, {
+      values$activecorlist = setdiff(values$activecorlist,c(input$oneCorpus))
+      values$selectdf = results[results$corpus %in% values$activecorlist,]
+    })
+     
+     
+
+output$downloadData <- downloadHandler(
+  filename = function() { 
+    "spaScores.csv"
+  },
+  content <- function(file) {
+    write.csv(values$selectdf, file, fileEncoding = "UTF-8",quote=T,row.names = F)
+  }
+  ,contentType = "text/csv"
+)
+  }
+  ,options = list(width=1200,height = 2000)
+)
+```
+
+- Bag-of-words Incremental Generation Sentence Prediction Accuracy (BIG-SPA) is an evaluation metric that can be used to compare how well sentences in typologically-different languages can be predicted by learners based on various statistics.  The approach is described in Chang, Lieven, and Tomasello (2008) <a href="https://sites.google.com/site/sentenceproductionmodel/cv/chang%2Clieven%2Ctomasello%2C2008.pdf?attredirects=0">pdf</a>.  For the child test scores, the whole adult input is used to collect the statistics.  For the adult test scores, 90% of the adult input is used for training and the remaining 10% is used for test. The adult test shows how well the learners work for mostly grammatical utterances.  The child test shows how well adult statistics generalize to child utterances.  The raw SPA score is not that interesting, because it depends on various factors (e.g., average length of utterances in the corpus).  But the differences in the scores between learners can be informative, because these show how different algorithms make use of the information that is available.
+
+- The first plot shows the scores for a typologically-diverse set of large corpora in CHILDES (number of adult training utterances is shown around 100 on y-axis).  If the score is on average higher for a particular learner across languages, that suggests that that learner is better able to make use of the statistics in the corpora to predict utterances.  You can add corpora or remove corpora by using the buttons and selector.  
+You can use the preset selector to select different subsets.
+    1. _Diverse_ 18 large typologically distinct languages
+    2. _>100000_ all corpora with more than 100000 adult utterances
+    3. _>50000_ all corpora with more than 50000 adult utterances
+    4. _Empty_ an empty set for creating a custom set
+
+- BIG-SPA scores can be an objective way to measure typological differences. The second plot shows a scatter plot for two different Learners, which allows us to spatial classify learners based on the relative preference for these learners.  A regression line is drawn and languages above the line tend to work better with the learner on the y-axis and those that are below the line tend to work better with the learner on the x-axis.  You can change the learners and the accuracy measure (sentence or word prediction accuracy) by using the selectors. 
+
+- The scores are regenerated every month and the raw SPA scores can change depending on updates in the corpora or different random utterances being used for training.
+
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
+
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/

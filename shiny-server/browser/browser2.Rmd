@@ -1,0 +1,91 @@
+---
+title: "CHILDES Browser"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+```{r setup, include=FALSE}
+require("stringr")
+library(shinycssloaders)
+require(RCurl)
+
+#alldf = read.csv("storage/summaryChildes.csv")
+#saveRDS(alldf,file="storage/summaryChildes.rds")
+alldf = readRDS(file="storage/summaryChildes.rds")
+alldf$X=NULL
+alldf$minAge[alldf$minAge == Inf]=NA
+alldf$minAge[alldf$minAge == -Inf]=NA
+alldf$maxAge[alldf$maxAge == Inf]=NA
+alldf$maxAge[alldf$maxAge == -Inf]=NA
+alldf$wordsPerUtt = round(alldf$wordsPerUtt,2)
+alldf$percTarChild = round(alldf$percTarChild*100)
+alldf$percParent = round(alldf$percParent*100)
+alldf$percOthers = round(alldf$percOthers*100)
+names(alldf)[1:2] <- c("langgroup","language")
+
+```
+
+```{r, echo=FALSE}
+
+shinyApp(
+  ui =  fluidPage(
+    sidebarPanel(helpText("To select a corpus, you can use this table, which provides various statistics about each corpus (columns are described below).  Use arrow key to see columns to right")
+                 ,helpText("Click on a row to see info about the corpus")      
+                 ,helpText("To sort by a column, click on the arrow next to each column label")
+                 ,helpText("To limit the elements in each column, click on the box below the label and select levels.  If the column is numeric, you can limit the range of values by adjusting the ends of the slider")
+                 ,h4("Column names")
+                 ,helpText("numWords: number of words in the corpus")
+                 ,helpText("numUtt: number of utterances in the corpus")
+                 ,helpText("wordsPerUtt: average number of words per utterance")
+                 ,helpText("minAge: lowest age in months for that corpus")
+                 ,helpText("maxAge: highest age in months for that corpus")
+                 ,helpText("percTarChild: percent of utterances that were by the target child")
+                 ,helpText("percParent: percent of utterances that were by the mother or father")
+                 ,helpText("percOthers: percent of utterances that were by other speakers")
+                 ,width = 2
+    )
+    ,mainPanel(
+      fluidPage(
+      withSpinner(DT::dataTableOutput("table",height = '400px'))
+      ,hr("------")
+      ,column(8
+      ,wellPanel(id = "tPanel",style = "overflow-y:scroll; max-height: 600px"
+                 ,htmlOutput("childeshtml")
+      )))
+    )),
+  server = function(input, output, session) {
+    values <- reactiveValues()
+    values$table = alldf
+    
+    getPage<-function(s) {
+      lg = values$table$langgroup[s]
+      lang = values$table$language[s]
+      corpus = values$table$corpus[s]
+      hf =  paste("http://childes.talkbank.org/access",lg,lang,corpus,sep="/")
+      if (url.exists(hf)){
+        return(includeHTML(hf))
+      }
+      hf =  paste("http://childes.talkbank.org/access",lg,lang,sep="/")
+      return(includeHTML(hf))
+    }
+    
+    output$childeshtml<-renderUI({
+      s = input$table_rows_selected
+      getPage(s)
+    })
+    
+    output$table <- DT::renderDataTable(DT::datatable(values$table,filter = 'top',selection = 'single'
+                                                      ,options = list( autoWidth = TRUE, lengthMenu = c(5, 10, 20, 200))
+                                                      #      ,  columnDefs = list(list(width = '80px', targets=1:3)))
+    ))
+  }
+  ,options = list(height=900, width = 1500)
+)
+```
+
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+
+

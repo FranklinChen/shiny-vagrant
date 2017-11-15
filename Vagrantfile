@@ -67,7 +67,9 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    resize2fs /dev/sda1
+   resize2fs /dev/sda1
+   if [ ! -f /srv/shiny-server/index.html ]; then
+
     apt-get update
     apt-get install -y apache2 r-base r-cran-rcpp r-cran-httpuv r-cran-htmltools r-cran-sourcetools r-cran-digest r-cran-stringr r-cran-dplyr r-cran-ggplot2 r-cran-rcurl r-cran-xml2 libpoppler-cpp-dev poppler-utils pandoc libcurl4-openssl-dev libxml2-dev libssl-dev emacs gdebi-core
     SHINY=shiny-server-1.5.3.838-amd64.deb
@@ -86,7 +88,13 @@ Vagrant.configure("2") do |config|
     R -e "install.packages('xml2',repos='https://cran.ma.imperial.ac.uk/')" 
     R -e "install.packages('dplyr',repos='https://cran.ma.imperial.ac.uk/')" 
     R -e "install.packages('doParallel',repos='https://cran.ma.imperial.ac.uk/')" 
- 
-    cp -r /vagrant/shiny-server/* /srv/shiny-server
+   fi
+    cp -r /vagrant/shiny-server/* /srv/shiny-server/
+    ln -s /vagrant/storage /srv/shiny-server/bigspa/storage
+    ln -s /vagrant/storage /srv/shiny-server/childes2csv/storage
+    ln -s /vagrant/storage /srv/shiny-server/browser/storage
+    ln -s /vagrant/storage /srv/shiny-server/ngrams/storage
+    ln -s /vagrant/storage /srv/shiny-server/filterCombine/storage
+   
   SHELL
 end

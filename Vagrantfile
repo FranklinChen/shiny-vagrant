@@ -68,27 +68,22 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
    resize2fs /dev/sda1
-   if [ ! -f /srv/shiny-server/index.html ]; then
 
+   # install apache R
     apt-get update
     apt-get install -y apache2 r-base r-cran-rcpp r-cran-httpuv r-cran-htmltools r-cran-sourcetools r-cran-digest r-cran-stringr r-cran-dplyr r-cran-ggplot2 r-cran-rcurl r-cran-xml2 libpoppler-cpp-dev poppler-utils pandoc libcurl4-openssl-dev libxml2-dev libssl-dev emacs gdebi-core
-    SHINY=shiny-server-1.5.3.838-amd64.deb
+
+   # install shiny server
+   SHINY=shiny-server-1.5.3.838-amd64.deb
+   if [ ! -f /srv/shiny-server/index.html ]; then
     wget -N https://download3.rstudio.org/ubuntu-12.04/x86_64/$SHINY
     gdebi --non-interactive $SHINY
+  fi
 
-    R -e "install.packages('shiny', repos='https://cran.rstudio.com/')"
-    #R -e "install.packages('RCurl',repos='https://cran.ma.imperial.ac.uk/')" 
-    R -e "install.packages('rmarkdown', repos='http://cran.rstudio.com/')"
-    R -e "install.packages('DT',repos='https://cran.rstudio.com/')"
-    R -e "install.packages('devtools',repos='https://cran.ma.imperial.ac.uk/')" 
-    R -e "devtools::install_github('rstudio/DT@feature/editor')"
-    R -e "install.packages('shinycssloaders',repos='https://cran.ma.imperial.ac.uk/')"
-
-    R -e "install.packages('ngram',repos='https://cran.ma.imperial.ac.uk/')" 
-    R -e "install.packages('xml2',repos='https://cran.ma.imperial.ac.uk/')" 
-    R -e "install.packages('dplyr',repos='https://cran.ma.imperial.ac.uk/')" 
-    R -e "install.packages('doParallel',repos='https://cran.ma.imperial.ac.uk/')" 
-   fi
+   # install R libraries
+    Rscript /vagrant/testInstall.R
+    
+    # setup shiny files
     cp -r /vagrant/shiny-server/* /srv/shiny-server/
     ln -s /vagrant/storage /srv/shiny-server/bigspa/storage
     ln -s /vagrant/storage /srv/shiny-server/childes2csv/storage

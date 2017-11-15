@@ -13,7 +13,7 @@ library(shinycssloaders)
 
 ignore = "-----"
 preread <- readRDS("storage/csvcorpora/Eng-UK_Belfast_Barbara_Word.rds")
-
+preread=preread[1:10000,]
 ```
 
 ```{r, echo=FALSE}
@@ -28,6 +28,8 @@ shinyApp(
                               choices = c("Barbara"),width='90%')
                  ,selectInput("rowunit", "Row Unit:", 
                               choices = c("Word","Utterance"), selected="Word",width='90%')
+                 ,selectInput("maxsize", "Max Size: ", 
+                              choices = c(10000,100000,1000000,10000000,1000000000000),width='90%')
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
     ,fluidRow(column(8,h4("Filter: Put a search string in the expression box and then selecting a column to filter on.  Strings and regular expressions are acceptable.")), column(3, downloadButton('downloadFilter','Download Filtered')))
@@ -59,6 +61,7 @@ shinyApp(
     source('shared2.R', local=TRUE)
     values$updateFilter = TRUE
     values$recodeUI = NULL
+    values$maxsize = 10000
     values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Belfast","Barbara")
 
@@ -75,12 +78,17 @@ shinyApp(
     
      observeEvent(input$lang,  ignoreInit=T,{
       updateCorpusSelect()
-      if (input$corpus == ignore){
-         searchForCorpusFile()
-          updateSelectorTable()
-      }
+  #    if (input$corpus == ignore){
+   #      searchForCorpusFile()
+   #       updateSelectorTable()
+    #  }
     })
-    
+     
+     observeEvent(input$maxsize,  ignoreInit=T,{
+        values$maxsize = as.integer(input$maxsize)
+        values$fulltable=values$fulltable[1:values$maxsize,]
+     })
+     
    observeEvent(input$source1,  ignoreInit=T,{
       if (input$source1 %in% names(values$table)){
         lev = as.character(unique(values$table[,input$source1]))
@@ -225,7 +233,7 @@ shinyApp(
 )
 ```
 
-- This program filters CHILDES corpora.  You first select the language group, language, and corpus that you want to use.  
+- This program filters CHILDES corpora.  You first select the language group, language, corpus, and row unit that you want to use.  Max size determines the maximum size of the corpus (the server is too slow for some analyses when using the whole corpus).
 - Let's say you want to see how the words "this" and "that" are used over development.  You can put the regular expression ^(this|that)$ into the Expression1 box.  Then change Column1 to the word column, which is w.  To learn more about regular expressions, click [here](https://regexone.com/lesson/introduction_abcs).  
 - Then you need to convert these words into numbers, so in the Recode section, put "w"" in the Source and you will see a set of boxes for "this" and "that".  Put a 1 in the "that" box and a 0 in the "this" box.  Then click Create and you will get a column new_w which codes 1 for "that" and 0 for "this" (see table above)
 - Now we want to see how the use of "this" and "that" change over development, so we put Y in the Group1 column.  You should see in the result table below the total number of rows in the data for each year of age.  Now change the Combine to "mean" and the DepVar to "new_w" and you will see the mean relative production of "that" vs "this".  Greater than 0.5 means that "that" is more than "this".  You can download the results or the original table using the download buttons.

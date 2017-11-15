@@ -84,13 +84,13 @@ Vagrant.configure("2") do |config|
     Rscript /vagrant/testInstall.R
     
     # setup shiny files
-    cp -r /vagrant/shiny-server/* /srv/shiny-server/
-    ln -s /vagrant/storage /srv/shiny-server/bigspa/storage
-    ln -s /vagrant/storage /srv/shiny-server/childes2csv/storage
-    ln -s /vagrant/storage /srv/shiny-server/browser/storage
-    ln -s /vagrant/storage /srv/shiny-server/ngrams/storage
-    ln -s /vagrant/storage /srv/shiny-server/filterCombine/storage
-    ln -s /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/filterCombine/
-    ln -s /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/ngrams/
+    rsync -avz /vagrant/shiny-server/ /srv/shiny-server/
+    ln -sf /vagrant/storage /srv/shiny-server/bigspa/storage
+    ln -sf /vagrant/storage /srv/shiny-server/childes2csv/storage
+    ln -sf /vagrant/storage /srv/shiny-server/browser/storage
+    ln -sf /vagrant/storage /srv/shiny-server/ngrams/storage
+    ln -sf /vagrant/storage /srv/shiny-server/filterCombine/storage
+    ln -sf /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/filterCombine/
+    ln -sf /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/ngrams/
   SHELL
 end

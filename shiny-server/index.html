@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>The LuCiD Toolkit</title>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="section-header">
+
+
+
+<h1 class="title toc-ignore">The LuCiD Toolkit</h1>
+
+</div>
+
+
+<p><img src="browser/LuCid.jpg" style="width: 15%; height: 15%; position:absolute;top:10px;right:10px;" /></p>
+<div id="section-childes-browser" class="section level4">
+<h4>CHILDES Browser</h4>
+<ul>
+<li><p>This browser allows you to examine various statistics to identify which corpus to use.</p>
+<ul>
+<li><a href="browser/">Browser</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="section-bag-of-words-incremental-generation---sentence-prediction-accuracy-bigspa" class="section level4">
+<h4>Bag-of-words Incremental Generation - Sentence Prediction Accuracy (BIGSPA)</h4>
+<ul>
+<li><p>This displays figures showing how well different statistics are at generating sentences in adult and child utterances in typologically-different languages.</p>
+<ul>
+<li><a href="bigspa/">BIGSPA</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="section-childes2csv" class="section level4">
+<h4>Childes2csv</h4>
+<ul>
+<li><p>Childes corpora are provided in various formats, but it can be difficult to convert them into data.frames which can be used in R for various analyses. Childes2csv is a program that generates CSV files directly from CHILDES XML files. It can generate word or utterance level corpora at different levels (e.g., dialects, languages). More information about how to use it is available at the bottom of the page.</p>
+<ul>
+<li><a href="childes2csv/">Childes2csv</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="section-filtergroup" class="section level4">
+<h4>FilterGroup</h4>
+<ul>
+<li><p>Another task that one often needs to do is to filter corpora for words/utterances that match particular rules. Also, it is useful to be able to count the number of rows for particular categories in the corpus. Both of these can be done with the Filter Group CHILDES Analyses program.</p>
+<ul>
+<li><a href="filterGroup/">FilterGroup</a>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="section-ngrams" class="section level4">
+<h4>Ngrams</h4>
+<ul>
+<li><p>This allows you to examine 1- to 4-grams in various corpora</p>
+<ul>
+<li><a href="ngrams/">Ngrams</a>.</li>
+</ul></li>
+</ul>
+<p></p>
+<ul>
+<li><p>This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (<a href="http://www.lucid.ac.uk/" class="uri">http://www.lucid.ac.uk/</a>, ESRC grant [ES/L008955/1]). Please contact Franklin Chang with any questions.</p></li>
+<li><p>To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher’s toolkit [Computer software]. Retrieved from <a href="http://www.lucid.ac.uk/resources/for-researchers/toolkit/" class="uri">http://www.lucid.ac.uk/resources/for-researchers/toolkit/</a></p></li>
+</ul>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

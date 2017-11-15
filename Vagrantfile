@@ -95,6 +95,7 @@ Vagrant.configure("2") do |config|
     ln -s /vagrant/storage /srv/shiny-server/browser/storage
     ln -s /vagrant/storage /srv/shiny-server/ngrams/storage
     ln -s /vagrant/storage /srv/shiny-server/filterCombine/storage
-   
+    ln -s /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/filterCombine/
+    ln -s /srv/shiny-server/childes2csv/shared2.R /srv/shiny-server/ngrams/
   SHELL
 end

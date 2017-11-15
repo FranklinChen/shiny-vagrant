@@ -10,6 +10,7 @@ values$parttable = NULL
 values$longcol = c()
 values$fulltable = NULL
 values$csvfile=""
+values$maxsize = 1000000000000
 
 readFileDir <- function(lgrp,lg,corp){
   dd <- readRDS("storage/filesData-XML.rds")
@@ -159,7 +160,11 @@ searchForCorpusFile <- function(){
   if (file.exists(csvfile) && csvfile != values$csvfile){
     print(paste("read csvfile",csvfile))
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
+    print(values$maxsize)
     values$fulltable <- readRDS(csvfile)
+    if (length(values$fulltable$w) > values$maxsize){
+      values$fulltable=values$fulltable[1:values$maxsize,]
+    }
     values$table <- values$fulltable
     adjustTableCol()
     values$csvfile = csvfile

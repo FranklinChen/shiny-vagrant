@@ -12,3 +12,5 @@ Only 2.6 GB is used after installation of Ubuntu and R packages.
 $ vagrant plugin install vagrant-disksize
 $ vagrant up
 ```
+
+The Shiny server will then be accessible at port 8080.

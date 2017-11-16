@@ -13,7 +13,7 @@ require(RCurl)
 
 #alldf = read.csv("storage/summaryChildes.csv")
 #saveRDS(alldf,file="storage/summaryChildes.rds")
-alldf = readRDS(file="storage/summaryChildes.rds")
+alldf = readRDS(file="../storage/summaryChildes.rds")
 alldf$X=NULL
 alldf$minAge[alldf$minAge == Inf]=NA
 alldf$minAge[alldf$minAge == -Inf]=NA

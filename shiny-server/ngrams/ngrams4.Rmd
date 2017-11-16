@@ -13,7 +13,7 @@ library(shinycssloaders)
 require(ggplot2)
 ignore = "-----"
 
-ngramdir = "storage/ngrams"
+ngramdir = "../storage/ngrams"
 
 
 ```
@@ -30,13 +30,13 @@ shinyApp(
                               choices = c(ignore),width='90%')
                  ,selectInput("ngram", "N-gram type", 
                               choices = c("1-gram","2-gram","3-gram","4-gram"), selected="unigram",width='90%')
-                 ,downloadButton('downloadData', 'Download')
+                 ,downloadButton('downloadNgram', 'Download')
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
     ,plotOutput("logrank")
      ),
   server = function(input, output, session) {
-    source('shared2.R', local=TRUE)
+    source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
     dd <- readFileDir("Eng-NA","Bates","Free20")
     
@@ -84,19 +84,17 @@ shinyApp(
       }
       })
     
-    output$downloadData <- downloadHandler(
+    output$downloadNgram <- downloadHandler(
       filename = function() { 
-        getFileName(TRUE)
+        ff= getFileName(TRUE)
+        ff=sub(".rds",".csv",ff)
+        ff
       },
       content <- function(file) {
-     #print(geturl)
-#    file.copy(geturl,file)
-    #download.file(geturl, destfile=file, method="auto")
-        # file.copy(fpath,file)
-
         fpath = getFileName(FALSE)
+        print(fpath)
          wholecsv <- readRDS(fpath)
-           write.csv.utf8.BOM(wholecsv, file)
+           write.csv(wholecsv, file)
 
       }
       ,contentType = "text/csv"

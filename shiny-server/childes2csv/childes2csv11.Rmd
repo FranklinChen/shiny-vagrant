@@ -1,0 +1,107 @@
+---
+title: "Childes to CSV Converter"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+- This program converts CHILDES XML files into CSV formatted files. Scroll down to the bottom for more information. Some files take a while to load, so please be patient. Click [here](../toolkit/) to return to toolkit page.
+
+```{r setup, include=FALSE}
+require(xml2)
+library(shinycssloaders)
+ignore = "-----"
+#dd <- readRDS("storage/filesData-XML.rds")
+preread <- read.csv("../storage/actualcsv/Chinese_Cantonese_HKU_Utterance.csv",nrows=1000)
+#preread2 <- preread[1:1000,]
+```
+
+```{r, echo=FALSE}
+
+shinyApp(
+  ui =  fluidPage(
+    sidebarPanel(selectInput("langGroup", "Language Group:", 
+                             choices = c("Chinese"), width='90%')
+                 ,downloadButton('downloadDataLangGroup', 'Download')
+                 ,selectInput("lang", "Language:", 
+                              choices = c("Cantonese"),width='90%')
+                 ,downloadButton('downloadDataLang', 'Download')
+                 ,selectInput("corpus", "Corpus:", 
+                              choices = c("HKU"),width='90%')
+                 ,downloadButton('downloadDataCorp', 'Download')
+            #     ,selectInput("xmlfileList", "File:", 
+            #                  choices = c(""),width='90%')
+                # ,downloadButton('downloadData', 'Download')
+                 ,selectInput("rowunit", "Row Unit:", 
+                              choices = c("Word","Utterance"), selected="Utterance",width='90%')
+#            ,actionButton('loadwhole', 'Load Whole Corpus')
+            ,selectInput("maxsize", "Max Size: ", 
+                              choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%')
+                 ,width = 3
+    )
+    ,mainPanel(
+      textOutput("text1"),
+      withSpinner(DT::dataTableOutput("parttable"))
+      ,withSpinner(DT::dataTableOutput("table", height = '400px'))
+    )
+  ),
+  server = function(input, output, session) {
+    source('shared3.R', local=TRUE)
+    #values$updateFilter = FALSE
+    values$text1 = ""
+    values$updateFilter = TRUE
+    values$recodeUI = NULL
+    values$maxsize = 1000
+    values$fulltable <- preread
+    values$table<-preread
+    
+    dd <- readFileDir("Chinese","Cantonese","HKU")
+ #   values$table <- readRDS("storage/csvcorpora/Chinese_Cantonese_HKU_Utterance.rds")
+     observeEvent(values$table, once=T,{
+        createPartTable()
+        adjustTableCol()
+    })
+   
+   # output$text1 <- renderText({ values$text1 })
+
+   observeEvent(input$corpus, ignoreInit=T,{
+      updateCorpusSelect()
+#      if (input$corpus != ignore){
+         searchForCorpusFile()
+       #  createPartTable()
+#      }
+    })
+    
+     observeEvent(input$lang,  ignoreInit=T,{
+      updateCorpusSelect()
+   #   if (input$corpus == ignore){
+  #       searchForCorpusFile()
+   #     createPartTable()
+  #    }
+    })
+     
+     observeEvent(input$rowunit,  ignoreInit=T,{
+        searchForCorpusFile()
+  #      
+    })
+     
+     observeEvent(input$maxsize,  ignoreInit=T,{
+        values$maxsize = as.integer(input$maxsize)
+        searchForCorpusFile()
+  #      
+    })
+                                            
+  }
+  ,options = list(width=1200,height = 650)
+)
+```
+
+- This program converts CHILDES XML files into CSV formatted files.  You first select the language group, language, corpus, and row unit that you want to use. The participant data and the corpus will be shown on the right side.  Max size determines the maximum size of the corpus in the viewer.
+- You can scroll right by clicking on a cell and using the right arrow key (or double fingers on a trackpad).  
+- Participant information is added to the main database for each speaker. The age of the child in years (Y), months (M), and days (D) is also added for all lines to allow analyses of how child or parental speech changes in response to the age of the child.
+- You can download a file at the corpus, language, and language group level. You will be downloading the whole file (regardless of max size), so it can take a while to download. You should be able to open csv files in excel, but if you need unicode encoded characters, then first load it in R and save using write.xlsx.
+- All files are generated from CHILDES XML in a way that attempts to maintain as much information as possible.  If you don't need particular columns, just delete them.  Sometimes there are extra rows without word information, because some other code was encoded in the xml (e.g., pauses, comments).  In the word format, these can be the type of utterance (t_type = p for statements, q for questions).  Files are updated automatically every month.
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+

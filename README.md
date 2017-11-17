@@ -15,10 +15,18 @@ $ vagrant up
 
 The Shiny server will then be accessible at port 8080.
 
-## Data files
+## Updating data files
 
 To install new data files from `shiny-vagrant-extras`, run
 
 ```
 $ ./sync-from-extras.sh
+```
+
+## Updating the VM
+
+```
+$ git pull
+$ vagrant reload
+$ vagrant provision
 ```

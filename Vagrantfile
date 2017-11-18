@@ -84,7 +84,7 @@ Vagrant.configure("2") do |config|
     Rscript /vagrant/testInstall.R
     
     # setup shiny files
-    rsync -avz /vagrant/shiny-server/ /srv/shiny-server/
+    rsync -avzr /vagrant/shiny-server/ /srv/shiny-server/
     ln -sf /vagrant/storage /srv/shiny-server/storage
   SHELL
 end

@@ -14,7 +14,7 @@ values$csvfile=""
 values$maxsize = 1000000000000
 
 readFileDir <- function(lgrp,lg,corp){
-  dd <- readRDS("storage/filesData-XML.rds")
+  dd <- readRDS("../storage/filesData-XML.rds")
   ignore = "-----"
   langgroup = unique(dd[,1])
   langgroup = langgroup[langgroup != ""]

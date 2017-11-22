@@ -30,3 +30,12 @@ $ git pull
 $ vagrant reload
 $ vagrant provision
 ```
+
+## If there are problems
+
+```
+$ vagrant destroy
+$ vagrant up
+```
+
+Check the files in /var/logs/shiny-server/

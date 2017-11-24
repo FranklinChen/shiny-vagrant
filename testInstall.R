@@ -1,8 +1,8 @@
 
-testinstall <- function(somepackage,rp='https://cran.ma.imperial.ac.uk/'){
+testinstall <- function(somepackage,repos='https://cran.ma.imperial.ac.uk/'){
   print(paste("testing ",somepackage))
   if(!require(somepackage,character.only = TRUE)){
-    install.packages(somepackage, repos=rp)
+    install.packages(somepackage, repos=repos)
   }
 }
 #install.packages('shiny', repos='https://cran.rstudio.com/')

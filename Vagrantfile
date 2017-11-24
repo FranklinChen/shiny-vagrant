@@ -81,7 +81,7 @@ Vagrant.configure("2") do |config|
   fi
 
    # install R libraries
-    Rscript /vagrant/testInstall.R
+    sudo Rscript /vagrant/testInstall.R
     
     # setup shiny files
     rsync -avzr /vagrant/shiny-server/ /srv/shiny-server/

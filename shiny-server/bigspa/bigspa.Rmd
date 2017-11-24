@@ -14,7 +14,7 @@ require(stringr)
 library(shinycssloaders)
 require(ggplot2)
 ignore = "-----"
-results = read.csv("storage/bigspa.csv",stringsAsFactors=F)
+results = read.csv("../storage/bigspa.csv",stringsAsFactors=F)
 #write.csv(results3,"allresults.csv")
 results$X=NULL
 results$corpus=as.character(results$corpus)

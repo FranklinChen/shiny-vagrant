@@ -529,5 +529,5 @@ class LearnerIterator:
 
 learnIter = LearnerIterator()
 learnIter.setClassNames(globals())
-langlist = glob.glob('actualcsv/*Utterance.csv')  # list of csv files
+langlist = glob.glob('actualcsv/*_*_*_Utterance.csv')  # list of csv files
 learnIter.runAllModelsLanguages(langlist,outcsv="bigspa.csv")

@@ -15,11 +15,11 @@ testinstall <- function(somepackage,repos='https://cran.ma.imperial.ac.uk/'){
 #install.packages('dplyr',repos='https://cran.ma.imperial.ac.uk/')
 #install.packages('doParallel',repos='https://cran.ma.imperial.ac.uk/')
 
+testinstall('devtools')
 testinstall('shiny', repos='https://cran.rstudio.com/')
 testinstall('rmarkdown', repos='https://cran.rstudio.com/')
 testinstall('DT', repos='https://cran.rstudio.com/')
 devtools::install_github('rstudio/DT@feature/editor')
-testinstall('devtools')
 testinstall('shinycssloaders')
 testinstall('ngram')
 testinstall('xml2')

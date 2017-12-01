@@ -23,6 +23,7 @@ testinstall('devtools')
 testinstall('shinycssloaders')
 testinstall('ngram')
 testinstall('xml2')
+testinstall('stringr')
 testinstall('dplyr')
 testinstall('doParallel')
 

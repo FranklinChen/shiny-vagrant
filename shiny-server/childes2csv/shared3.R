@@ -12,6 +12,7 @@ values$longcol = c()
 values$fulltable = NULL
 values$csvfile=""
 values$maxsize = 1000000000000
+fileinfo = readRDS("../storage/summaryChildes.rds")
 
 readFileDir <- function(lgrp,lg,corp){
   dd <- readRDS("../storage/filesData-XML.rds")
@@ -82,15 +83,20 @@ adjustTableCol <- function(){
   print("adjust")
   if (nrow(values$table) > 4){ # set column lengths
   #  print("adjust col")
-    collength = data.frame(apply(apply(values$table,1,nchar),1,max))
+    vdf = values$table
+    if (length(vdf[,1]) > 1000){
+      vdf = values$table[1:1000,]
+    }
+    collength = data.frame(apply(apply(vdf,1,nchar),1,max))
     if ("rowunit" %in% input && input$rowunit == "Utterance"){
-      values$longcol = union(which(names(values$table)=="w"),which(collength > 40))
+      values$longcol = union(which(names(vdf)=="w"),which(collength > 40))
       # values$text = paste(values$longcol)
     }else{ # word
       values$longcol = which(collength > 10)
     }
   }
 }
+
 
 
 observeEvent(input$langGroup,  ignoreInit=T,{
@@ -162,11 +168,21 @@ searchForCorpusFile <- function(){
   if (file.exists(csvfile) ){
     print(paste("read csvfile",csvfile))
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
-    print(values$maxsize)
-    
-      tryCatch( values$fulltable <- read.csv(csvfile,nrows=values$maxsize),
-             finally =  values$fulltable <- read.csv(csvfile)) 
-#    values$fulltable <- read.csv(csvfile,nrows=values$maxsize)
+    msize = values$maxsize
+    onefile = fileinfo[fileinfo$lg==input$langGroup && fileinfo$lang==input$lang && fileinfo$corpus==input$corpus,]
+    if (length(onefile[,1]) > 2){
+     if (input$rowunit == "Utterance"){
+      if (onefile$numUtt < msize){
+        msize = -1
+      }
+    }else{
+      if (onefile$numWords < msize){
+        msize = -1
+      }
+    }
+    }
+    values$fulltable <- read.csv(csvfile,nrows=msize)
+    #    values$fulltable <- read.csv(csvfile,nrows=values$maxsize)
 #    values$fulltable <- readRDS(csvfile)
 #    if (length(values$fulltable$w) > values$maxsize){
 #      values$fulltable=values$fulltable[1:values$maxsize,]

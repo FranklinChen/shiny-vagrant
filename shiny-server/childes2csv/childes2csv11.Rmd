@@ -6,7 +6,7 @@ html_document:
 fig_caption: yes
 ---
 
-- This program converts CHILDES XML files into CSV formatted files. Scroll down to the bottom for more information. Some files take a while to load, so please be patient. Click [here](../toolkit/) to return to toolkit page.
+- This program converts CHILDES XML files into CSV formatted files. Scroll down to the bottom for more information. Some files take a while to load, so please be patient. Click [here](../) to return to toolkit page.
 
 ```{r setup, include=FALSE}
 require(xml2)

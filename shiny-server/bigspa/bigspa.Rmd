@@ -6,7 +6,7 @@ html_document:
 fig_caption: yes
 ---
 
-- This page displays sentence prediction accuracy scores for adult and child utterances in typologically different corpora.  Scroll down for more information.  Click [here](../toolkit/) to return to toolkit page.
+- This page displays sentence prediction accuracy scores for adult and child utterances in typologically different corpora.  Scroll down for more information.  Click [here](../) to return to toolkit page.
 
 ```{r setup, include=FALSE}
 require(stringr)

@@ -71,16 +71,11 @@ shinyApp(
       updateCorpusSelect()
       if (input$corpus != ignore){
          searchForCorpusFile()
-          updateSelectorTable()
       }
     })
     
      observeEvent(input$lang,  ignoreInit=T,{
       updateCorpusSelect()
-  #    if (input$corpus == ignore){
-   #      searchForCorpusFile()
-   #       updateSelectorTable()
-    #  }
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
@@ -91,6 +86,37 @@ shinyApp(
       observeEvent(input$rowunit,  ignoreInit=T,{
         searchForCorpusFile()
      })
+     
+     
+observeEvent(values$table,{
+  if (nrow(values$table)>2){
+    dv = input$dv
+    if (!"ONE" %in% names(values$table) ){
+      values$table$ONE = 1
+      if (dv == ignore)
+      dv = "ONE"
+    }
+    cho = c(ignore,names( values$table))
+    source1=input$source1
+    updateSelectInput(session, "source1", choices = cho,selected=source1)
+    updateSelectInput(session, "dv", choices = cho,selected=dv)
+    col1 = input$col1
+    updateSelectInput(session, "col1", choices = cho,selected=col1)
+    col2 = input$col2
+    updateSelectInput(session, "col2", choices = cho,selected=col2)
+    col3 = input$col3
+    updateSelectInput(session, "col3", choices = cho,selected=col3)
+    grp1 = input$grp1
+    updateSelectInput(session, "grp1", choices = cho,selected=grp1)
+    grp2 = input$grp2
+    updateSelectInput(session, "grp2", choices = cho,selected=grp2)
+    grp3 = input$grp3
+    updateSelectInput(session, "grp3", choices = cho,selected=grp3)
+    
+  }
+})
+
+   output$recodeUI <- renderUI(values$recodeUI)
      
    observeEvent(input$source1,  ignoreInit=T,{
       if (input$source1 %in% names(values$table)){

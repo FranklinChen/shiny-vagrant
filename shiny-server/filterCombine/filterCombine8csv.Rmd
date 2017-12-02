@@ -6,7 +6,7 @@ html_document:
 fig_caption: yes
 ---
 
-- This program allows you to do some simple analyses with CHILDES corpora.  You can filter for some target items, recode some columns into numeric values, and then group those values and report some combined metric for those values.  Scroll down to the bottom for more information.  Click [here](../toolkit/) to return to toolkit page.
+- This program allows you to do some simple analyses with CHILDES corpora.  You can filter for some target items, recode some columns into numeric values, and then group those values and report some combined metric for those values.  Scroll down to the bottom for more information.  Click [here](../) to return to toolkit page.
 
 ```{r setup, include=FALSE}
 library(shinycssloaders)

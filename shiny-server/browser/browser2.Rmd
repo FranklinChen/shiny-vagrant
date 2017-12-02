@@ -6,6 +6,8 @@ html_document:
 fig_caption: yes
 ---
 
+- This program allows you to browse through CHILDES corpora using various criteria.  Click [here](../) to return to toolkit page.
+
 ```{r setup, include=FALSE}
 require("stringr")
 library(shinycssloaders)

@@ -6,7 +6,7 @@ html_document:
 fig_caption: yes
 ---
 
-- This page allows you to examine and download 1- to 4-grams in various CHILDES corpus.  Scroll down to the bottom for more information.  Click [here](../toolkit/) to return to toolkit page.
+- This page allows you to examine and download 1- to 4-grams in various CHILDES corpus.  Scroll down to the bottom for more information.  Click [here](../) to return to toolkit page.
 
 ```{r setup, include=FALSE}
 library(shinycssloaders)

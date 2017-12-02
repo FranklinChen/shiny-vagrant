@@ -164,7 +164,9 @@ searchForCorpusFile <- function(){
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
     print(values$maxsize)
     
-    values$fulltable <- read.csv(csvfile,nrows=values$maxsize)
+      tryCatch( values$fulltable <- read.csv(csvfile,nrows=values$maxsize),
+             finally =  values$fulltable <- read.csv(csvfile)) 
+#    values$fulltable <- read.csv(csvfile,nrows=values$maxsize)
 #    values$fulltable <- readRDS(csvfile)
 #    if (length(values$fulltable$w) > values$maxsize){
 #      values$fulltable=values$fulltable[1:values$maxsize,]

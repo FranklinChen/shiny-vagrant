@@ -1,3 +1,5 @@
+#!/bin/sh
+PATH=/usr/local/bin:/usr/local/sbin:~/bin:/usr/bin:/bin:/usr/sbin:/sbin
 mkdir workfiles
 cd workfiles
 rm -rf data-xml

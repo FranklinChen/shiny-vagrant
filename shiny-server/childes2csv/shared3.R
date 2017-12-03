@@ -2,7 +2,6 @@ require(dplyr)
 require(xml2)
 require(stringr)
 
-#gstorage = "storage/csvcorpora/"
 gstorage = "../storage/actualcsv/"
 values <- reactiveValues()
 values$text = ""
@@ -20,10 +19,10 @@ readFileDir <- function(lgrp,lg,corp){
   langgroup = unique(dd[,1])
   langgroup = langgroup[langgroup != ""]
   langlist = unique(dd[dd[,1]==lgrp ,2])
-  langlist = c(ignore,langlist)
+#  langlist = c(ignore,langlist)
   corpuslist = unique(dd[dd[,1]==lgrp & dd[,2]==lg,3])
   corpuslist = corpuslist[corpuslist != ""]
-  corpuslist = c(ignore,corpuslist)
+#  corpuslist = c(ignore,corpuslist)
   
   
   updateSelectInput(session, "langGroup", label="Language Group:",choices = langgroup,selected=lgrp)
@@ -104,9 +103,7 @@ observeEvent(input$langGroup,  ignoreInit=T,{
   langlist = unique(dd[dd[,1]==input$langGroup,2])
   langlist = langlist[langlist != ""]
   len = length(langlist)
-  if (values$updateFilter){
-    langlist = c(ignore,langlist)
-  }
+
   defval = langlist[1]
   if (defval == ignore && len > 1){
     defval = langlist[2]
@@ -128,7 +125,9 @@ updateLangSelect <- function(){
   if (input$lang != ""){
     corpuslist = unique(dd[dd[,1]==input$langGroup & dd[,2]==input$lang,3])
     corpuslist = corpuslist[corpuslist != ""]
-    corpuslist = c(ignore,corpuslist)
+    if (length(corpuslist) < 1){
+      corpuslist = c(ignore)
+    }
     len = length(corpuslist)
     defval = corpuslist[1]
     if (defval == ignore && len > 1){
@@ -136,16 +135,7 @@ updateLangSelect <- function(){
     }
     updateSelectInput(session, "corpus", label=paste("Corpora (",len,"):"),
                       choices = corpuslist,selected=defval)
-    
- #   values$csvfile = ""
-    
-#    if (length(corpuslist) < 1){
-#      fpath = paste(top,input$langGroup,input$lang,sep="/")
-#      filelist = list.files(path = fpath,pattern="[^.]+?.xml",full.names = F, recursive = T)
-#      updateSelectInput(session, "xmlfileList", label=paste("File (",len,"):"),
-#                        choices = filelist)
-#    }
-  }
+   }
 }
 
 
@@ -192,9 +182,6 @@ searchForCorpusFile <- function(){
     values$csvfile = csvfile
     print(length(values$table))
     print("done")
-#    values$table$file = factor(values$table$file)
-#    values$table$lang = factor(values$table$lang)
-#    values$table$corpus = factor(values$table$corpus)
   }
   })
 }
@@ -209,64 +196,6 @@ createPartTable <- function(){
   }
   print("part done")
 }
-
-
-
-updateCorpusSelect <- function(){
-  #     curl = paste(url,input$langGroup,input$lang,input$corpus,sep="/")
-  #     if (input$corpus == ignore){
-  #       xmllist = unique(dd[dd[,1]==input$langGroup & dd[,2]==input$lang,4])
-  #        xmllist = xmllist[xmllist != ""]
-  #       fpath = paste(top,input$langGroup,input$lang,sep="/")
-  #      }else{
-  xmllist = unique(dd[dd[,1]==input$langGroup & dd[,2]==input$lang & dd[,3]==input$corpus,4])
-  xmllist = xmllist[xmllist != ""]
-  #        fpath = paste(top,input$langGroup,input$lang,input$corpus,sep="/")
-  #     }
-  #     filelist = list.files(path = fpath,pattern=".+?.xml",full.names = F, recursive = T)
-  
-  #  print(fpath)
-  len = length(xmllist)
-  values$csvfile = ""
-  #   print(filelist)
-  if (len > 0){
-    updateSelectInput(session, "xmlfileList", label=paste("File (",len,"):"),
-                      choices = xmllist)
-  }
-}
-
-
-
-
-updateSelectorTable <- function(){
-  #  if ("recodeUI" %in% values){
-  if (nrow(values$table)>2){
-    dv = input$dv
-    if (!"ONE" %in% names(values$table) ){
-      values$table$ONE = 1
-      if (dv == ignore)
-      dv = "ONE"
-    }
-    cho = c(ignore,names( values$table))
-    source1=input$source1
-    updateSelectInput(session, "source1", choices = cho,selected=source1)
-    updateSelectInput(session, "dv", choices = cho,selected=dv)
-    col1 = input$col1
-    updateSelectInput(session, "col1", choices = cho,selected=col1)
-    col2 = input$col2
-    updateSelectInput(session, "col2", choices = cho,selected=col2)
-    col3 = input$col3
-    updateSelectInput(session, "col3", choices = cho,selected=col3)
-    grp1 = input$grp1
-    updateSelectInput(session, "grp1", choices = cho,selected=grp1)
-    grp2 = input$grp2
-    updateSelectInput(session, "grp2", choices = cho,selected=grp2)
-    grp3 = input$grp3
-    updateSelectInput(session, "grp3", choices = cho,selected=grp3)
-    
-  }
-}
-
 
 processParticipants <- function(one){
   partdf = data.frame()

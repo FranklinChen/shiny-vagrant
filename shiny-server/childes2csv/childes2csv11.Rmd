@@ -57,14 +57,9 @@ shinyApp(
     })
    
    observeEvent(input$corpus, ignoreInit=T,{
-      updateCorpusSelect()
       searchForCorpusFile()
     })
-    
-     observeEvent(input$lang,  ignoreInit=T,{
-      updateCorpusSelect()
-    })
-     
+
      observeEvent(input$rowunit,  ignoreInit=T,{
         searchForCorpusFile()      
     })

@@ -159,8 +159,13 @@ searchForCorpusFile <- function(){
     print(paste("read csvfile",csvfile))
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
     msize = values$maxsize
-    onefile = fileinfo[fileinfo$lg==input$langGroup && fileinfo$lang==input$lang && fileinfo$corpus==input$corpus,]
+    corp = input$corpus
+    if (corp == ignore){
+      corp = ""
+    }
+    onefile = fileinfo[fileinfo$lg==input$langGroup && fileinfo$lang==input$lang && fileinfo$corpus==corp,]
     if (length(onefile[,1]) > 2){
+      print(onefile)
      if (input$rowunit == "Utterance"){
       if (onefile$numUtt < msize){
         msize = -1

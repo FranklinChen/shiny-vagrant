@@ -1,5 +1,5 @@
 ---
-title: "Filter Recode Combine CHILDES Analyses"
+title: "Filter Combine"
 runtime: shiny
 output: 
 html_document: 
@@ -99,35 +99,6 @@ shinyApp(
         searchForCorpusFile()
         resetTable()
      })
-     
-#      
-# observeEvent(values$table,{
-#   if (nrow(values$table)>2){
-#     dv = input$dv
-#     if (!"ONE" %in% names(values$table) ){
-#       values$table$ONE = 1
-#       if (dv == ignore)
-#       dv = "ONE"
-#     }
-#     cho = c(ignore,names( values$table))
-#     source1=input$source1
-#     updateSelectInput(session, "source1", choices = cho,selected=source1)
-#     updateSelectInput(session, "dv", choices = cho,selected=dv)
-#     col1 = input$col1
-#     updateSelectInput(session, "col1", choices = cho,selected=col1)
-#     col2 = input$col2
-#     updateSelectInput(session, "col2", choices = cho,selected=col2)
-#     col3 = input$col3
-#     updateSelectInput(session, "col3", choices = cho,selected=col3)
-#     grp1 = input$grp1
-#     updateSelectInput(session, "grp1", choices = cho,selected=grp1)
-#     grp2 = input$grp2
-#     updateSelectInput(session, "grp2", choices = cho,selected=grp2)
-#     grp3 = input$grp3
-#     updateSelectInput(session, "grp3", choices = cho,selected=grp3)
-#     
-#   }
-# })
 
    output$recodeUI <- renderUI(values$recodeUI)
      
@@ -176,8 +147,14 @@ shinyApp(
 
         numcol = which(newcol == names(values$table))
         values$table = values$table[,c(numcol,setdiff(1:length(values$table), numcol))]
-        updateSelectorTable()
-      }
+            
+        cho = c(ignore,names( values$table))
+          updateSelectInput(session, "dv", choices = cho,selected=newcol)
+          updateSelectInput(session, "grp1", choices = cho)
+          updateSelectInput(session, "grp2", choices = cho)
+          updateSelectInput(session, "grp3", choices = cho)
+
+       }
     })
     
     observe({

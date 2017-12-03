@@ -67,54 +67,67 @@ shinyApp(
     # results data at bottom
     output$results <- DT::renderDataTable(DT::datatable(values$results))
     
-    observeEvent(input$corpus,  ignoreInit=T,{
-      updateCorpusSelect()
-      if (input$corpus != ignore){
-         searchForCorpusFile()
-      }
-    })
+    resetTable <- function(){
+         if (!"ONE" %in% names(values$table) ){
+            values$table$ONE = 1
+         }
+          dv = "ONE"
+          cho = c(ignore,names( values$table))
+          updateSelectInput(session, "source1", choices = cho,selected=ignore)
+          updateSelectInput(session, "dv", choices = cho,selected=dv)
+          updateSelectInput(session, "col1", choices = cho,selected=ignore)
+          updateSelectInput(session, "col2", choices = cho,selected=ignore)
+          updateSelectInput(session, "col3", choices = cho,selected=ignore)
+          updateSelectInput(session, "grp1", choices = cho,selected=ignore)
+          updateSelectInput(session, "grp2", choices = cho,selected=ignore)
+          updateSelectInput(session, "grp3", choices = cho,selected=ignore)
+ 
+    }
     
-     observeEvent(input$lang,  ignoreInit=T,{
-      updateCorpusSelect()
+    observeEvent(input$corpus,  ignoreInit=T,{
+         searchForCorpusFile()
+        resetTable()
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
         values$maxsize = as.integer(input$maxsize)
         searchForCorpusFile()
+        resetTable()
      })
      
-      observeEvent(input$rowunit,  ignoreInit=T,{
+      observeEvent(input$rowunit,{
         searchForCorpusFile()
+        resetTable()
      })
      
-     
-observeEvent(values$table,{
-  if (nrow(values$table)>2){
-    dv = input$dv
-    if (!"ONE" %in% names(values$table) ){
-      values$table$ONE = 1
-      if (dv == ignore)
-      dv = "ONE"
-    }
-    cho = c(ignore,names( values$table))
-    source1=input$source1
-    updateSelectInput(session, "source1", choices = cho,selected=source1)
-    updateSelectInput(session, "dv", choices = cho,selected=dv)
-    col1 = input$col1
-    updateSelectInput(session, "col1", choices = cho,selected=col1)
-    col2 = input$col2
-    updateSelectInput(session, "col2", choices = cho,selected=col2)
-    col3 = input$col3
-    updateSelectInput(session, "col3", choices = cho,selected=col3)
-    grp1 = input$grp1
-    updateSelectInput(session, "grp1", choices = cho,selected=grp1)
-    grp2 = input$grp2
-    updateSelectInput(session, "grp2", choices = cho,selected=grp2)
-    grp3 = input$grp3
-    updateSelectInput(session, "grp3", choices = cho,selected=grp3)
-    
-  }
-})
+#      
+# observeEvent(values$table,{
+#   if (nrow(values$table)>2){
+#     dv = input$dv
+#     if (!"ONE" %in% names(values$table) ){
+#       values$table$ONE = 1
+#       if (dv == ignore)
+#       dv = "ONE"
+#     }
+#     cho = c(ignore,names( values$table))
+#     source1=input$source1
+#     updateSelectInput(session, "source1", choices = cho,selected=source1)
+#     updateSelectInput(session, "dv", choices = cho,selected=dv)
+#     col1 = input$col1
+#     updateSelectInput(session, "col1", choices = cho,selected=col1)
+#     col2 = input$col2
+#     updateSelectInput(session, "col2", choices = cho,selected=col2)
+#     col3 = input$col3
+#     updateSelectInput(session, "col3", choices = cho,selected=col3)
+#     grp1 = input$grp1
+#     updateSelectInput(session, "grp1", choices = cho,selected=grp1)
+#     grp2 = input$grp2
+#     updateSelectInput(session, "grp2", choices = cho,selected=grp2)
+#     grp3 = input$grp3
+#     updateSelectInput(session, "grp3", choices = cho,selected=grp3)
+#     
+#   }
+# })
 
    output$recodeUI <- renderUI(values$recodeUI)
      
@@ -265,7 +278,7 @@ observeEvent(values$table,{
 - This program filters CHILDES corpora.  You first select the language group, language, corpus, and row unit that you want to use.  Max size determines the maximum size of the corpus (the server is too slow for some analyses when using the whole corpus).
 - Let's say you want to see how the words "this" and "that" are used over development.  You can put the regular expression ^(this|that)$ into the Expression1 box.  Then change Column1 to the word column, which is w.  To learn more about regular expressions, click [here](https://regexone.com/lesson/introduction_abcs).  
 - Then you need to convert these words into numbers, so in the Recode section, put "w"" in the Source and you will see a set of boxes for "this" and "that".  Put a 1 in the "that" box and a 0 in the "this" box.  Then click Create and you will get a column new_w which codes 1 for "that" and 0 for "this" (see table above)
-- Now we want to see how the use of "this" and "that" change over development, so we put Y in the Group1 column.  You should see in the result table below the total number of rows in the data for each year of age.  Now change the Combine to "mean" and the DepVar to "new_w" and you will see the mean relative production of "that" vs "this".  Greater than 0.5 means that "that" is more than "this".  You can download the results or the original table using the download buttons.
+- Now we want to see how the use of "this" and "that" change over development, so we put Y in the Group1 column.  Since the DepVar is 1 and Combine is "count", you will get a count of the number of lines with either this and that for each year. Now change the Combine to "mean" and the DepVar to "new_w" and you will see the mean proportion of "that" produced. You can download the results or the original table using the download buttons.
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
 

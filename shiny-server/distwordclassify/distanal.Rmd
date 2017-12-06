@@ -1,0 +1,212 @@
+---
+title: "Distributional Word Classification"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+- This page allows you to classify words by the distribution of words that they occur with.  Click [here](../) to return to toolkit page.
+
+```{r setup, include=FALSE}
+library(shinycssloaders)
+require(ggplot2)
+require(stringr)
+require(ca)
+ignore = "-----"
+ngramdir = "../storage/ngrams"
+
+xx <- function(){
+thomasthree = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
+verbs = "give throw send bring pass show hand"
+search = str_replace_all(verbs," ","|")
+search = paste("^(",search,") ",sep="")
+verbtrigrams = thomasthree[str_detect(thomasthree$ngrams,search),]
+parts = str_split_fixed(verbtrigrams$ngrams," ",3)
+verbtrigrams$verb = parts[,1]
+verbtrigrams$n1 = parts[,2]
+verbtrigrams$n2 = parts[,3]
+        one = verbtrigrams[,c("verb","n1","freq")]
+        two = verbtrigrams[,c("verb","n2","freq")]
+        names(two)[2]="n1"
+        both = rbind(one,two)
+        mytable = xtabs(freq ~ verb + n1, both)
+        fit <- ca(mytable)
+print(fit) # basic results 
+summary(fit) # extended results 
+plot(fit) # symmetric map
+
+cadf = as.data.frame(fit$rowcoord)
+ggplot(cadf,aes(x=Dim3,y=Dim4,label=rownames(cadf)))+geom_text()
+}
+```
+
+```{r, echo=FALSE}
+
+shinyApp(
+  ui =  fluidPage(
+    sidebarPanel(selectInput("langGroup", "Language Group: ", 
+                             choices = c("Eng-UK"), selected="Eng-UK",width='90%')
+                 ,selectInput("lang", "Language: ",
+                              choices = c("Thomas"),selected="Thomas",width='90%')
+                 ,selectInput("corpus", "Corpus: ", 
+                              choices = c(ignore),selected=ignore,width='90%')
+                 ,selectInput("ngram", "N-gram type", 
+                              choices = c("2-gram" = 2,"3-gram" = 3,"4-gram"= 4), selected="2-gram",width='90%')
+                 ,downloadButton('downloadNgram', 'Download')
+                 ,width = 3)
+    ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
+    ,textInput("wordsearch","Words", value="man woman boy girl jumped sang gave ate",width='90%')
+    ,fluidRow(column(2,selectInput("pos", "Position", 
+                              choices = 1:2,selected=2))
+    ,column(2,selectInput("xaxis", "X-axis",
+                              choices = c("Dim1")))
+    ,column(2,selectInput("yaxis", "Y-axis",
+                              choices = c("Dim2"))))
+    ,plotOutput("logrank")
+     ),
+  server = function(input, output, session) {
+    source('../childes2csv/shared3.R', local=TRUE)
+    values$updateFilter = TRUE
+    values$search=""
+    values$cadf=NULL
+    dd <- readFileDir("Eng-UK","Thomas",ignore)
+
+    values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
+
+    
+    observeEvent(input$ngram, ignoreInit=T,{
+      if (!is.null(input$ngram)){
+        print(as.integer(input$ngram))
+        updateSelectInput(session, "pos", choices = 1:as.integer(input$ngram))
+        
+        loadCorpora()
+      }
+   })
+    
+    observeEvent(input$corpus, ignoreInit=T,{
+        loadCorpora()
+    })
+    
+    getFileName <- function(nopath){
+      gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
+      fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,".rds",sep="")
+      if (input$lang == ignore | input$lang == ""){
+        fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
+      }else{
+        if (input$corpus == ignore | input$corpus == ""){
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
+        }
+      }
+      if (nopath){
+        fpath = str_replace(fpath,paste(ngramdir,"/",sep=""),"")
+      }
+      print(fpath)
+      return(fpath)
+    }
+    
+    searchWords <- function(){
+      if (length(values$fulltable[,1]) > 3 && str_length(input$wordsearch) > 1){
+      search = str_replace_all(input$wordsearch," ","|")
+      search = paste("(",search,")",sep="")
+      pos = as.integer(input$pos)
+      print(pos)
+      i = 1
+      while(i < pos){
+        search = paste("[^ ]+ ",search,sep="")
+        i = i +1
+      }
+      search = paste("^",search,"( |$)",sep="")
+       values$table = values$fulltable[str_detect(values$fulltable$ngrams,search),]
+       values$search = search
+       print(search)
+        parts = str_split_fixed(values$table$ngrams," ",2)
+        nc=c()
+        for (p in 1:ncol(parts)){
+          cn = paste("n",p,sep="")
+          values$table[cn] = parts[,p]
+          nc = c(nc,cn)
+        }
+        just = c(nc[pos])
+        other = setdiff(nc,just)
+        both = data.frame()
+        for (o in other){
+          one = values$table[,c(nc[pos],o,"freq")]
+          names(one)[2]=o
+          both = rbind(both,one)
+        }
+        print(head(both))
+        mytable = xtabs(as.formula(paste("freq ~ ",nc[pos]," + ",other[1],sep="")), both)
+        fit <- ca(mytable)
+        values$fit = fit
+        values$cadf = as.data.frame(fit$rowcoord)
+        values$cadf$words = rownames(values$cadf)
+        print(values$cadf)
+        cn = names(values$cadf)
+        print(cn)
+         updateSelectInput(session, "xaxis", choices = cn,selected=cn[1])
+         updateSelectInput(session, "yaxis", choices = cn,selected=cn[2])
+        print("done")
+      }
+     }
+    
+    observeEvent(input$pos, ignoreInit=T,{
+     #   loadCorpora()
+        searchWords()
+    })
+    
+    loadCorpora <- function(){
+      fpath = getFileName(FALSE)
+      print(fpath)
+      if (file.exists(fpath)){
+        print("found")
+        values$fulltable = readRDS(fpath)
+        values$table = values$fulltable
+        if (is.null(values$cadf)){
+          searchWords()
+        }
+      }
+    }
+    
+    output$logrank<-renderPlot({
+      if (!is.null(values$cadf)){
+        aesstr = aes_string(x=input$xaxis,y=input$yaxis,label="words")
+        p = ggplot(values$cadf,aesstr)
+        p = p +geom_text()
+  #      p = p + geom_point()
+        p=p+theme_bw()
+        p
+        #plot(values$fit,map="rowprincipal")
+      }
+      })
+    
+    output$downloadNgram <- downloadHandler(
+      filename = function() { 
+        ff= getFileName(TRUE)
+        ff=sub(".rds",".csv",ff)
+        ff
+      },
+      content <- function(file) {
+        fpath = getFileName(FALSE)
+        print(fpath)
+         wholecsv <- readRDS(fpath)
+           write.csv(wholecsv, file)
+
+      }
+      ,contentType = "text/csv"
+    )
+  }
+  ,options = list(width=1000,height = 960)
+)
+```
+
+- Word distributions have been used extensively to create syntactic or semantic dimensions that cab be used for classification.  This page allows you to apply a correspondence analysis (CA) which is a standard technique for classifying items using the frequency of co-occurrence with other items.
+- When you load the page, it will load a file with the bigrams from the English Thomas corpus.
+There is a list of words in the Words text field and a position field with the number 2.
+This will cause the program to search for bigrams with the target words in the second position.
+Then it will create a table of frequencies that represent how often each word occur with other words.  For example, _boy_ occurs with _good_ before it 1784 times and this will cause it to be classified with other words that also occur with _good_ before them.  The CA will have various
+dimensions that encode these co-occurence relations.  In the example above, Dim1 seems to distinguish between verbs (negative values) and nouns (positive values).  Dim2 might encode age, because the children are more positive and adults are more negative.
+- This program uses the R library (ca).  To see an application of correspondence analysis to the classification of verb bias for locative verbs, please see [Twomey, Chang, and Ambridge (2014)](https://sites.google.com/site/sentenceproductionmodel/cv/twomey%2Cchang%2Cambridge%2C2014.pdf?attredirects=0&d=1).
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+

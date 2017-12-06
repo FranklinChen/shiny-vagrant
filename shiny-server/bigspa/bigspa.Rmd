@@ -182,6 +182,6 @@ You can use the preset selector to select different subsets.
 
 - The scores are regenerated every month and the raw SPA scores can change depending on updates in the corpora or different random utterances being used for training.
 
-- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact <a href="https://sites.google.com/site/sentenceproductionmodel/cv" class="uri">Franklin Chang</a> with any questions.
 
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/

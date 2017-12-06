@@ -105,6 +105,6 @@ shinyApp(
 ```
 
 - Zipf (1949) found that there was a negative linear relationship between log frequency and log rank in written texts, but larger natural spoken corpora do no always exhibit this relationship.  Punctuation words (e.g., #ppp = declarative, #qqq = questions, #eee = exclamation).
-- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact Franklin Chang with any questions.
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact <a href="https://sites.google.com/site/sentenceproductionmodel/cv" class="uri">Franklin Chang</a> with any questions.
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
 

@@ -176,7 +176,7 @@ searchForCorpusFile <- function(){
       }
     }
     }
-    values$fulltable <- read.csv(csvfile,nrows=msize)
+    values$fulltable <- read.csv(csvfile,nrows=msize,fileEncoding = "UTF-8")
     #    values$fulltable <- read.csv(csvfile,nrows=values$maxsize)
 #    values$fulltable <- readRDS(csvfile)
 #    if (length(values$fulltable$w) > values$maxsize){

@@ -26,4 +26,4 @@ testinstall('xml2')
 testinstall('stringr')
 testinstall('dplyr')
 testinstall('doParallel')
-
+testinstall('ca')

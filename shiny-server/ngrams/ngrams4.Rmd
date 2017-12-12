@@ -57,7 +57,7 @@ shinyApp(
         fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
       }else{
         if (input$corpus == ignore | input$corpus == ""){
-          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,".rds",sep="")
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
         }
       }
       if (nopath){

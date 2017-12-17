@@ -65,7 +65,6 @@ shinyApp(
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
-        values$maxsize = as.integer(input$maxsize)
         searchForCorpusFile()     
     })
                                             

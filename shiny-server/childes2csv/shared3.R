@@ -158,7 +158,7 @@ searchForCorpusFile <- function(){
   if (file.exists(csvfile) ){
     print(paste("read csvfile",csvfile))
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
-    msize = values$maxsize
+     msize = as.integer(as.character(input$maxsize))
     corp = input$corpus
     if (corp == ignore){
       corp = ""

@@ -146,7 +146,7 @@ searchForCorpusFile <- function(){
   if (input$lang == ignore){
     csvfile <-  paste(gstorage,input$langGroup,"_",input$rowunit,type,sep="")
   }else{
-    if (input$corpus == ignore){
+    if (input$corpus == ignore || input$corpus == ""){
       csvfile <-  paste(gstorage,input$langGroup,"_",input$lang,"_",input$rowunit,type,sep="")
     }else{
       csvfile <-  paste(gstorage,input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,type,sep="") 
@@ -158,7 +158,7 @@ searchForCorpusFile <- function(){
   if (file.exists(csvfile) ){
     print(paste("read csvfile",csvfile))
 #    csvfile ="storage/csvcorpora/Biling_Amsterdam_Annick_Utterance.rds"
-     msize = as.integer(as.character(input$maxsize))
+     msize = as.integer(input$maxsize)
     corp = input$corpus
     if (corp == ignore){
       corp = ""

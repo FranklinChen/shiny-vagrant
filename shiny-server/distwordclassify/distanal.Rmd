@@ -17,27 +17,27 @@ ignore = "-----"
 ngramdir = "../storage/ngrams"
 
 xx <- function(){
-thomasthree = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
-verbs = "give throw send bring pass show hand"
-search = str_replace_all(verbs," ","|")
-search = paste("^(",search,") ",sep="")
-verbtrigrams = thomasthree[str_detect(thomasthree$ngrams,search),]
-parts = str_split_fixed(verbtrigrams$ngrams," ",3)
-verbtrigrams$verb = parts[,1]
-verbtrigrams$n1 = parts[,2]
-verbtrigrams$n2 = parts[,3]
-        one = verbtrigrams[,c("verb","n1","freq")]
-        two = verbtrigrams[,c("verb","n2","freq")]
-        names(two)[2]="n1"
-        both = rbind(one,two)
-        mytable = xtabs(freq ~ verb + n1, both)
-        fit <- ca(mytable)
-print(fit) # basic results 
-summary(fit) # extended results 
-plot(fit) # symmetric map
-
-cadf = as.data.frame(fit$rowcoord)
-ggplot(cadf,aes(x=Dim3,y=Dim4,label=rownames(cadf)))+geom_text()
+  thomasthree = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
+  verbs = "give throw send bring pass show hand"
+  search = str_replace_all(verbs," ","|")
+  search = paste("^(",search,") ",sep="")
+  verbtrigrams = thomasthree[str_detect(thomasthree$ngrams,search),]
+  parts = str_split_fixed(verbtrigrams$ngrams," ",3)
+  verbtrigrams$verb = parts[,1]
+  verbtrigrams$n1 = parts[,2]
+  verbtrigrams$n2 = parts[,3]
+  one = verbtrigrams[,c("verb","n1","freq")]
+  two = verbtrigrams[,c("verb","n2","freq")]
+  names(two)[2]="n1"
+  both = rbind(one,two)
+  mytable = xtabs(freq ~ verb + n1, both)
+  fit <- ca(mytable)
+  print(fit) # basic results 
+  summary(fit) # extended results 
+  plot(fit) # symmetric map
+  
+  cadf = as.data.frame(fit$rowcoord)
+  ggplot(cadf,aes(x=Dim3,y=Dim4,label=rownames(cadf)))+geom_text()
 }
 ```
 
@@ -55,7 +55,7 @@ shinyApp(
                               choices = c("2-gram" = 2,"3-gram" = 3,"4-gram"= 4), selected="2-gram",width='90%')
                  ,downloadButton('downloadNgram', 'Download')
                  ,width = 3)
-    ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
+    ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px', width='400px')))
     ,textInput("wordsearch","Words", value="man woman boy girl jumped sang gave ate",width='90%')
     ,fluidRow(column(2,selectInput("pos", "Position", 
                               choices = 1:2,selected=2))
@@ -72,7 +72,7 @@ shinyApp(
     values$cadf=NULL
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
-    values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
+    values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_2.rds",sep="/"))
 
     
     observeEvent(input$ngram, ignoreInit=T,{
@@ -117,36 +117,29 @@ shinyApp(
         i = i +1
       }
       search = paste("^",search,"( |$)",sep="")
-       values$table = values$fulltable[str_detect(values$fulltable$ngrams,search),]
+       values$table = values$fulltable[str_detect(values$fulltable$ngrams,search),c("ngrams","freq")]
        values$search = search
        print(search)
-        parts = str_split_fixed(values$table$ngrams," ",2)
-        nc=c()
-        for (p in 1:ncol(parts)){
-          cn = paste("n",p,sep="")
-          values$table[cn] = parts[,p]
-          nc = c(nc,cn)
+        parts = str_split_fixed(values$table$ngrams," ",input$ngram)
+  #      print(head(parts))
+        values$table["target"] = parts[,pos] 
+        parts2 = parts[,-pos]
+  #      print(head(parts2))
+        values$table["context"] = ""
+        if (is.null(dim(parts2))){
+                    values$table["context"] = parts[,-pos]
+        }else{
+        values$table["context"] =  apply(parts2, 1, paste, collapse="_",sep="")
         }
-        just = c(nc[pos])
-        other = setdiff(nc,just)
-        both = data.frame()
-        for (o in other){
-          one = values$table[,c(nc[pos],o,"freq")]
-          names(one)[2]=o
-          both = rbind(both,one)
-        }
-        print(head(both))
-        mytable = xtabs(as.formula(paste("freq ~ ",nc[pos]," + ",other[1],sep="")), both)
-        fit <- ca(mytable)
-        values$fit = fit
-        values$cadf = as.data.frame(fit$rowcoord)
-        values$cadf$words = rownames(values$cadf)
-        print(values$cadf)
-        cn = names(values$cadf)
-        print(cn)
-         updateSelectInput(session, "xaxis", choices = cn,selected=cn[1])
-         updateSelectInput(session, "yaxis", choices = cn,selected=cn[2])
-        print("done")
+         mytable = xtabs(freq ~ target + context, values$table)
+         fit <- ca(mytable)
+         values$fit = fit
+         values$cadf = as.data.frame(fit$rowcoord)
+         values$cadf$words = rownames(values$cadf)
+         cn = names(values$cadf)
+          updateSelectInput(session, "xaxis", choices = cn,selected=cn[1])
+          updateSelectInput(session, "yaxis", choices = cn,selected=cn[2])
+         print("done")
       }
      }
     
@@ -200,13 +193,12 @@ shinyApp(
 )
 ```
 
-- Word distributions have been used extensively to create syntactic or semantic dimensions that can be used for classification.  This page allows you to apply a correspondence analysis (CA) which is a standard technique for classifying items using the frequency of co-occurrence with other items.
+- Word distributions have been used extensively to create syntactic or semantic dimensions that cab be used for classification.  This page allows you to apply a correspondence analysis (CA) which is a standard technique for classifying items using the frequency of co-occurrence with other items.
 - When you load the page, it will load a file with the bigrams from the English Thomas corpus.
 There is a list of words in the Words text field and a position field with the number 2.
 This will cause the program to search for bigrams with the target words in the second position.
-Then it will create a table of frequencies that represent how often each word occur with other words.  For example, the words _a_, _the_, and _little_ occur before nouns and this causes these words to cluster together.  The CA will have various
-dimensions that encode these co-occurence relations.  In the example above, Dim1 seems to distinguish between verbs (negative values) and nouns (positive values).  Dim2 might encode age, because the children are more positive and adults are more negative.
-- This program uses the R library ([ca](https://www.jstatsoft.org/article/view/v020i03/v20i03.pdf)).  To see an application of correspondence analysis to the classification of verb bias for locative verbs, please see [Twomey, Chang, and Ambridge (2014)](https://sites.google.com/site/sentenceproductionmodel/cv/twomey%2Cchang%2Cambridge%2C2014.pdf?attredirects=0&d=1).
+Then it will create a table of frequencies that represent how often each word occur with other words.  For example, the words _a_, _the_, and _little_ occur before nouns and this causes these words to cluster together. The CA will have various dimensions that encode these co-occurence relations.  In the example above, Dim1 seems to distinguish between verbs (negative values) and nouns (positive values).  Dim2 might encode age, because the children are more positive and adults are more negative.
+- This program uses the R library (ca).  To see an application of correspondence analysis to the classification of verb bias for locative verbs, please see [Twomey, Chang, and Ambridge (2014)](https://sites.google.com/site/sentenceproductionmodel/cv/twomey%2Cchang%2Cambridge%2C2014.pdf?attredirects=0&d=1).
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
 

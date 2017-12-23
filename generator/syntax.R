@@ -2,7 +2,7 @@ require(dplyr)
 library(jsonlite)
 require(stringr)
 
-fl = list.files("csvfolderMake","^.+.rds",full.names=T)
+fl = list.files("csvfolderMake","^(Chin|Eng|Span|Dutc|Ger|Rom|Othe|Fren|Jap|Sla).+.rds",full.names=T)
 print(fl)
 
 nfl = str_replace(fl,"csvfolderMake","googletags")

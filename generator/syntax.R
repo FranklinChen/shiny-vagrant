@@ -1,5 +1,6 @@
 require(dplyr)
 library(jsonlite)
+require(stringr)
 
 fl = list.files("csvfolderMake","^.+.rds",full.names=T)
 print(fl)

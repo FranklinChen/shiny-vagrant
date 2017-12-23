@@ -16,7 +16,7 @@ for (i in 1:length(fl)){
     all = data.frame()
     for (i in 1:length(df$w)){
       var = as.character(df$w[2])
-      cmd = paste("/Users/chang/Downloads/google-cloud-sdk/bin/gcloud ml language analyze-syntax --content=\"",var,"\"",sep="")
+      cmd = paste("/usr/bin/gcloud ml language analyze-syntax --content=\"",var,"\"",sep="")
       out = system(cmd, intern = TRUE)
       js = fromJSON(paste(out,collapse=" "))
       jsdf = flatten(js$tokens)

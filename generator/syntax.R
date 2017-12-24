@@ -16,7 +16,7 @@ fl = list.files("csvfolderMake","^(Eng).+?_.+?_.+?_Utterance.rds",full.names=T)
 print(fl)
 
 nfl = str_replace(fl,"csvfolderMake","googletags")
-nfl = str_replace(nfl,"Utterance","Word")
+nfl = str_replace(nfl,"Utterance","WordGT")
 
 for (i in 1:length(fl)){
   if (!file.exists(nfl[i])){

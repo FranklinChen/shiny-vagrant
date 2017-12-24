@@ -1,33 +1,46 @@
 require(dplyr)
 library(jsonlite)
 require(stringr)
+require(stringi)
 
-fl = list.files("csvfolderMake","^(Eng).+.rds",full.names=T)
+#df= readRDS("~/big/rscripts/shiny-vagrant/generator/workfiles/googletags/Eng-NA_Bloom70_Gia_Word.rds")
+#head(df)
+# var = "jʌwʌblublublujujæwæ wæjawe"
+# var = stri_enc_toascii(var)
+# cmd = enc2utf8(paste("~/google-cloud-sdk/bin/gcloud  ml language analyze-syntax --content=\"",var,"\"",sep=""))
+# print(cmd)
+# out = system(cmd, intern = TRUE)
+#df = readRDS("workfiles/googletags/Eng-NA_Bates_Free28_Word.rds")  
+
+fl = list.files("csvfolderMake","^(Eng).+?_.+?_.+?_Utterance.rds",full.names=T)
 print(fl)
 
 nfl = str_replace(fl,"csvfolderMake","googletags")
-#nfl = str_replace(nfl,"rds","rds")
+nfl = str_replace(nfl,"Utterance","Word")
 
 for (i in 1:length(fl)){
   if (!file.exists(nfl[i])){
     print(fl[i])
+    outfile = nfl[i]
+    print(outfile)
     df = readRDS(fl[i])
     
     all = data.frame()
-    for (i in 1:length(df$w)){
-      var = as.character(df$w[i])
+ #   saveRDS(all,file=outfile)
+    for (j in 1:length(df$w)){
+        var = stri_enc_toascii(as.character(df$w[j]))
         if (str_length(var) > 3){
-      cmd = enc2utf8(paste("/usr/bin/gcloud ml language analyze-syntax --content=\"",var,"\"",sep=""))
-      print(cmd)
+           cmd = enc2utf8(paste("gcloud ml language analyze-syntax --content=\"",var,"\"",sep=""))
+           print(cmd)
       out = system(cmd, intern = TRUE)
       js = fromJSON(paste(out,collapse=" "))
       jsdf = flatten(js$tokens)
       jsdf$sent = js$sentences$text$content
-      jsdf$sentnum = i
+      jsdf$sentnum = j
       all = bind_rows(all,jsdf)
       }
     }
     print(head(all))
-    saveRDS(all,nfl[i])
+    saveRDS(all,file=outfile)
   }
 }

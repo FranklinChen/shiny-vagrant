@@ -3,7 +3,7 @@ library(stringr)
 require(xml2)
 require(dplyr)
 require(ngram)
-#library(xmlview)
+options(encoding = 'UTF-8')
 
 library(doParallel)
 cl <- makeCluster(3,outfile="",type = "FORK")

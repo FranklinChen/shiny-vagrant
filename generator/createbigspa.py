@@ -193,8 +193,7 @@ class Learner:
         print("printmod "+str(printmod))
         for ind in range(len(self.testset['ubag'])):
             ubag = self.testset.ubag[ind]
-            punct = "##"+self.testset.t_type[ind]
-#            ubag = ubag+[punct]
+            punct = "##"+str(self.testset.t_type[ind])
            # print(ubag)
             self.printpar = False
             if ind % printmod == printmod-1:

@@ -15,7 +15,7 @@ nfl = str_replace(nfl,"rds","csv")
 
 for (i in 1:length(fl)){
   if (!file.exists(nfl[i])){
-    print(fl[i])
+    print(paste("reading ",fl[i]))
     df = readRDS(fl[i])
     write.csv(df,nfl[i],fileEncoding = "UTF-8")
   }

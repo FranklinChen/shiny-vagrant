@@ -32,12 +32,28 @@ for (i in 1:length(fl)){
         if (str_length(var) > 3){
            cmd = enc2utf8(paste("gcloud ml language analyze-syntax --content=\"",var,"\"",sep=""))
            print(cmd)
-      out = system(cmd, intern = TRUE)
-      js = fromJSON(paste(out,collapse=" "))
-      jsdf = flatten(js$tokens)
-      jsdf$sent = js$sentences$text$content
-      jsdf$sentnum = j
-      all = bind_rows(all,jsdf)
+          out = NULL
+          out = tryCatch({
+            system(cmd, intern = TRUE)
+         }, warning = function(w) {
+              print(paste("warning ",w))
+            out = NULL
+          }, error = function(e) {
+              print(paste("error ",e))
+            out = NULL
+          }, finally = {
+              print("done")
+            out = NULL
+          })
+           if (length(out) > 0){
+             js = fromJSON(paste(out,collapse=" "))
+             jsdf = flatten(js$tokens)
+             jsdf$sent = js$sentences$text$content
+             jsdf$sentnum = j
+             all = bind_rows(all,jsdf)
+           }
+  
+      
       }
     }
     print(head(all))

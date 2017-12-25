@@ -1,6 +1,7 @@
 require(stringr)
 #options(encoding = 'UTF-8')
 
+dir.create("actualcsv")
 fl = list.files("csvfolderMake","^.+.rds",full.names=T)
 print(fl)
 

@@ -1,7 +1,9 @@
 #!/bin/sh
-PATH=/usr/local/bin:/usr/local/sbin:~/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/VMware Fusion.app/Contents/Public
 cd workfiles
 mkdir actualcsv
-nice -n 19 Rscript ../convertRDS2CSV.R > out2
+nohup Rscript ../convertRDS2CSV.R > out2
 rm -f bigspa.csv 
-nice -n 19 python3 ../createbigspa.py > out3
+nohup python3 ../createbigspa.py > out3

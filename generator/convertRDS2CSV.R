@@ -1,5 +1,5 @@
 require(stringr)
-options(encoding = 'UTF-8')
+#options(encoding = 'UTF-8')
 
 fl = list.files("csvfolderMake","^.+.rds",full.names=T)
 print(fl)

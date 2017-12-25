@@ -1,7 +1,7 @@
 #!/bin/sh
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/VMware Fusion.app/Contents/Public
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
 cd workfiles
 mkdir actualcsv
 nohup Rscript ../convertRDS2CSV.R > out2

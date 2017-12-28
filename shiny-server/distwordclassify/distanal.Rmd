@@ -15,30 +15,6 @@ require(stringr)
 require(ca)
 ignore = "-----"
 ngramdir = "../storage/ngrams"
-
-xx <- function(){
-  thomasthree = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_3.rds",sep="/"))
-  verbs = "give throw send bring pass show hand"
-  search = str_replace_all(verbs," ","|")
-  search = paste("^(",search,") ",sep="")
-  verbtrigrams = thomasthree[str_detect(thomasthree$ngrams,search),]
-  parts = str_split_fixed(verbtrigrams$ngrams," ",3)
-  verbtrigrams$verb = parts[,1]
-  verbtrigrams$n1 = parts[,2]
-  verbtrigrams$n2 = parts[,3]
-  one = verbtrigrams[,c("verb","n1","freq")]
-  two = verbtrigrams[,c("verb","n2","freq")]
-  names(two)[2]="n1"
-  both = rbind(one,two)
-  mytable = xtabs(freq ~ verb + n1, both)
-  fit <- ca(mytable)
-  print(fit) # basic results 
-  summary(fit) # extended results 
-  plot(fit) # symmetric map
-  
-  cadf = as.data.frame(fit$rowcoord)
-  ggplot(cadf,aes(x=Dim3,y=Dim4,label=rownames(cadf)))+geom_text()
-}
 ```
 
 ```{r, echo=FALSE}
@@ -62,7 +38,9 @@ shinyApp(
     ,column(2,selectInput("xaxis", "X-axis",
                               choices = c("Dim1")))
     ,column(2,selectInput("yaxis", "Y-axis",
-                              choices = c("Dim2"))))
+                              choices = c("Dim2")))
+    ,column(2,downloadButton('downloadFit', 'Download CA Table'))
+    )
     ,plotOutput("logrank")
      ),
   server = function(input, output, session) {
@@ -176,14 +154,24 @@ shinyApp(
     output$downloadNgram <- downloadHandler(
       filename = function() { 
         ff= getFileName(TRUE)
-        ff=sub(".rds",".csv",ff)
+        ff=sub(".rds","dist.csv",ff)
         ff
       },
       content <- function(file) {
-        fpath = getFileName(FALSE)
-        print(fpath)
-         wholecsv <- readRDS(fpath)
-           write.csv(wholecsv, file)
+        write.csv(values$table, file,row.names=F)
+
+      }
+      ,contentType = "text/csv"
+    )
+    
+     output$downloadFit <- downloadHandler(
+      filename = function() { 
+        ff= getFileName(TRUE)
+        ff=sub(".rds","table.csv",ff)
+        ff
+      },
+      content <- function(file) {
+        write.csv(values$cadf, file,row.names=F)
 
       }
       ,contentType = "text/csv"

@@ -28,11 +28,24 @@ alldf$percOthers = round(alldf$percOthers*100)
 names(alldf)[1:2] <- c("langgroup","language")
 
 ```
-
+  
 ```{r, echo=FALSE}
 
 shinyApp(
   ui =  fluidPage(
+  tags$head(
+    tags$style(HTML("
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-7929639-5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-7929639-5');
+</script>
+ "))
+),
     sidebarPanel(helpText("To select a corpus, you can use this table, which provides various statistics about each corpus (columns are described below).  Use arrow key to see columns to right")
                  ,helpText("Click on a row to see info about the corpus")      
                  ,helpText("To sort by a column, click on the arrow next to each column label")

@@ -481,7 +481,7 @@ if (mode == 6 || mode == 0){
 summarizeOne <- function(f){
   parts = str_split_fixed(f,"[_/]",5)
   cdf = data.frame(lg=parts[2],lang=parts[3],corpus=parts[4],
-                   numWords = NA, numUtt = NA, wordsPerUtt=NA, minAge=NA,maxAge = NA,
+                   numWords = NA, numUtt = NA, wordsPerUtt=NA, mored=0, minAge=NA, maxAge = NA,
                    percTarChild=NA,percParent=NA,percOthers=NA)
   #  worddf = read.csv(f,stringsAsFactors = F)
   #  print(f)
@@ -491,6 +491,9 @@ summarizeOne <- function(f){
     worddf$w = str_trim(worddf$w)
     worddf = worddf[worddf$w != "",]
     worddf = worddf[!is.na(worddf$w),]
+    if ("mor_type" %in% names(worddf)){
+      cdf$mored=round(sum(!is.na(worddf$mor_type))/length(worddf$mor_type),3)
+    }
     #   length(worddf$w)
     if (length(worddf$w) > 1){
       fhead = str_replace(f,"Word.rds","")

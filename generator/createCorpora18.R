@@ -61,8 +61,27 @@ processParticipants <- function(one){
     #   print(df)
     partdf = bind_rows(partdf, df)
   }
+  
   if ("age" %in% names(partdf) && sum(!is.na(partdf$age)) > 0){
-    agenum = as.integer(as.character(str_split(partdf$age[!is.na(partdf$age)],"[A-Z]")[[1]]))
+    print(partdf)
+    partage = partdf$age[!is.na(partdf$age)]
+    # if (sum(partage) > 1){
+    #   print("## too many ages")
+    #   print(partdf)
+    #   partage = partdf$age[partdf$role == "Target_Child"]
+    # }
+    agenum = as.integer(as.character(str_split(partage,"[A-Z]")[[1]]))
+    partdf$agemonth = agenum[2] * 12
+    if (!is.na(agenum[3])){
+      partdf$agemonth = agenum[2] * 12 + agenum[3]
+      if (!is.na(agenum[4])){
+        partdf$agemonth = agenum[2] * 12 + agenum[3] + agenum[4]/31
+      }
+    }else{
+      print("age month 6")
+      print(partdf)
+      partdf$agemonth = agenum[2] * 12 + 6 # if missing, put age in middle of year
+    } 
     partdf$Y = as.character(agenum[2])
     partdf$M = as.character(agenum[3])
     partdf$D = as.character(agenum[4])
@@ -195,6 +214,8 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
         filelinenum=filelinenum+1
       }
  #     print("done file")
+      alllines2 = alllines %>% group_by(uID) %>% mutate(word_posn = row_number())
+      alllines$word_posn = alllines2$word_posn
       
       fnameparts = str_split_fixed(fulfile,"/",5)
       if (length(alllines)>0){
@@ -336,7 +357,7 @@ word2sent <- function(alluttdf){
   if ("w" %in% names(newdf)){
     newdf$w = str_trim(newdf$w)
     newdf$w = str_replace(newdf$w,"\\s+"," ")
-    newdf$wordlen = sapply(strsplit(newdf$w, "\\s+"), length)
+    newdf$utt_len = sapply(strsplit(newdf$w, "\\s+"), length)
   }
   if ("t_type" %in% names(newdf)){
     newdf$t_type = str_trim(newdf$t_type)
@@ -659,8 +680,4 @@ if (mode == 8 || mode == 0){
 }
 
 print("done")
-
-
-
-
 

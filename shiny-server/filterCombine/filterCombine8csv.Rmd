@@ -112,6 +112,7 @@ shinyApp(
         searchForCorpusFile()
         resetTable()
        }
+       values$load=TRUE
      })
      
       observeEvent(input$rowunit,{
@@ -119,6 +120,7 @@ shinyApp(
         searchForCorpusFile()
         resetTable()
         }
+        values$load=TRUE
      })
       
       recode <- function(){
@@ -155,7 +157,7 @@ shinyApp(
       }
          
       observeEvent(input$preset,{
-        values$load=FALSE
+        
         isolate({
         if (input$preset == "U-shape Curve"){
           values$fulltable=readRDS("gocome3.rds")
@@ -181,6 +183,7 @@ shinyApp(
           updateSelectInput(session, "varB", selected="M")
         }
        if (input$preset == "Mean Length Utterance"){
+         values$load=FALSE
           values$fulltable=readRDS("mlu.rds")
           values$table=values$fulltable
           adjustTableCol()
@@ -196,11 +199,10 @@ shinyApp(
           updateSelectInput(session, "varA", selected="Y")
           updateSelectInput(session, "varB", selected="M")
           updateSelectInput(session, "rowunit", selected="Utterance")
-          updateSelectInput(session, "maxsize", selected=10000000)
+#          updateSelectInput(session, "maxsize", selected=10000000)
           
        }
         })
-        values$load=TRUE
       })
       
    output$recodeUI <- renderUI(values$recodeUI)
@@ -401,6 +403,7 @@ shinyApp(
           p=p+facet_wrap(as.formula(paste("~", input$grp3)),ncol=1)
         }
         p=p+theme(text = element_text(size=20))
+        p=p+scale_colour_brewer(palette="Set1")
         # p=p + geom_text(aes(x=corpus,y=90),colour="black",size=fontsize*5/14)
         p
       }
@@ -436,8 +439,11 @@ shinyApp(
 - The Recode source column is _w_ and there is a list of the four words in the _w_ column.  By clicking on the Create new_w button, we can create a new column called _new_w_ with a 1 for _came_ and _went_, and 0 for overregularized _goed_ and _comed_.  You can set these values to whatever you want in order to code the distinctions that you are interested in.
 - The Operate section allows us to create a variable _op_Y_M_, which has the number of months that the target child has been alive.  This is created by selecting VarA (Years variable _Y_) and VarB (Month variable _M_) and then placing _12 * VarA + VarB_ in the Equation field.
 - The Combine section uses the _new_w_ variable as the dependent variable (1=irregular past tense, 0 = overregularize past tense), the Combine field is set to _mean_, and Group1 is set to age in month variable _op_Y_M_.  So the figure shows the mean proportion correct irregular past tense production over age in months of the target child.  You can see that there is a U-shape curve with an early period of correct production of irregulars, followed by overgeneralization of _-ed_, followed by correct production of irregulars.
+- There is a second preset called Mean Length Utterance, which will plot the mean length in words for the Target_Child and Mother in the Thomas corpus.  It is slow to load.
 - To learn more about regular expressions, look [here](https://regexone.com/lesson/introduction_abcs).  
 - You can download the results or the original table using the download buttons.
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+
+
 

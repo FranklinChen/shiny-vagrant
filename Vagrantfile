@@ -86,6 +86,8 @@ Vagrant.configure("2") do |config|
     
     # setup shiny files
     rsync -avzr /vagrant/shiny-server/ /srv/shiny-server/
-    ln -sf /vagrant/storage /srv/shiny-server/storage
+    if [ ! -e /srv/shiny-server/storage]; then
+      ln -sf /vagrant/storage /srv/shiny-server/storage
+    fi
    SHELL
 end

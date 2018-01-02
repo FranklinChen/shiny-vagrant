@@ -76,7 +76,7 @@ Vagrant.configure("2") do |config|
 
    # install shiny server
    SHINY=shiny-server-1.5.3.838-amd64.deb
-   if [ ! -f /srv/shiny-server/index.html ]; then
+   if [[ ! -f /srv/shiny-server/index.html ]]; then
     wget -N https://download3.rstudio.org/ubuntu-12.04/x86_64/$SHINY
     gdebi --non-interactive $SHINY
   fi
@@ -86,7 +86,7 @@ Vagrant.configure("2") do |config|
     
     # setup shiny files
     rsync -avzr /vagrant/shiny-server/ /srv/shiny-server/
-    if [ ! -e /srv/shiny-server/storage ]; then
+    if [[ ! -e /srv/shiny-server/storage ]]; then
       ln -sf /vagrant/storage /srv/shiny-server/storage
     fi
    SHELL

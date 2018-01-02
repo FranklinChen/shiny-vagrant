@@ -5,6 +5,7 @@ echo "${0%/*}"
 cd "${0%/*}"
 
 #git -C ${0%/*} pull
+/usr/bin/git -q pull origin master
 
 if [[ $1 = "skip" ]]; then
   echo "skip reload provision"

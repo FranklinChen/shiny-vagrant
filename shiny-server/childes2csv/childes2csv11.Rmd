@@ -83,5 +83,5 @@ shinyApp(
 
 
 ```{r, echo=FALSE}
-pre(htmltools::includeText('../storage/savexlsx.R'))
+pre(htmltools::includeText('savexlsx.R'))
 ```

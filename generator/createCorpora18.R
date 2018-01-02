@@ -65,11 +65,7 @@ processParticipants <- function(one){
   if ("age" %in% names(partdf) && sum(!is.na(partdf$age)) > 0){
     print(partdf)
     partage = partdf$age[!is.na(partdf$age)]
-    # if (sum(partage) > 1){
-    #   print("## too many ages")
-    #   print(partdf)
-    #   partage = partdf$age[partdf$role == "Target_Child"]
-    # }
+
     agenum = as.integer(as.character(str_split(partage,"[A-Z]")[[1]]))
     partdf$agemonth = agenum[2] * 12
     if (!is.na(agenum[3])){

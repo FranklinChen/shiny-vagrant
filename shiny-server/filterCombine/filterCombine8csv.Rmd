@@ -14,7 +14,7 @@ require(ggplot2)
 
 ignore = "-----"
 #preread <- readRDS("gocome3.rds")
-#preread <- read.csv("../storage/actualcsv/Eng-UK_Belfast_Barbara_Word.csv")
+#preread <- read.csv("../storage/actualcsv/Eng-UK_Thomas_Utterance.csv")
 ```
 
 ```{r, echo=FALSE}
@@ -42,7 +42,7 @@ shinyApp(
                 selectInput("col2", "Column2: ", choices=c(ignore),width='100%'))
         ,column(3,textInput("search3", "Expression3:", "[A-z]+?ed$"), 
                 selectInput("col3", "Column3: ", choices=c(ignore),width='100%'))
-        ,column(2, selectInput("preset", "Preset: ", choices=c(ignore,"U-shape Curve"))
+        ,column(2, selectInput("preset", "Preset: ", choices=c(ignore,"U-shape Curve","Mean Length Utterance"))
                 ,h5("Filtered CSV")
                 ,downloadButton('downloadFilter','Download Filtered')
                 ))
@@ -73,6 +73,7 @@ shinyApp(
     values$updateFilter = TRUE
     values$recodeUI = NULL
     values$maxsize = 1000
+    values$load = TRUE
     values$forcepush=FALSE
  #   values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Thomas",ignore)
@@ -107,13 +108,17 @@ shinyApp(
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
+       if (values$load){
         searchForCorpusFile()
         resetTable()
+       }
      })
      
       observeEvent(input$rowunit,{
+        if (values$load){
         searchForCorpusFile()
         resetTable()
+        }
      })
       
       recode <- function(){
@@ -150,16 +155,14 @@ shinyApp(
       }
          
       observeEvent(input$preset,{
+        values$load=FALSE
+        isolate({
         if (input$preset == "U-shape Curve"){
- #         updateSelectInput(session, "langGroup",selected="Eng-UK")
-  #        updateSelectInput(session, "lang",selected="Thomas")
-   #       updateSelectInput(session, "corpus",selected=ignore)
-     #    isolate({
           values$fulltable=readRDS("gocome3.rds")
           values$table=values$fulltable
           adjustTableCol()
-           resetTable()
-        updateSelectInput(session, "col1", selected="w")
+          resetTable()
+          updateSelectInput(session, "col1", selected="w")
           updateSelectInput(session, "col2", selected="role")
           updateSelectInput(session, "source1", selected="w")
           lev = as.character(unique(values$table[,"w"]))
@@ -170,18 +173,36 @@ shinyApp(
           })
           print(level_list)
           values$recodeUI <- do.call(tagList, level_list)
-        updateActionButton(session,"create", label=paste("Create new_w",sep=""))
+          updateActionButton(session,"create", label=paste("Create new_w",sep=""))
           updateSelectInput(session, "dv", selected = "new_w")
           updateSelectInput(session, "comb", selected = "mean")
           updateSelectInput(session, "grp1", selected = "op_Y_M")
-         updateSelectInput(session, "varA", selected="Y")
-        updateSelectInput(session, "varB", selected="M")
- 
-     #    })
-       #   values$table=values$fulltable
+          updateSelectInput(session, "varA", selected="Y")
+          updateSelectInput(session, "varB", selected="M")
         }
-     })
-
+       if (input$preset == "Mean Length Utterance"){
+          values$fulltable=readRDS("mlu.rds")
+          values$table=values$fulltable
+          adjustTableCol()
+          resetTable()
+          updateSelectInput(session, "search1", selected="(Target_Child|Mother)")
+          updateSelectInput(session, "col1", selected="role")
+         
+          updateActionButton(session,"create", label=paste("Create new_w",sep=""))
+          updateSelectInput(session, "dv", selected = "wordlen")
+          updateSelectInput(session, "comb", selected = "mean")
+          updateSelectInput(session, "grp1", selected = "op_Y_M")
+          updateSelectInput(session, "grp2", selected = "role")
+          updateSelectInput(session, "varA", selected="Y")
+          updateSelectInput(session, "varB", selected="M")
+          updateSelectInput(session, "rowunit", selected="Utterance")
+          updateSelectInput(session, "maxsize", selected=10000000)
+          
+       }
+        })
+        values$load=TRUE
+      })
+      
    output$recodeUI <- renderUI(values$recodeUI)
      
    observeEvent(input$source1,  ignoreInit=T,{

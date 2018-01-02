@@ -10,3 +10,4 @@ else
   vagrant reload
   vagrant provision
 fi
+

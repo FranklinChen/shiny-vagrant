@@ -160,7 +160,7 @@ shinyApp(
         
         isolate({
         if (input$preset == "U-shape Curve"){
-          values$fulltable=readRDS("gocome3.rds")
+          values$fulltable=readRDS("../storage/presets/gocome3.rds")
           values$table=values$fulltable
           adjustTableCol()
           resetTable()
@@ -184,7 +184,7 @@ shinyApp(
         }
        if (input$preset == "Mean Length Utterance"){
          values$load=FALSE
-          values$fulltable=readRDS("mlu.rds")
+          values$fulltable=readRDS("../storage/presets/mlu.rds")
           values$table=values$fulltable
           adjustTableCol()
           resetTable()

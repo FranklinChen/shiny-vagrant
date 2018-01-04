@@ -210,8 +210,10 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
         filelinenum=filelinenum+1
       }
  #     print("done file")
-      alllines2 = alllines %>% group_by(uID) %>% mutate(word_posn = row_number())
-      alllines$word_posn = alllines2$word_posn
+      if ("uID" %in% names(alllines)){
+        alllines2 = alllines %>% group_by(uID) %>% mutate(word_posn = row_number())
+        alllines$word_posn = alllines2$word_posn
+      }
       
       fnameparts = str_split_fixed(fulfile,"/",5)
       if (length(alllines)>0){
@@ -268,6 +270,27 @@ if (mode == 1 || mode == 0){
   system.time(createCSVfromXML(csvfolder))
 }
 
+shiftLessInterestingLeft <- function(df){
+  lgp = which(names(df)=="langgrp")-1
+  df2 = df[,1:lgp]
+  percna = apply(is.na(df2),2,sum)/length(df2$who)
+  percna2 = percna2[percna2 > 0.5]
+  uniquelen = lapply(apply(df2,2,unique),length)
+  uniquelen2 = uniquelen[uniquelen < 4]
+  
+  endcol = c(union(names(percna2),names(uniquelen2)),"xmlline")
+  endcol = setdiff(endcol,c("t_type"))
+  allcol = names(df)
+  allcol = setdiff(allcol,c("t_type"))
+  wpos = which(allcol=="w")
+  allcol = c(allcol[1:wpos],"t_type",allcol[(wpos+1):length(allcol)])
+  
+  firstcol = setdiff(allcol,endcol)
+  newlab = c(firstcol,endcol)
+  
+  return(df[,newlab])
+}
+
 combineCSVFiles <- function(csvfolder,foldname){
   newfname = str_replace_all(foldname,"_","-")
   newfname = str_replace_all(newfname,"/","_")
@@ -296,6 +319,7 @@ combineCSVFiles <- function(csvfolder,foldname){
     if (max(xtabs( ~ uID,allcorpus)) == 1){
       newfname = str_replace(newfname,"_Word","_Utt")
     }
+    allcorpus = shiftLessInterestingLeft(allcorpus)
     print(paste("writing ",newfname))
     saveRDS(allcorpus,newfname)
     allcorpus = NULL

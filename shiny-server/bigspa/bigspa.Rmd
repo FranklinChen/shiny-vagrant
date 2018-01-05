@@ -37,6 +37,11 @@ results$corpus=factor(results$corpus)
 
 shinyApp(
   ui =  fluidPage(
+       tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-7929639-6', 'auto');
+ga('send', 'pageview');")),
+    tags$script(src='https://www.google-analytics.com/analytics.js'),
+
     mainPanel(
       textOutput("text1")
       ,fluidRow(

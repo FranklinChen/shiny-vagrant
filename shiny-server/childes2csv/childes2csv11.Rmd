@@ -19,6 +19,11 @@ preread <- read.csv("../storage/actualcsv/Chinese_Cantonese_HKU_Utterance.csv",n
 
 shinyApp(
   ui =  fluidPage(
+       tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-7929639-6', 'auto');
+ga('send', 'pageview');")),
+    tags$script(src='https://www.google-analytics.com/analytics.js'),
+
     sidebarPanel(selectInput("langGroup", "Language Group:", 
                              choices = c("Chinese"), width='90%')
                  ,downloadButton('downloadDataLangGroup', 'Download')

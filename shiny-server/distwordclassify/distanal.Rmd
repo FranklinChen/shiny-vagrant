@@ -21,6 +21,11 @@ ngramdir = "../storage/ngrams"
 
 shinyApp(
   ui =  fluidPage(
+       tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-7929639-6', 'auto');
+ga('send', 'pageview');")),
+    tags$script(src='https://www.google-analytics.com/analytics.js'),
+
     sidebarPanel(selectInput("langGroup", "Language Group: ", 
                              choices = c("Eng-UK"), selected="Eng-UK",width='90%')
                  ,selectInput("lang", "Language: ",

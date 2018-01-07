@@ -173,7 +173,9 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
       file = NULL
       alllines = data.frame()
       filelinenum = 1
-      print(tail(wholefilelines))
+      if (verbose){
+        print(tail(wholefilelines))
+      }
       while(filelinenum <= length(wholefilelines)){
         linenodeset = wholefilelines[filelinenum]
         nodetype = xml_name(linenodeset)

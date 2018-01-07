@@ -12,6 +12,9 @@ registerDoParallel(cl)
 
 args <- commandArgs(TRUE)
 mode <- as.integer(args[1])
+if (is.na(mode)){
+  mode=0
+}
 print("mode")
 print(mode)
 
@@ -170,12 +173,17 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
       file = NULL
       alllines = data.frame()
       filelinenum = 1
-      while(filelinenum < length(wholefilelines)){
+      print(tail(wholefilelines))
+      while(filelinenum <= length(wholefilelines)){
         linenodeset = wholefilelines[filelinenum]
         nodetype = xml_name(linenodeset)
         #   print(linenodeset)
         
         if (nodetype == "u"){
+          if (verbose){
+            print("u")
+            print(linenodeset)
+          }
           nodeattr = xml_attrs(linenodeset)[[1]]
           attnames = names(nodeattr)
           wdf = data.frame(xmlline = filelinenum)
@@ -272,6 +280,8 @@ createCSVfromXML <- function(csvfolder){
  # print(length(x))
   print("finished csvfoldermake")
 }
+#processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
+
 if (mode == 1 || mode == 0){
   system.time(createCSVfromXML(csvfolder))
 }
@@ -284,7 +294,7 @@ shiftLessInterestingLeft <- function(df){
   uniquelen = lapply(apply(df2,2,unique),length)
   uniquelen2 = uniquelen[uniquelen < 4]
   
- endcol = c(union(names(percna2),names(uniquelen2)))
+  endcol = c(union(names(percna2),names(uniquelen2)))
   allcol = names(df)
   if ("t_type" %in% names(percna2)){
     endcol = setdiff(endcol,c("t_type"))
@@ -313,7 +323,7 @@ combineCSVFiles <- function(csvfolder,foldname){
     fold = str_replace(fold,"/ALL","")
  #   print(newfname)
     flist2 = list.files(path = paste(csvfolder,fold,sep="/"),".+?[.]rds", full.names = T, recursive = T)
-  #  print(flist2)
+    print(flist2)
     allcorpus=data.frame()
     for (i in 1:length(flist2)){
       fdf = readFileLoop(flist2[i])
@@ -332,6 +342,7 @@ combineCSVFiles <- function(csvfolder,foldname){
 #    if (max(xtabs( ~ uID,allcorpus)) == 1){
 #      newfname = str_replace(newfname,"_Word","_Utt")
 #    }
+    print(head(allcorpus))
     print(paste("writing ",newfname))
     allcorpus = shiftLessInterestingLeft(allcorpus)
     saveRDS(allcorpus,newfname)
@@ -340,20 +351,20 @@ combineCSVFiles <- function(csvfolder,foldname){
     gc()
   }
 }
-combineCSVFiles(csvfolder,"Biling/Amsterdam/Annick")
+#combineCSVFiles(csvfolder,"Biling/Amsterdam/Annick")
 
 combineFileCorpora <- function(csvfolder){
   print(paste("\n\n@@ combine csv into folder csv ",csvfolder))
   flist = list.files(path = csvfolder, ".+?rds", full.names = T, recursive = T)
-#  print(flist)
+ # print(flist)
   fparts = str_split_fixed(as.character(flist),"/",5)
   fparts = fparts[fparts[,3] != "",]
   fparts[str_detect(fparts[,4],".rds"),4] = "ALL"
   foldname = as.character(unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/")))
-#  print(foldname)
-#  for (i in 1:length(foldname)){
+  print(foldname)
+  for (i in 1:length(foldname)){
   funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
-  x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
+#  x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineCSVFiles(csvfolder,foldname[i])
   }
  # print(length(x))

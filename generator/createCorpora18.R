@@ -284,12 +284,16 @@ shiftLessInterestingLeft <- function(df){
   uniquelen = lapply(apply(df2,2,unique),length)
   uniquelen2 = uniquelen[uniquelen < 4]
   
-  endcol = c(union(names(percna2),names(uniquelen2)))
-  endcol = setdiff(endcol,c("t_type"))
+ endcol = c(union(names(percna2),names(uniquelen2)))
   allcol = names(df)
-  allcol = setdiff(allcol,c("t_type"))
-  wpos = which(allcol=="w")
-  allcol = c(allcol[1:wpos],"t_type",allcol[(wpos+1):length(allcol)])
+  if ("t_type" %in% names(percna2)){
+    endcol = setdiff(endcol,c("t_type"))
+    allcol = setdiff(allcol,c("t_type"))
+    if ("w" %in% allcol){
+      wpos = which(allcol=="w")
+      allcol = c(allcol[1:wpos],"t_type",allcol[(wpos+1):length(allcol)])
+    }
+  }
   
   firstcol = setdiff(allcol,endcol)
   newlab = as.character(c(firstcol,endcol))

@@ -4,6 +4,7 @@ require(xml2)
 require(dplyr)
 require(ngram)
 options(encoding = 'UTF-8')
+csvfolder = "csvfolderMake"
 
 library(doParallel)
 cl <- makeCluster(3,outfile="",type = "FORK")
@@ -16,7 +17,6 @@ print(mode)
 
 #setwd("~/big/rscripts/corpus/childes/workfiles")
 #write("start",file="myfile",append=FALSE)
-csvfolder = "csvfolderMake"
 
 readFileLoop <- function(fname){
   fdf=NULL
@@ -63,9 +63,13 @@ processParticipants <- function(one){
   }
   
   if ("age" %in% names(partdf) && sum(!is.na(partdf$age)) > 0){
-    print(partdf)
+#    print(partdf)
     partage = partdf$age[!is.na(partdf$age)]
-
+    # if (sum(partage) > 1){
+    #   print("## too many ages")
+    #   print(partdf)
+    #   partage = partdf$age[partdf$role == "Target_Child"]
+    # }
     agenum = as.integer(as.character(str_split(partage,"[A-Z]")[[1]]))
     partdf$agemonth = agenum[2] * 12
     if (!is.na(agenum[3])){
@@ -75,7 +79,7 @@ processParticipants <- function(one){
       }
     }else{
       print("age month 6")
-      print(partdf)
+#      print(partdf)
       partdf$agemonth = agenum[2] * 12 + 6 # if missing, put age in middle of year
     } 
     partdf$Y = as.character(agenum[2])
@@ -210,6 +214,8 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
         filelinenum=filelinenum+1
       }
  #     print("done file")
+      print("alllines")
+      print(head(alllines))
       if ("uID" %in% names(alllines)){
         alllines2 = alllines %>% group_by(uID) %>% mutate(word_posn = row_number())
         alllines$word_posn = alllines2$word_posn
@@ -218,7 +224,7 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
       fnameparts = str_split_fixed(fulfile,"/",5)
       if (length(alllines)>0){
         alllines$langgrp = fnameparts[2]
-        alllines$lang = fnameparts[3]
+        alllines$langtype = fnameparts[3]
         if (str_detect(".xml",fnameparts[4])){
           alllines$corpus = ""
           alllines$file = fnameparts[4]
@@ -274,11 +280,11 @@ shiftLessInterestingLeft <- function(df){
   lgp = which(names(df)=="langgrp")-1
   df2 = df[,1:lgp]
   percna = apply(is.na(df2),2,sum)/length(df2$who)
-  percna2 = percna2[percna2 > 0.5]
+  percna2 = percna[percna > 0.5]
   uniquelen = lapply(apply(df2,2,unique),length)
   uniquelen2 = uniquelen[uniquelen < 4]
   
-  endcol = c(union(names(percna2),names(uniquelen2)),"xmlline")
+  endcol = c(union(names(percna2),names(uniquelen2)))
   endcol = setdiff(endcol,c("t_type"))
   allcol = names(df)
   allcol = setdiff(allcol,c("t_type"))
@@ -286,19 +292,22 @@ shiftLessInterestingLeft <- function(df){
   allcol = c(allcol[1:wpos],"t_type",allcol[(wpos+1):length(allcol)])
   
   firstcol = setdiff(allcol,endcol)
-  newlab = c(firstcol,endcol)
-  
-  return(df[,newlab])
+  newlab = as.character(c(firstcol,endcol))
+  newdf = df[,newlab]
+  return(newdf)
 }
+#df = readRDS("csvfolderMake/Biling_Amsterdam_Annick_Word.rds")
+#head(shiftLessInterestingLeft(df))
 
 combineCSVFiles <- function(csvfolder,foldname){
+  print(paste("combineCSVFiles ",csvfolder," ",foldname))
   newfname = str_replace_all(foldname,"_","-")
   newfname = str_replace_all(newfname,"/","_")
   newfname = paste(csvfolder,"/",newfname,"_Word.rds",sep="")
   if (!file.exists(newfname)){
     fold = foldname
     fold = str_replace(fold,"/ALL","")
-  #  print(fold)
+ #   print(newfname)
     flist2 = list.files(path = paste(csvfolder,fold,sep="/"),".+?[.]rds", full.names = T, recursive = T)
   #  print(flist2)
     allcorpus=data.frame()
@@ -316,27 +325,30 @@ combineCSVFiles <- function(csvfolder,foldname){
     allcorpus$xmlnum = allcorpus$xmlline
     allcorpus$rownum = 1:length(allcorpus$who)
     allcorpus$xmlline = NULL
-    if (max(xtabs( ~ uID,allcorpus)) == 1){
-      newfname = str_replace(newfname,"_Word","_Utt")
-    }
-    allcorpus = shiftLessInterestingLeft(allcorpus)
+#    if (max(xtabs( ~ uID,allcorpus)) == 1){
+#      newfname = str_replace(newfname,"_Word","_Utt")
+#    }
     print(paste("writing ",newfname))
+    allcorpus = shiftLessInterestingLeft(allcorpus)
     saveRDS(allcorpus,newfname)
     allcorpus = NULL
     fdf = NULL
     gc()
   }
 }
+combineCSVFiles(csvfolder,"Biling/Amsterdam/Annick")
 
 combineFileCorpora <- function(csvfolder){
-  print("\n\n@@ combine csv into folder csv")
+  print(paste("\n\n@@ combine csv into folder csv ",csvfolder))
   flist = list.files(path = csvfolder, ".+?rds", full.names = T, recursive = T)
-  fparts = str_split_fixed(flist,"/",5)
+#  print(flist)
+  fparts = str_split_fixed(as.character(flist),"/",5)
   fparts = fparts[fparts[,3] != "",]
   fparts[str_detect(fparts[,4],".rds"),4] = "ALL"
-  foldname = unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/"))
+  foldname = as.character(unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/")))
+#  print(foldname)
 #  for (i in 1:length(foldname)){
-  funclist = c('combineCSVFiles','readFileLoop')
+  funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
   x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineCSVFiles(csvfolder,foldname[i])
   }
@@ -521,7 +533,7 @@ if (mode == 6 || mode == 0){
 
 summarizeOne <- function(f){
   parts = str_split_fixed(f,"[_/]",5)
-  cdf = data.frame(lg=parts[2],lang=parts[3],corpus=parts[4],
+  cdf = data.frame(lg=parts[2],langtype=parts[3],corpus=parts[4],
                    numWords = NA, numUtt = NA, wordsPerUtt=NA, mored=0, minAge=NA, maxAge = NA,
                    percTarChild=NA,percParent=NA,percOthers=NA)
   #  worddf = read.csv(f,stringsAsFactors = F)
@@ -614,7 +626,7 @@ summarizeCorpora <- function(csvfolder){
     }
     cordf2 = do.call("rbind",cordf)
     # print(tail(cordf2))
-    cordf2 = cordf2[order(cordf2$lg,cordf2$lang,cordf2$corpus),]
+    cordf2 = cordf2[order(cordf2$lg,cordf2$langtype,cordf2$corpus),]
     saveRDS(cordf2,"summaryChildes.rds")
     cordf2=NULL
     gc()
@@ -700,4 +712,3 @@ if (mode == 8 || mode == 0){
 }
 
 print("done")
-

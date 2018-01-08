@@ -18,6 +18,6 @@ for (i in 1:length(fl)){
   if (!file.exists(nfl[i])){
     print(paste("reading ",fl[i]))
     df = readRDS(fl[i])
-    write.csv(df,nfl[i],fileEncoding = "UTF-8")
+    write.csv(df,nfl[i],fileEncoding = "UTF-8",row.names = F)
   }
 }

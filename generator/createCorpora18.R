@@ -364,9 +364,9 @@ combineFileCorpora <- function(csvfolder){
   fparts[str_detect(fparts[,4],".rds"),4] = "ALL"
   foldname = as.character(unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/")))
   print(foldname)
-  for (i in 1:length(foldname)){
+#  for (i in 1:length(foldname)){
   funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
-#  x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
+  x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineCSVFiles(csvfolder,foldname[i])
   }
  # print(length(x))

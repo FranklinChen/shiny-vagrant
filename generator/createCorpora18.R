@@ -231,8 +231,12 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
         alllines$word_posn = alllines2$word_posn
       }
       
+      if (length(alllines) <= 0){
+        print(paste("EMPTY ",newfile))
+        alllines = data.frame(who=partdf$id,uID="",w="",t_type="p")
+        alllines$word_posn = 1:length(alllines$who)
+      }
       fnameparts = str_split_fixed(fulfile,"/",5)
-      if (length(alllines)>0){
         alllines$langgrp = fnameparts[2]
         alllines$langtype = fnameparts[3]
         if (str_detect(".xml",fnameparts[4])){
@@ -257,14 +261,12 @@ processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
         onefilelines = NULL
         gc()
         return(lenone)
-      }else{
-        print(paste("EMPTY ",newfile))
-        return(-1)
-      }
     }
   }
   return("exists")
 }
+#processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T)
+
 
 createCSVfromXML <- function(csvfolder){
   print("\n\n@@ create CSV from XML")

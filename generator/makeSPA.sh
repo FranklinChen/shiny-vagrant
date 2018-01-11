@@ -6,3 +6,4 @@ cd workfiles
 nohup Rscript ../convertRDS2CSV.R > out2
 rm -f bigspa.csv 
 nohup python3 ../createbigspa.py > out3
+echo "done make spa" >> out3

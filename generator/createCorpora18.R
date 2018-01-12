@@ -300,13 +300,25 @@ shiftLessInterestingLeft <- function(df){
   
   endcol = c(union(names(percna2),names(uniquelen2)))
   allcol = names(df)
-  if ("t_type" %in% names(percna2)){
+  if ("xmlline" %in% allcol){
+    endcol = setdiff(endcol,c("xmlline"))
+    allcol = setdiff(allcol,c("xmlline"))
+    allcol = c(allcol,"xmlline")
+  }
+  if ("t_type" %in% allcol){
     endcol = setdiff(endcol,c("t_type"))
     allcol = setdiff(allcol,c("t_type"))
-    if ("w" %in% allcol){
-      wpos = which(allcol=="w")
-      allcol = c(allcol[1:wpos],"t_type",allcol[(wpos+1):length(allcol)])
-    }
+    allcol = c("t_type",allcol)
+  }
+  if ("w" %in% allcol){
+    endcol = setdiff(endcol,c("w"))
+    allcol = setdiff(allcol,c("w"))
+    allcol = c("w",allcol)
+  }
+  if ("who" %in% allcol){
+    endcol = setdiff(endcol,c("who"))
+    allcol = setdiff(allcol,c("who"))
+    allcol = c("who",allcol)
   }
   
   firstcol = setdiff(allcol,endcol)

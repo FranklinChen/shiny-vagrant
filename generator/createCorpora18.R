@@ -159,113 +159,133 @@ processXML <- function(wdf, node, lab = "", verbose=FALSE){
 # processXML(data.frame(line=1),node,lab="",verbose=T)
 #node=read_xml('<a type="extension" flavor="trn"></a>')
 
-processXMLFileList <- function(fulfile,csvfolder,verbose=FALSE){
- # print("STARTXML")
+
+processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,label="") {
+  # print("STARTXML")
   newfile = fulfile
-  newfile = str_replace(newfile,"data-xml",csvfolder)
-  newfile = str_replace(newfile,"[.]xml$",".rds")
-  if (!file.exists(newfile)){
-    if (file.exists(fulfile) && str_detect(fulfile,"xml")){
+  newfile = str_replace(newfile, "data-xml", csvfolder)
+  newfile = str_replace(newfile, "[.]xml$", ".rds")
+  if (!file.exists(newfile) || force) {
+#    print(fulfile)
+    if (file.exists(fulfile) && str_detect(fulfile, "xml")) {
       file <- read_xml(fulfile)
-  #    print("read file")
-      dir.create(dirname(newfile),recursive=T,showWarnings=F)
-      wholefilelines= xml_children(file)
+      print(paste("read file",fulfile,label))
+      dir.create(dirname(newfile),
+                 recursive = T,
+                 showWarnings = F)
+      wholefilelines = xml_children(file)
       file = NULL
-      alllines = data.frame()
+      alldf = data.frame()
       filelinenum = 1
-      if (verbose){
+      if (verbose) {
         print(tail(wholefilelines))
       }
-      while(filelinenum <= length(wholefilelines)){
+      while (filelinenum <= length(wholefilelines)) {
         linenodeset = wholefilelines[filelinenum]
         nodetype = xml_name(linenodeset)
         #   print(linenodeset)
         
-        if (nodetype == "u"){
-          if (verbose){
+        if (nodetype == "u") {
+          if (verbose) {
             print("u")
             print(linenodeset)
           }
           nodeattr = xml_attrs(linenodeset)[[1]]
           attnames = names(nodeattr)
           wdf = data.frame(xmlline = filelinenum)
-          for (ii in 1:length(attnames)){
+          for (ii in 1:length(attnames)) {
             onecol = attnames[ii]
-            wdf = addtodf(wdf,onecol,nodeattr[ii])
+            wdf = addtodf(wdf, onecol, nodeattr[ii])
           }
-          resetwdf=wdf
+          resetwdf = wdf
           uchildren = xml_children(linenodeset)
-          if (length(uchildren) > 0){
-            for (i in 1:length(uchildren)){
+          if (length(uchildren) > 0) {
+            for (i in 1:length(uchildren)) {
               childnode = uchildren[[i]]
               groupchild = NULL
               unodename = xml_name(childnode)
-              if ((unodename == "g" || unodename == "w") && length(resetwdf) != length(wdf)){
-                alllines= bind_rows(alllines, wdf)
+              if ((unodename == "g" ||
+                   unodename == "w") && length(resetwdf) != length(wdf)) {
+                alldf = bind_rows(alldf, wdf)
                 wdf = resetwdf
               }
-              if (unodename == "g"){
+              if (unodename == "g") {
                 groupchild = xml_children(childnode)
-                for (gc in 1:length(groupchild)){
-                  wdf = processXML(wdf, groupchild[[gc]],lab = "",verbose=verbose)
+                for (gc in 1:length(groupchild)) {
+                  wdf = processXML(wdf,
+                                   groupchild[[gc]],
+                                   lab = "",
+                                   verbose = verbose)
                 }
               }
-              wdf = processXML(wdf, childnode,lab = "",verbose=verbose)
+              wdf = processXML(wdf,
+                               childnode,
+                               lab = "",
+                               verbose = verbose)
             }
-            alllines= bind_rows(alllines, wdf)
+            alldf = bind_rows(alldf, wdf)
           }
           uchildren = NULL
           wdf = NULL
-          resetwdf=NULL
+          resetwdf = NULL
         }
-        if (nodetype== "Participants"){
+        if (nodetype == "Participants") {
           partdf = processParticipants(linenodeset)
         }
-        filelinenum=filelinenum+1
+        filelinenum = filelinenum + 1
       }
- #     print("done file")
-      print("alllines")
-      print(head(alllines))
-      if ("uID" %in% names(alllines)){
-        alllines2 = alllines %>% group_by(uID) %>% mutate(word_posn = row_number())
-        alllines$word_posn = alllines2$word_posn
+#      print("finished reading xml file")
+      #     print("alldf")
+  #    print(head(alldf))
+      if (length(alldf) > 0 && "uID" %in% names(alldf)) {
+        alldf2 = alldf %>% group_by(uID) %>% mutate(word_posn = row_number())
+        alldf$word_posn = alldf2$word_posn
+      }
+ #     print(partdf)
+      
+      if ("id" %in% names(partdf)){
+        alldf3 = data.frame(who = partdf$id,uID = "u-1", w = "",t_type = "p",word_posn = 1)
+        if (length(alldf) > 0 && length(alldf[, 1]) < length(partdf$id)) {
+          print("bind prev")
+          print(head(alldf))
+          print("new")
+          alldf = bind_rows(alldf, alldf3)
+          print(head(alldf))
+        } 
+        if (length(alldf) <= 0){
+          print(paste("EMPTY ", newfile))
+          alldf = alldf3
+          print(head(alldf))
+        }
       }
       
-      if (length(alllines) <= 0){
-        print(paste("EMPTY ",newfile))
-        alllines = data.frame(who=partdf$id,uID="",w="",t_type="p")
-        alllines$word_posn = 1:length(alllines$who)
+      fnameparts = str_split_fixed(fulfile, "/", 5)
+      alldf$langgrp = fnameparts[2]
+      alldf$langtype = fnameparts[3]
+      if (str_detect(".xml", fnameparts[4])) {
+        alldf$corpus = ""
+        alldf$file = fnameparts[4]
+      } else{
+        alldf$corpus = fnameparts[4]
+        alldf$file = fnameparts[5]
       }
-      fnameparts = str_split_fixed(fulfile,"/",5)
-        alllines$langgrp = fnameparts[2]
-        alllines$langtype = fnameparts[3]
-        if (str_detect(".xml",fnameparts[4])){
-          alllines$corpus = ""
-          alllines$file = fnameparts[4]
-        }else{
-          alllines$corpus = fnameparts[4]
-          alllines$file = fnameparts[5]
-        }
-        onefilelines = mergePartMain(alllines,partdf)
-        names(onefilelines) <- str_replace_all(names(onefilelines),"-","_")
-   #     if (verbose){
-  #        View(onefilelines)
-  #      }
-        print(paste("making ",newfile))
-        #      print(head(onefilelines))
-        saveRDS(onefilelines,newfile)
-        alllines = NULL
-        partdf = NULL
-        wdf = NULL
-        lenone = length(onefilelines)
-        onefilelines = NULL
-        gc()
-        return(lenone)
+      onefilelines = mergePartMain(alldf, partdf)
+      names(onefilelines) <- str_replace_all(names(onefilelines), "-", "_")
+      print(paste("saving ", newfile))
+      #      print(head(onefilelines))
+      saveRDS(onefilelines, newfile)
+      alldf = NULL
+      partdf = NULL
+      wdf = NULL
+      lenone = length(onefilelines)
+      onefilelines = NULL
+      gc()
+      return(lenone)
     }
   }
   return("exists")
 }
-#processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T)
+#processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T,force=TRUE)
 
 
 createCSVfromXML <- function(csvfolder){
@@ -278,7 +298,7 @@ createCSVfromXML <- function(csvfolder){
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')
 #  for (i in 1:length(flist)){
   x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
-    processXMLFileList(flist[i],csvfolder,verbose=F)
+    processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))
   }
 #  print(x)
  # print(length(x))
@@ -368,6 +388,8 @@ combineCSVFiles <- function(csvfolder,foldname){
   }
 }
 #combineCSVFiles(csvfolder,"Biling/Amsterdam/Annick")
+#df = readRDS("workfiles/csvfolderMake/Biling/SilvaCorvalan/eng/10.rds")
+#unique(df$mor_type)
 
 combineFileCorpora <- function(csvfolder){
   print(paste("\n\n@@ combine csv into folder csv ",csvfolder))

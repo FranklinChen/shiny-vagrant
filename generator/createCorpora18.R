@@ -7,7 +7,8 @@ options(encoding = 'UTF-8')
 csvfolder = "csvfolderMake"
 
 library(doParallel)
-cl <- makeCluster(3,outfile="",type = "FORK")
+nc = detectCores()
+cl <- makeCluster(nc-1,outfile="",type = "FORK")
 registerDoParallel(cl)
 
 args <- commandArgs(TRUE)

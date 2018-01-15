@@ -56,6 +56,38 @@ mergePartMain <- function(table,parttable){
   return(table)
 }
 
+parstr = '<Participants>
+  <participant id="ET1" name="Teacher_Dorothy" role="Teacher" language="eng"/>
+<participant id="KIE" name="Kiera" role="Child" language="eng" age="P5Y8M" education="K2"/>
+<participant id="SAN" name="Sandra" role="Child" language="eng" age="P5Y5M" education="K2"/>
+<participant id="STA" name="Stacey" role="Child" language="eng" age="P6Y2M" education="K2"/>
+<participant id="KRI" name="Krista" role="Child" language="eng" education="K2"/>
+<participant id="CT1" name="Hua_Wen_Laoshi" role="Teacher" language="zho"/>
+<participant id="IVA" name="Ivan" role="Child" language="eng" age="P6Y2M" education="K2"/>
+<participant id="JAM" name="James" role="Child" language="eng" age="P5Y5M" education="K2"/>
+<participant id="CM1" name="Unidentified" role="Child" language="eng" education="K2"/>
+<participant id="ALA" name="Alan_Lai" role="Child" language="eng" age="P6Y4M" education="K2"/>
+<participant id="LEA" name="Lea" role="Child" language="eng" education="K2"/>
+<participant id="MEL" name="Melvin" role="Child" language="eng" age="P5Y10M" education="K2"/>
+<participant id="TIF" name="Tiffany" role="Child" language="eng" age="P5Y6M" education="K2"/>
+<participant id="LUC" name="Lucas" role="Child" language="eng" education="K2"/>
+<participant id="LEW" name="Lewis" role="Child" language="eng" age="P5Y9M" education="K2"/>
+<participant id="MAR" name="Martin" role="Child" language="eng" age="P6Y4M" education="K2"/>
+<participant id="AUG" name="Augustine_Zhang" role="Child" language="eng" age="P5Y9M" education="K2"/>
+<participant id="EDD" name="Eddie" role="Child" language="eng" education="K2"/>
+<participant id="DIA" name="Claudia" role="Child" language="eng" education="K2"/>
+<participant id="TAL" name="Tai_Lin" role="Child" language="eng" age="P5Y3M" education="K2"/>
+<participant id="CM2" name="Unidentified" role="Child" language="eng" education="K2"/>
+<participant id="DRA" name="Kendra" role="Child" language="eng" age="P6Y0M" education="K2"/>
+<participant id="EDW" name="Edward" role="Child" language="eng" education="K2"/>
+<participant id="JAR" name="Jared" role="Child" language="eng" age="P5Y8M" education="K2"/>
+<participant id="CAL" name="Calista" role="Child" language="eng" age="P5Y7M" education="K2"/>
+<participant id="TIT" name="Titus" role="Child" language="eng" age="P5Y7M" education="K2"/>
+<participant id="CF1" name="Unidentified" role="Child" language="eng" education="K2"/>
+<participant id="CF2" name="Unidentified" role="Child" language="eng" education="K2"/>
+<participant id="AUN" name="Aunty_Carmen" role="Teacher" language="eng" education="K2"/>
+</Participants>'
+
 processParticipants <- function(one){
   partdf = data.frame()
   partset = xml_children(one)
@@ -65,42 +97,54 @@ processParticipants <- function(one){
     #   print(df)
     partdf = bind_rows(partdf, df)
   }
+#  partdf$age[1]="P12"
+#  partdf$age[2]="P5Y5M29D"
   
   if ("age" %in% names(partdf) && sum(!is.na(partdf$age)) > 0){
 #    print(partdf)
-    partage = partdf$age[!is.na(partdf$age)]
-    # if (sum(partage) > 1){
-    #   print("## too many ages")
-    #   print(partdf)
-    #   partage = partdf$age[partdf$role == "Target_Child"]
-    # }
-    agenum = as.integer(as.character(str_split(partage,"[A-Z]")[[1]]))
-    partdf$agemonth = agenum[2] * 12
-    if (!is.na(agenum[3])){
-      partdf$agemonth = agenum[2] * 12 + agenum[3]
-      if (!is.na(agenum[4])){
-        partdf$agemonth = agenum[2] * 12 + agenum[3] + agenum[4]/31
-      }
-    }else{
-      print("age month 6")
-#      print(partdf)
-      partdf$agemonth = agenum[2] * 12 + 6 # if missing, put age in middle of year
-    } 
-    partdf$Y = as.character(agenum[2])
-    partdf$M = as.character(agenum[3])
-    partdf$D = as.character(agenum[4])
+    rr = !is.na(partdf$age)
+    ymd = data.frame(str_split_fixed(partdf$age,"[A-Z]",5))
+    ymd$X1=NULL
+    ymd$X5=NULL
+    names(ymd) = c("Y","M","D")
+    ymd$Y = as.integer(as.character(ymd$Y))
+    ymd$M = as.integer(as.character(ymd$M))
+    ymd$D = as.integer(as.character(ymd$D))
+    
+    partdf = cbind(partdf,ymd)
+
+    partdf$agemonth = partdf$Y * 12
+    mon = !is.na(partdf$M)
+    partdf$agemonth[mon] = partdf$agemonth[mon] + partdf$M[mon]
+    ye = !is.na(partdf$Y)
+    partdf$agemonth[ye & !mon] =  partdf$agemonth[ye & !mon] + 6 # if missing, put age in middle of year
+    day = !is.na(partdf$D)
+    partdf$agemonth[day] = partdf$agemonth[day] + partdf$D[day]/31
+ 
+    # partdf$Y = as.character(partdf$Y)
+    # partdf$M = as.character(partdf$M)
+    # partdf$D = as.character(partdf$D)
+    ages = which(!is.na(partdf$age))
+    if (length(ages) == 1){
+      partdf$agemonth = partdf$agemonth[ages]
+      partdf$Y = partdf$Y[ages]
+      partdf$M = partdf$M[ages]
+      partdf$D = partdf$D[ages]
+    }
   }
   return(partdf)
 }
+#processParticipants(read_xml(parstr))
 
 addtodf <- function(wwdf,cname,val,verbose=FALSE){
-  if (verbose){
-    print(paste("adddf",cname,val))
-  }
   if (cname %in% names(wwdf)){
     wwdf[cname] = paste(wwdf[cname],val,sep=";")
   }else{
     wwdf[cname] = val
+  }
+  if (verbose){
+    print(paste("addtodf",cname,val))
+    print(wwdf)
   }
   return(wwdf)
 }
@@ -112,22 +156,20 @@ addattr <- function(wdf,nodename, node,verbose=FALSE){
     if (nodename != ""){
       attnames = paste(nodename,attnames,sep="_")
     }
-    if (verbose){
-      print(nodeattr)
-    }
     for (ii in 1:length(attnames)){
       onecol = attnames[ii]
       wdf = addtodf(wdf,onecol,nodeattr[ii],verbose)
+    }
+    if (verbose){
+      print("addattr")
+      print(nodeattr)
+      print(wdf)
     }
   }
   return(wdf)
 }
 
 processXML <- function(wdf, node, lab = "", verbose=FALSE){
-  if(verbose){
-    print("procXML")
-    print(node)
-  }
   
   if (class(node) == "xml_node"){
     nodename = xml_name(node)
@@ -155,6 +197,12 @@ processXML <- function(wdf, node, lab = "", verbose=FALSE){
       wdf= processXML(wdf, children[[i]],lab, verbose)
     }
   }
+  if(verbose){
+    print("procXML")
+    print(node)
+    print(wdf)
+  }
+  
   return(wdf)
 }
 # processXML(data.frame(line=1),node,lab="",verbose=T)
@@ -224,6 +272,8 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
                                lab = "",
                                verbose = verbose)
             }
+#            print("bindrows")
+#            print(wdf)
             alldf = bind_rows(alldf, wdf)
           }
           uchildren = NULL
@@ -232,26 +282,32 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
         }
         if (nodetype == "Participants") {
           partdf = processParticipants(linenodeset)
+          print(partdf)
         }
         filelinenum = filelinenum + 1
       }
+      
 #      print("finished reading xml file")
-      #     print("alldf")
-  #    print(head(alldf))
+#       print("alldf")
+#      print(alldf)
       if (length(alldf) > 0 && "uID" %in% names(alldf)) {
+        # add word position to data frame
         alldf2 = alldf %>% group_by(uID) %>% mutate(word_posn = row_number())
         alldf$word_posn = alldf2$word_posn
       }
- #     print(partdf)
+      print(partdf)
       
       if ("id" %in% names(partdf)){
         alldf3 = data.frame(who = partdf$id,uID = "u-1", w = "",t_type = "p",word_posn = 1)
-        if (length(alldf) > 0 && length(alldf[, 1]) < length(partdf$id)) {
+#        print(alldf3)
+#        print(length(alldf))
+        print(length(unique(partdf$id)))
+        print(length(unique(alldf$who)))
+        if ("who" %in% names(alldf) && length(unique(alldf$who)) < length(unique(partdf$id))) {
           print("bind prev")
-          print(head(alldf))
-          print("new")
+ #         print(head(alldf))
+#          print("new")
           alldf = bind_rows(alldf, alldf3)
-          print(head(alldf))
         } 
         if (length(alldf) <= 0){
           print(paste("EMPTY ", newfile))
@@ -273,7 +329,11 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
       onefilelines = mergePartMain(alldf, partdf)
       names(onefilelines) <- str_replace_all(names(onefilelines), "-", "_")
       print(paste("saving ", newfile))
-      #      print(head(onefilelines))
+#      print(onefilelines)
+      if (sum(onefilelines$uID=="u-1") > 0) {
+        start = min(which(onefilelines$uID=="u-1"))-2
+        print(onefilelines[start:length(onefilelines),])
+      }
       saveRDS(onefilelines, newfile)
       alldf = NULL
       partdf = NULL
@@ -287,13 +347,13 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
   return("exists")
 }
 #processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T,force=TRUE)
-
+#processXMLFileList("data-xml/Biling/Singapore/e3d5b.xml",csvfolder,verbose=F,force=TRUE)
 
 createCSVfromXML <- function(csvfolder){
   print("\n\n@@ create CSV from XML")
   dir.create(csvfolder,showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
-  flist = listFilesSortSize("data-xml",".+?xml")
+  flist = rev(listFilesSortSize("data-xml",".+?xml"))
 #  flist = flist[1:14]
 #  print(flist)
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')
@@ -394,13 +454,13 @@ combineCSVFiles <- function(csvfolder,foldname){
 
 combineFileCorpora <- function(csvfolder){
   print(paste("\n\n@@ combine csv into folder csv ",csvfolder))
-  flist = list.files(path = csvfolder, ".+?rds", full.names = T, recursive = T)
+  flist = list.files(path = csvfolder, ".+?rds", full.names = T, recursive = T) 
  # print(flist)
   fparts = str_split_fixed(as.character(flist),"/",5)
   fparts = fparts[fparts[,3] != "",]
   fparts[str_detect(fparts[,4],".rds"),4] = "ALL"
   foldname = as.character(unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/")))
-  print(foldname)
+#  print(foldname)
 #  for (i in 1:length(foldname)){
   funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
   x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 

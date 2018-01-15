@@ -187,7 +187,6 @@ You can use the preset selector to select different subsets.
 - BIG-SPA scores can be an objective way to measure typological differences. The second plot shows a scatter plot for two different Learners, which allows us to spatial classify learners based on the relative preference for these learners.  A regression line is drawn and languages above the line tend to work better with the learner on the y-axis and those that are below the line tend to work better with the learner on the x-axis.  You can change the learners and the accuracy measure (sentence or word prediction accuracy) by using the selectors. 
 
 - The scores are regenerated every month and the raw SPA scores can change depending on updates in the corpora or different random utterances being used for training.
-
+- These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
-
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/

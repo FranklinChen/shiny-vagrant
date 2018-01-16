@@ -7,8 +7,13 @@ options(encoding = 'UTF-8')
 csvfolder = "csvfolderMake"
 
 library(doParallel)
-nc = detectCores()
-cl <- makeCluster(nc-1,outfile="",type = "FORK")
+nc = 1
+if (!Sys.getenv("RSTUDIO")){
+  nc = as.integer(detectCores()/2)
+}else{
+  setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
+}
+cl <- makeCluster(nc,outfile="",type = "FORK")
 registerDoParallel(cl)
 
 args <- commandArgs(TRUE)
@@ -214,8 +219,11 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
   newfile = fulfile
   newfile = str_replace(newfile, "data-xml", csvfolder)
   newfile = str_replace(newfile, "[.]xml$", ".rds")
-  if (!file.exists(newfile) || force) {
-#    print(fulfile)
+#  print(force)
+  if (!file.exists(newfile) | force) {
+    if (verbose){
+      print(fulfile)
+    }
     if (file.exists(fulfile) && str_detect(fulfile, "xml")) {
       file <- read_xml(fulfile)
       print(paste("read file",fulfile,label))
@@ -295,7 +303,7 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
         alldf2 = alldf %>% group_by(uID) %>% mutate(word_posn = row_number())
         alldf$word_posn = alldf2$word_posn
       }
-      print(partdf)
+#      print(partdf)
       
       if ("id" %in% names(partdf)){
         alldf3 = data.frame(who = partdf$id,uID = "u-1", w = "",t_type = "p",word_posn = 1)
@@ -332,7 +340,14 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
 #      print(onefilelines)
       if (sum(onefilelines$uID=="u-1") > 0) {
         start = min(which(onefilelines$uID=="u-1"))-2
+        if (start < 1){
+          start = 1
+        }
         print(onefilelines[start:length(onefilelines),])
+      }else{
+        if (verbose){
+          print(head(onefilelines))
+        }
       }
       saveRDS(onefilelines, newfile)
       alldf = NULL
@@ -348,12 +363,15 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
 }
 #processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T,force=TRUE)
 #processXMLFileList("data-xml/Biling/Singapore/e3d5b.xml",csvfolder,verbose=F,force=TRUE)
+#processXMLFileList("data-xml/Slavic/Slovenian/Zagar/group2/01pop.xml",csvfolder,verbose=TRUE,force=TRUE)
+
+
 
 createCSVfromXML <- function(csvfolder){
   print("\n\n@@ create CSV from XML")
   dir.create(csvfolder,showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
-  flist = listFilesSortSize("data-xml",".+?xml")
+  flist = rev(listFilesSortSize("data-xml",".+?xml"))
 #  flist = flist[1:14]
 #  print(flist)
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')

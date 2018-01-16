@@ -8,7 +8,7 @@ csvfolder = "csvfolderMake"
 
 library(doParallel)
 nc = 1
-if (!Sys.getenv("RSTUDIO")){
+if (Sys.getenv("RSTUDIO")!="1"){
   nc = as.integer(detectCores()/2)
 }else{
   setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")

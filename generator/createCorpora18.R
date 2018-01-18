@@ -381,8 +381,6 @@ createCSVfromXML <- function(csvfolder){
   x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
     processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))
   }
-#  print(x)
- # print(length(x))
 }
 #processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
 
@@ -470,12 +468,11 @@ combineCSVFiles <- function(csvfolder,foldname){
   newfname = str_replace_all(newfname,"/","_")
   newfnamerds = paste(csvfolder,"/",newfname,"_Word.rds",sep="")
   newfnamecsv = paste("actualcsv/",newfname,"_Word.csv",sep="")
-  if (!file.exists(newfname)){
+  if (!file.exists(newfnamerds)){
     fold = foldname
-    fold = str_replace(fold,"/ALL","")
     print(paste("starting combineCSVFiles ",newfname))
     flist2 = list.files(path = paste(csvfolder,fold,sep="/"),".+?[.]rds", full.names = T, recursive = T)
-    print(head(flist2))
+#    print(head(flist2))
     allcorpus=data.frame()
     for (i in 1:length(flist2)){
       fdf = readFileLoop(flist2[i])
@@ -493,12 +490,12 @@ combineCSVFiles <- function(csvfolder,foldname){
       allcorpus$xmlline = NULL
     }
     allcorpus$rownum = 1:length(allcorpus$who)
-    print(head(allcorpus))
+#    print(head(allcorpus))
     print(paste("writing combineCSVFiles ",newfnamerds))
     allcorpus = shiftLessInterestingLeft(allcorpus)
     saveRDS(allcorpus,newfnamerds)
-    print(paste("writecsv",newfnamecsv))
-    write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = F)
+#    print(paste("writecsv",newfnamecsv))
+    write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = FALSE)
     allcorpus = NULL
     fdf = NULL
     gc()
@@ -516,20 +513,20 @@ combineFileCorpora <- function(csvfolder){
  # print(flist)
   fparts = str_split_fixed(as.character(flist),"/",5)
   fparts = fparts[fparts[,3] != "",]
-  fparts[str_detect(fparts[,4],".rds"),4] = "ALL"
+  fparts[str_detect(fparts[,4],".rds"),4] = ""
   foldname = as.character(unique(paste(fparts[,2],fparts[,3],fparts[,4],sep="/")))
+  foldname = str_replace(foldname,"[/]$","")
 #  print(foldname)
 #  for (i in 1:length(foldname)){
   funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
   x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineCSVFiles(csvfolder,foldname[i])
   }
- # print(length(x))
 }
 if (mode == 2 || mode == 0){
   system.time(combineFileCorpora(csvfolder))
 }
-print("finished combineFileCorpora")
+print("finished combineFileCorpora Word")
 
 pasteCol <- function(v) {
   return(paste0(v,collapse=" "))
@@ -581,16 +578,17 @@ writeUtteranceCorpora <- function(fname,force=FALSE){
   uttfnamecsv = str_replace(uttfname,".rds",".csv")
   uttfnamecsv = str_replace(uttfnamecsv,csvfolder,"actualcsv")
   if (!file.exists(uttfname) | force){
-#    print(paste("reading",fname))
+    #    print(paste("reading",fname))
     fdf = readFileLoop(fname)
-    #    uttfname = str_replace(uttfname,"whole9","whole9utt")
-    uttfdf = word2sent(fdf)
-    print(paste("writing writeUtteranceCorpora ",uttfname))
-    uttfdf$rownum = 1:length(uttfdf$who)
-    saveRDS(uttfdf,uttfname)
-    write.csv(uttfdf,uttfnamecsv,fileEncoding = "UTF-8",row.names = F)
-    uttfdf=NULL
-    gc()
+    if ("w" %in% names(fdf)){
+      uttfdf = word2sent(fdf)
+      print(paste("writing writeUtteranceCorpora ",uttfname))
+      uttfdf$rownum = 1:length(uttfdf$who)
+      saveRDS(uttfdf,uttfname)
+      write.csv(uttfdf,uttfnamecsv,fileEncoding = "UTF-8",row.names = F)
+      uttfdf=NULL
+      gc()
+    }
     return(uttfname)
   }
   return(paste("exists",uttfname))
@@ -606,7 +604,6 @@ createUtteranceCorpora <- function(csvfolder){
 #  for (i in 1:length(flist)){
     writeUtteranceCorpora(flist[i])
   }
- # print(length(x))
   print("finished createUtteranceCorpora")
 }
 if (mode == 3 || mode == 0){
@@ -620,8 +617,6 @@ combineLangCorpora <- function(csvfolder,name,type){
   newfnamecsv = str_replace(newfnamecsv,csvfolder,"actualcsv")
   
   if (!file.exists(newfname)){
-#    print(name)
-#    print(type)
     searchname = paste(name,"_[^_]+_",type,sep="")
     flist2 = list.files(path = csvfolder,searchname, full.names = T, recursive = F)
     if (length(flist2) > 0){
@@ -631,7 +626,6 @@ combineLangCorpora <- function(csvfolder,name,type){
         fdf = readFileLoop(flist2[j])
         allcorpus= bind_rows(allcorpus,fdf)
       }
-      #        print(unique(allcorpus$corpus))
       print(paste("writing",newfname))
       allcorpus$rownum = 1:length(allcorpus$who)
       saveRDS(allcorpus,newfname)
@@ -673,18 +667,18 @@ createLangCorpora <- function(csvfolder, langgrp=FALSE){
   x <- foreach(i=1:length(fdf3$file),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineLangCorpora(csvfolder,fdf3$file[i],fdf3$type[i])
   }
-#  print(length(x))
-  print("finished createLangCorpora")
 }
 if (mode == 4 || mode == 0){
   system.time(createLangCorpora(csvfolder))
     gc()
 }
+
 if (mode == 5 || mode == 0){
      createLangCorpora(csvfolder,langgrp = TRUE)
-     system(paste("rm -f ",csvfolder,"/*_ALL_*",sep=""))
+#     system(paste("rm -f ",csvfolder,"/*_ALL_*",sep=""))
      gc()
 }
+print("finished createLangCorpora")
 
 ######################################################
 
@@ -699,21 +693,16 @@ makeDirList <- function(){
     fparts2[fparts2[,4]=="Word.rds",4]=""
     fparts2[fparts2[,3]=="Word.rds",3]=""
     fparts2[fparts2[,2]=="Word.rds",2]=""
-    ##    flist = list.files(path = "data-xml", full.names = F, recursive = T)
-##    dd = str_split_fixed(flist,"/",4)
-##    shortlines = dd[,4] == ""
-##    dd[shortlines,4]=dd[shortlines,3]
-##    dd[shortlines,3]="ALL"
-    # dd= dd[,1:3]
     #   print(head(dd))
     print(fparts2)
     saveRDS(fparts2, file = "filesData-XML.rds")
   }
-  print("finished makeDirList")
 }
 if (mode == 6 || mode == 0){
   makeDirList()
 }
+print("finished makeDirList")
+
 ################################
 
 summarizeOne <- function(f){
@@ -816,11 +805,12 @@ summarizeCorpora <- function(csvfolder){
     cordf2=NULL
     gc()
   }
-  print("finished summarizeCorpora")
 }
 if (mode == 7 || mode == 0){
   summarizeCorpora(csvfolder)
 }
+print("finished summarizeCorpora")
+
 #### NGRAMS
 
 computeNgrams <- function(f,csvdir,ngramdir){
@@ -887,14 +877,13 @@ computeNgramsAll <- function(csvdir, ngramdir){
   x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr")) %dopar% { 
     computeNgrams(flist[i],csvdir,ngramdir)
   }
- # print(length(x))
-  print("finished computeNgramsAll")
 }
   
   
 if (mode == 8 || mode == 0){
   computeNgramsAll(csvfolder, "ngramdir")
 }
+print("finished computeNgramsAll")
 
 stopCluster(cl)
 print("done")

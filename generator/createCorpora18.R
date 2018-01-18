@@ -578,14 +578,14 @@ writeUtteranceCorpora <- function(fname,force=FALSE){
   uttfnamecsv = str_replace(uttfname,".rds",".csv")
   uttfnamecsv = str_replace(uttfnamecsv,csvfolder,"actualcsv")
   if (!file.exists(uttfname) | force){
-    #    print(paste("reading",fname))
+    print(paste("reading",fname))
     fdf = readFileLoop(fname)
     if ("w" %in% names(fdf)){
       uttfdf = word2sent(fdf)
-      print(paste("writing writeUtteranceCorpora ",uttfname))
       uttfdf$rownum = 1:length(uttfdf$who)
       saveRDS(uttfdf,uttfname)
       write.csv(uttfdf,uttfnamecsv,fileEncoding = "UTF-8",row.names = F)
+      print(paste("writing writeUtteranceCorpora ",uttfname))
       uttfdf=NULL
       gc()
     }
@@ -597,19 +597,17 @@ writeUtteranceCorpora <- function(fname,force=FALSE){
 
 createUtteranceCorpora <- function(csvfolder){
   print("\n\n@@ change Word To Utterance")
- # flist = list.files(path = csvfolder,".+?_.+?_.+?_Word.csv", full.names = T, recursive = F)
-  flist = listFilesSortSize(csvfolder,".+?_.+?_.+?_Word.rds", fn = T, rec = F)
+  flist = listFilesSortSize(csvfolder,".+?_Word.rds", fn = T, rec = F)
   funclist = c('writeUtteranceCorpora','word2sent','pasteCol','readFileLoop')
   x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
-#  for (i in 1:length(flist)){
     writeUtteranceCorpora(flist[i])
   }
-  print("finished createUtteranceCorpora")
 }
 if (mode == 3 || mode == 0){
   system.time(createUtteranceCorpora(csvfolder))
 }
 #utt = read.csv("whole9utt/Biling_Amsterdam_Annick_Utterance.csv")
+print("finished createUtteranceCorpora")
 
 combineLangCorpora <- function(csvfolder,name,type){
   newfname = paste(csvfolder,"/",name,"_",type,sep="")

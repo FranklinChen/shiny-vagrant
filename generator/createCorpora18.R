@@ -3,24 +3,26 @@ library(stringr)
 require(xml2)
 require(dplyr)
 require(ngram)
+library(doParallel)
+
 options(encoding = 'UTF-8')
 csvfolder = "csvfolderMake"
-
-library(doParallel)
-nc = 1
-if (Sys.getenv("RSTUDIO")!="1"){
-  nc = as.integer(detectCores()/2)
-}else{
-  setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
-}
-cl <- makeCluster(nc,outfile="",type = "FORK")
-registerDoParallel(cl)
 
 args <- commandArgs(TRUE)
 mode <- as.integer(args[1])
 if (is.na(mode)){
   mode=0
 }
+nc = 1
+if (Sys.getenv("RSTUDIO")!="1"){
+  nc = as.integer(detectCores())-2
+}else{
+  setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
+  mode = -1
+}
+cl <- makeCluster(nc,outfile="",type = "FORK")
+registerDoParallel(cl)
+
 print("mode")
 print(mode)
 
@@ -290,7 +292,7 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
         }
         if (nodetype == "Participants") {
           partdf = processParticipants(linenodeset)
-          print(partdf)
+#          print(partdf)
         }
         filelinenum = filelinenum + 1
       }
@@ -309,8 +311,8 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
         alldf3 = data.frame(who = partdf$id,uID = "u-1", w = "",t_type = "p",word_posn = 1)
 #        print(alldf3)
 #        print(length(alldf))
-        print(length(unique(partdf$id)))
-        print(length(unique(alldf$who)))
+#        print(length(unique(partdf$id)))
+#        print(length(unique(alldf$who)))
         if ("who" %in% names(alldf) && length(unique(alldf$who)) < length(unique(partdf$id))) {
           print("bind prev")
  #         print(head(alldf))
@@ -371,7 +373,7 @@ createCSVfromXML <- function(csvfolder){
   print("\n\n@@ create CSV from XML")
   dir.create(csvfolder,showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
-  flist = rev(listFilesSortSize("data-xml",".+?xml"))
+  flist = listFilesSortSize("data-xml",".+?xml")
 #  flist = flist[1:14]
 #  print(flist)
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')
@@ -381,64 +383,99 @@ createCSVfromXML <- function(csvfolder){
   }
 #  print(x)
  # print(length(x))
-  print("finished csvfoldermake")
 }
 #processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
 
 if (mode == 1 || mode == 0){
   system.time(createCSVfromXML(csvfolder))
 }
+print("done createCSVfromXML XML -> rds")
 
 shiftLessInterestingLeft <- function(df){
-  lgp = which(names(df)=="langgrp")-1
-  df2 = df[,1:lgp]
-  percna = apply(is.na(df2),2,sum)/length(df2$who)
-  percna2 = percna[percna > 0.5]
-  uniquelen = lapply(apply(df2,2,unique),length)
-  uniquelen2 = uniquelen[uniquelen < 4]
-  
-  endcol = c(union(names(percna2),names(uniquelen2)))
-  allcol = names(df)
+  print("shift columns")
+  print(head(df))
+  lgp = which(names(df)=="langgrp")
+  dcol = which(names(df)=="role")
+  if ("D" %in% names(df)){
+    dcol = which(names(df)=="D")
+  }
+  if ("agemonth" %in% names(df)){
+    dcol = which(names(df)=="agemonth")
+  }
+  corpusinfo = df[,lgp:dcol]
+  df2 = df[,-c(lgp:dcol)]
+  if ("w" %in% names(df2)){
+    df2$w = NULL
+  }
+  if ("rownum" %in% names(df2)){
+    df2$rownum = NULL
+  }
+  if ("uID" %in% names(df2)){
+    df2$uID = NULL
+  }
+  if ("xmlnum" %in% names(df2)){
+    df2$xmlnum = NULL
+  }
+  if ("who" %in% names(df2)){
+    df2$who = NULL
+  }
+  if ("t_type" %in% names(df2)){
+    df2$t_type = NULL
+  }
+  if ("word_posn" %in% names(df2)){
+    df2$word_posn = NULL
+  }
+#  percna = apply(is.na(df2),2,sum)/length(df2$who)
+#  percna2 = percna[percna > 0.5]
+  uniquelen = rev(sort(sapply(apply(df2,2,unique),length)))
+#  uniquelen2 = uniquelen[-c(which(names(uniquelen) %in% c("rownum","w","uID","xmlnum")))]
+  logunique = log(uniquelen)
+  lastset = names(logunique[logunique < mean(logunique)*2])
+  firstset = names(logunique[logunique >= mean(logunique)*2])
+  allname = names(df)
+  notordered = setdiff(allname,c(firstset,lastset))
+#  endcol = c(union(names(percna2),names(uniquelen2)))
+#  allcol = names(df)
+  allcol = c(firstset,notordered,lastset)
   if ("xmlline" %in% allcol){
-    endcol = setdiff(endcol,c("xmlline"))
     allcol = setdiff(allcol,c("xmlline"))
     allcol = c(allcol,"xmlline")
   }
   if ("t_type" %in% allcol){
-    endcol = setdiff(endcol,c("t_type"))
     allcol = setdiff(allcol,c("t_type"))
     allcol = c("t_type",allcol)
   }
   if ("w" %in% allcol){
-    endcol = setdiff(endcol,c("w"))
     allcol = setdiff(allcol,c("w"))
     allcol = c("w",allcol)
   }
   if ("who" %in% allcol){
-    endcol = setdiff(endcol,c("who"))
     allcol = setdiff(allcol,c("who"))
     allcol = c("who",allcol)
   }
+  if ("uID" %in% allcol){
+    allcol = setdiff(allcol,c("uID"))
+    allcol = c("uID",allcol)
+  }
   
-  firstcol = setdiff(allcol,endcol)
-  newlab = as.character(c(firstcol,endcol))
-  newdf = df[,newlab]
+  newdf = df[,allcol]
   return(newdf)
 }
 #df = readRDS("csvfolderMake/Biling_Amsterdam_Annick_Word.rds")
 #head(shiftLessInterestingLeft(df))
 
 combineCSVFiles <- function(csvfolder,foldname){
-  print(paste("combineCSVFiles ",csvfolder," ",foldname))
+  dir.create("actualcsv",showWarnings = F)
   newfname = str_replace_all(foldname,"_","-")
   newfname = str_replace_all(newfname,"/","_")
-  newfname = paste(csvfolder,"/",newfname,"_Word.rds",sep="")
+  newfnamerds = paste(csvfolder,"/",newfname,"_Word.rds",sep="")
+  newfnamecsv = paste("actualcsv/",newfname,"_Word.csv",sep="")
   if (!file.exists(newfname)){
     fold = foldname
     fold = str_replace(fold,"/ALL","")
- #   print(newfname)
+    print(paste("starting combineCSVFiles ",newfname))
     flist2 = list.files(path = paste(csvfolder,fold,sep="/"),".+?[.]rds", full.names = T, recursive = T)
-    print(flist2)
+    print(head(flist2))
     allcorpus=data.frame()
     for (i in 1:length(flist2)){
       fdf = readFileLoop(flist2[i])
@@ -451,24 +488,27 @@ combineCSVFiles <- function(csvfolder,foldname){
       }
       allcorpus= bind_rows(allcorpus,fdf)
     }
-    allcorpus$xmlnum = allcorpus$xmlline
+    if ("xmlline" %in% allcorpus){
+      allcorpus$xmlnum = allcorpus$xmlline
+      allcorpus$xmlline = NULL
+    }
     allcorpus$rownum = 1:length(allcorpus$who)
-    allcorpus$xmlline = NULL
-#    if (max(xtabs( ~ uID,allcorpus)) == 1){
-#      newfname = str_replace(newfname,"_Word","_Utt")
-#    }
     print(head(allcorpus))
-    print(paste("writing ",newfname))
+    print(paste("writing combineCSVFiles ",newfnamerds))
     allcorpus = shiftLessInterestingLeft(allcorpus)
-    saveRDS(allcorpus,newfname)
+    saveRDS(allcorpus,newfnamerds)
+    print(paste("writecsv",newfnamecsv))
+    write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = F)
     allcorpus = NULL
     fdf = NULL
     gc()
   }
 }
-#combineCSVFiles(csvfolder,"Biling/Amsterdam/Annick")
+
+#combineCSVFiles(csvfolder,"EastAsian/Korean/Jiwon")
 #df = readRDS("workfiles/csvfolderMake/Biling/SilvaCorvalan/eng/10.rds")
 #unique(df$mor_type)
+#df = readRDS("csvfolderMake/EastAsian_Indonesian_Jakarta_Word.rds")
 
 combineFileCorpora <- function(csvfolder){
   print(paste("\n\n@@ combine csv into folder csv ",csvfolder))
@@ -485,24 +525,29 @@ combineFileCorpora <- function(csvfolder){
     combineCSVFiles(csvfolder,foldname[i])
   }
  # print(length(x))
-  print("finished combineFileCorpora")
 }
 if (mode == 2 || mode == 0){
   system.time(combineFileCorpora(csvfolder))
 }
+print("finished combineFileCorpora")
 
 pasteCol <- function(v) {
   return(paste0(v,collapse=" "))
 }
 
+#alluttdf = readFileLoop("csvfolderMake/Clinical-MOR_EllisWeismer_30ec_Word.rds")
 word2sent <- function(alluttdf){
   #  print("word2sent")
   alluttdf$lnum = NULL
+  alluttdf$word_posn = NULL
 #  print(head(alluttdf))
   lgnum = which(names(alluttdf)=="langgrp")
   dcol = which(names(alluttdf)=="role")
   if ("D" %in% names(alluttdf)){
     dcol = which(names(alluttdf)=="D")
+  }
+  if ("agemonth" %in% names(alluttdf)){
+    dcol = which(names(alluttdf)=="agemonth")
   }
   alluttdf[is.na(alluttdf)]=""
   alluttdf[] <- lapply(alluttdf, as.character)
@@ -531,22 +576,26 @@ word2sent <- function(alluttdf){
   return(newdf)
 }
 
-writeUtteranceCorpora <- function(fname){
+writeUtteranceCorpora <- function(fname,force=FALSE){
   uttfname = str_replace(fname,"_Word","_Utterance")
-  if (!file.exists(uttfname)){
+  uttfnamecsv = str_replace(uttfname,".rds",".csv")
+  uttfnamecsv = str_replace(uttfnamecsv,csvfolder,"actualcsv")
+  if (!file.exists(uttfname) | force){
 #    print(paste("reading",fname))
     fdf = readFileLoop(fname)
     #    uttfname = str_replace(uttfname,"whole9","whole9utt")
     uttfdf = word2sent(fdf)
-    print(paste("writing",uttfname))
+    print(paste("writing writeUtteranceCorpora ",uttfname))
     uttfdf$rownum = 1:length(uttfdf$who)
     saveRDS(uttfdf,uttfname)
+    write.csv(uttfdf,uttfnamecsv,fileEncoding = "UTF-8",row.names = F)
     uttfdf=NULL
     gc()
     return(uttfname)
   }
   return(paste("exists",uttfname))
 }
+#writeUtteranceCorpora("csvfolderMake/Clinical-MOR_EllisWeismer_30ec_Word.rds",force=TRUE)
 
 createUtteranceCorpora <- function(csvfolder){
   print("\n\n@@ change Word To Utterance")
@@ -567,6 +616,9 @@ if (mode == 3 || mode == 0){
 
 combineLangCorpora <- function(csvfolder,name,type){
   newfname = paste(csvfolder,"/",name,"_",type,sep="")
+  newfnamecsv = str_replace(newfname,".rds",".csv")
+  newfnamecsv = str_replace(newfnamecsv,csvfolder,"actualcsv")
+  
   if (!file.exists(newfname)){
 #    print(name)
 #    print(type)
@@ -583,6 +635,7 @@ combineLangCorpora <- function(csvfolder,name,type){
       print(paste("writing",newfname))
       allcorpus$rownum = 1:length(allcorpus$who)
       saveRDS(allcorpus,newfname)
+      write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = F)
       allcorpus = NULL
       fdf = NULL
       gc()
@@ -843,5 +896,6 @@ if (mode == 8 || mode == 0){
   computeNgramsAll(csvfolder, "ngramdir")
 }
 
+stopCluster(cl)
 print("done")
 

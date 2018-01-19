@@ -41,8 +41,8 @@ ga('send', 'pageview');")),
                  ,width = 3
     )
     ,mainPanel(
-      textOutput("text1"),
-      withSpinner(DT::dataTableOutput("parttable"))
+      textOutput("text1")
+      #,withSpinner(DT::dataTableOutput("parttable"))
       ,withSpinner(DT::dataTableOutput("table", height = '400px'))
     )
   ),

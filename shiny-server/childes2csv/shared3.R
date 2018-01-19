@@ -91,7 +91,7 @@ adjustTableCol <- function(){
       values$longcol = union(which(names(vdf)=="w"),which(collength > 40))
       # values$text = paste(values$longcol)
     }else{ # word
-      values$longcol = which(collength > 10)
+      values$longcol = which(collength > 12)
     }
   }
 }

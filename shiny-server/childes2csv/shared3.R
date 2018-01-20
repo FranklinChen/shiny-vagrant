@@ -35,7 +35,7 @@ readFileDir <- function(lgrp,lg,corp){
 
 output$parttable <- DT::renderDataTable(DT::datatable({
   values$parttable
-},options = list(searching = FALSE,paging = FALSE,autoWidth = TRUE)))
+},options = list(searching = FALSE,paging = TRUE,autoWidth = TRUE)))
 
 output$table <- DT::renderDataTable(DT::datatable(values$table,fillContainer=TRUE
                       ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,
@@ -80,19 +80,23 @@ word2sent <- function(alluttdf){
 
 adjustTableCol <- function(){
   print("adjust")
-  if (nrow(values$table) > 4){ # set column lengths
+  if (nrow(values$table) > 4){ 
   #  print("adjust col")
     vdf = values$table
+#    head(vdf)
     if (length(vdf[,1]) > 1000){
       vdf = values$table[1:1000,]
     }
     collength = data.frame(apply(apply(vdf,1,nchar),1,max))
+#    print(unique(vdf$t_type))
+#    print(collength)
     if ("rowunit" %in% input && input$rowunit == "Utterance"){
       values$longcol = union(which(names(vdf)=="w"),which(collength > 40))
       # values$text = paste(values$longcol)
     }else{ # word
       values$longcol = which(collength > 12)
     }
+#    print(collength)
   }
 }
 
@@ -163,7 +167,9 @@ searchForCorpusFile <- function(){
     if (corp == ignore){
       corp = ""
     }
-    onefile = fileinfo[fileinfo$lg==input$langGroup && fileinfo$lang==input$lang && fileinfo$corpus==corp,]
+    onefile =  subset(fileinfo,lg==input$langGroup & langtype == input$lang & corpus == corp)
+ #   print(onefile)
+    #   onefile = fileinfo[fileinfo$lg==input$langGroup && fileinfo$langtype==input$lang && fileinfo$corpus==corp,]
     if (length(onefile[,1]) > 2){
       print(onefile)
      if (input$rowunit == "Utterance"){
@@ -185,19 +191,26 @@ searchForCorpusFile <- function(){
     values$table <- values$fulltable
     adjustTableCol()
     values$csvfile = csvfile
-    print(length(values$table))
+#    print(length(values$table))
+    if (!is.null(values$parttable)){
+      createPartTable()
+    }
     print("done")
   }
   })
 }
 
 createPartTable <- function(){
-  print("part")
-  F = which(names(values$table)=="file")+1
-  Y= which(names(values$table)=="Y")-1
+  print("part2")
+  df = values$table
+  print(names(df))
+  F = which(names(df)=="file")
+  Y= which(names(df)=="Y")-1
   if (length(Y) > 0 && length(F) > 0){
-    partdf =  values$table[,F:Y]
-    values$parttable = partdf[!duplicated(partdf$role),]
+    partdf =  df[,F:Y]
+    partdf = partdf[!duplicated(partdf$role),]
+    values$parttable = partdf
+    print(head(partdf))
   }
   print("part done")
 }

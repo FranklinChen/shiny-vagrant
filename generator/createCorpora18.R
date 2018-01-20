@@ -15,7 +15,7 @@ if (is.na(mode)){
 }
 nc = 1
 if (Sys.getenv("RSTUDIO")!="1"){
-  nc = as.integer(detectCores())-2
+  nc = as.integer(detectCores()/2)
 }else{
   setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
   mode = -1
@@ -53,6 +53,27 @@ listFilesSortSize <- function(csvfolder,filere,fn = T, rec = T){
   details = file.info(flist)
   details2=details[order(-details$size),]
   return(rownames(details2))
+}
+
+safeSave <- function(df,namerds,namecsv){
+  tryCatch({
+    saveRDS(df,namerds)
+    print(paste("safesave rds",namerds))
+  }, warning = function(w) {
+    print(paste("warning rds",w))
+  }, error = function(e) {
+    print(paste("error rds",e))
+  })
+  if (!is.null(namecsv)){
+    tryCatch({
+      write.csv(df,namecsv,fileEncoding = "UTF-8",row.names = F)
+      print(paste("safesave csv",namerds))
+    }, warning = function(w) {
+      print(paste("warning csv",w))
+    }, error = function(e) {
+      print(paste("error csv",e))
+    })
+  }
 }
 
 mergePartMain <- function(table,parttable){
@@ -351,17 +372,19 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
           print(head(onefilelines))
         }
       }
-      saveRDS(onefilelines, newfile)
+      safeSave(onefilelines,newfile,NULL)      
       alldf = NULL
       partdf = NULL
       wdf = NULL
       lenone = length(onefilelines)
       onefilelines = NULL
       gc()
-      return(lenone)
+      return(1)
     }
+  }else{
+      return(1)
   }
-  return("exists")
+  return(0)
 }
 #processXMLFileList("data-xml/Chinese/Mandarin/Xinjiang/2012.09/ENNI/sdfyxb10.xml",csvfolder,verbose=T,force=TRUE)
 #processXMLFileList("data-xml/Biling/Singapore/e3d5b.xml",csvfolder,verbose=F,force=TRUE)
@@ -370,17 +393,18 @@ processXMLFileList <- function(fulfile, csvfolder, verbose = FALSE, force=FALSE,
 
 
 createCSVfromXML <- function(csvfolder){
-  print("\n\n@@ create CSV from XML")
   dir.create(csvfolder,showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
   flist = listFilesSortSize("data-xml",".+?xml")
+  print(paste("\n\n@@ create CSV from XML numfiles=",length(flist))
 #  flist = flist[1:14]
 #  print(flist)
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')
 #  for (i in 1:length(flist)){
-  x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
+  foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
     processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))
   }
+  print(paste("found=",sum(foundFiles)))
 }
 #processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
 
@@ -391,7 +415,6 @@ print("done createCSVfromXML XML -> rds")
 
 shiftLessInterestingLeft <- function(df){
   print("shift columns")
-  print(head(df))
   lgp = which(names(df)=="langgrp")
   dcol = which(names(df)=="role")
   if ("D" %in% names(df)){
@@ -493,13 +516,15 @@ combineCSVFiles <- function(csvfolder,foldname){
 #    print(head(allcorpus))
     print(paste("writing combineCSVFiles ",newfnamerds))
     allcorpus = shiftLessInterestingLeft(allcorpus)
-    saveRDS(allcorpus,newfnamerds)
-#    print(paste("writecsv",newfnamecsv))
-    write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = FALSE)
+    safeSave(allcorpus,newfnamerds,newfnamecsv)      
     allcorpus = NULL
     fdf = NULL
     gc()
+    return(1)
+  }else{
+    return(1)
   }
+  return(0)
 }
 
 #combineCSVFiles(csvfolder,"EastAsian/Korean/Jiwon")
@@ -578,30 +603,34 @@ writeUtteranceCorpora <- function(fname,force=FALSE){
   uttfnamecsv = str_replace(uttfname,".rds",".csv")
   uttfnamecsv = str_replace(uttfnamecsv,csvfolder,"actualcsv")
   if (!file.exists(uttfname) | force){
-    print(paste("reading",fname))
+    print(paste("reading writeUtteranceCorpora ",fname))
     fdf = readFileLoop(fname)
     if ("w" %in% names(fdf)){
       uttfdf = word2sent(fdf)
       uttfdf$rownum = 1:length(uttfdf$who)
-      saveRDS(uttfdf,uttfname)
-      write.csv(uttfdf,uttfnamecsv,fileEncoding = "UTF-8",row.names = F)
+      safeSave(uttfdf,uttfname,uttfnamecsv)      
       print(paste("writing writeUtteranceCorpora ",uttfname))
       uttfdf=NULL
       gc()
+      return(1)
+    }else{
+      return(0)
     }
-    return(uttfname)
+  }else{
+    return(1)
   }
-  return(paste("exists",uttfname))
+  return(0)
 }
 #writeUtteranceCorpora("csvfolderMake/Clinical-MOR_EllisWeismer_30ec_Word.rds",force=TRUE)
 
 createUtteranceCorpora <- function(csvfolder){
-  print("\n\n@@ change Word To Utterance")
-  flist = listFilesSortSize(csvfolder,".+?_Word.rds", fn = T, rec = F)
+  flist = listFilesSortSize(csvfolder,".+?_.+?_Word.rds", fn = T, rec = F)
+  print(paste("\n\n@@ change Word To Utterance",length(flist)))
   funclist = c('writeUtteranceCorpora','word2sent','pasteCol','readFileLoop')
-  x <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
+  foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     writeUtteranceCorpora(flist[i])
   }
+  print(paste("finished=",sum(foundFiles)))
 }
 if (mode == 3 || mode == 0){
   system.time(createUtteranceCorpora(csvfolder))
@@ -615,6 +644,7 @@ combineLangCorpora <- function(csvfolder,name,type){
   newfnamecsv = str_replace(newfnamecsv,csvfolder,"actualcsv")
   
   if (!file.exists(newfname)){
+    print(paste("starting combineLangCorpora ",newfname))
     searchname = paste(name,"_[^_]+_",type,sep="")
     flist2 = list.files(path = csvfolder,searchname, full.names = T, recursive = F)
     if (length(flist2) > 0){
@@ -624,28 +654,28 @@ combineLangCorpora <- function(csvfolder,name,type){
         fdf = readFileLoop(flist2[j])
         allcorpus= bind_rows(allcorpus,fdf)
       }
-      print(paste("writing",newfname))
       allcorpus$rownum = 1:length(allcorpus$who)
-      saveRDS(allcorpus,newfname)
-      write.csv(allcorpus,newfnamecsv,fileEncoding = "UTF-8",row.names = F)
+      safeSave(allcorpus,newfname,newfnamecsv)    
+      print(paste("made combineLangCorpora ",newfname))
       allcorpus = NULL
       fdf = NULL
       gc()
     }else{
-      print(paste("no files found ",searchname))
+      print(paste("no files found combineLangCorpora ",searchname))
     }
   }else{
-    print(paste("found ",newfname))
+    print(paste("found combineLangCorpora ",newfname))
   }
 }
 
 createLangCorpora <- function(csvfolder, langgrp=FALSE){
   if (langgrp){
     print(paste("\n\n@@create Lang Group Corpora"))
+    flist = listFilesSortSize(csvfolder,"[^_]+?_[^_]+?_[^_]+?_Word.rds", fn = T, rec = F)
   }else{
     print(paste("\n\n@@create Lang Corpora"))
+    flist = listFilesSortSize(csvfolder,"[^_]+?_[^_]+?_Word.rds", fn = T, rec = F)
   }
-  flist = listFilesSortSize(csvfolder,".+?_Word.rds", fn = T, rec = F)
 #  flist = list.files(path = csvfolder,paste(".+?_",type,sep=""), full.names = T, recursive = F)
   fparts= basename(flist)
  # fparts = str_split_fixed(flist,"/",2)
@@ -670,12 +700,13 @@ if (mode == 4 || mode == 0){
   system.time(createLangCorpora(csvfolder))
     gc()
 }
+print("finished createLangCorpora")
 
-if (mode == 5 || mode == 0){
-     createLangCorpora(csvfolder,langgrp = TRUE)
+#if (mode == 5 || mode == 0){
+#     createLangCorpora(csvfolder,langgrp = TRUE)
 #     system(paste("rm -f ",csvfolder,"/*_ALL_*",sep=""))
-     gc()
-}
+#     gc()
+#}
 print("finished createLangCorpora")
 
 ######################################################

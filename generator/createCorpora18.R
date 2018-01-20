@@ -702,11 +702,11 @@ if (mode == 4 || mode == 0){
 }
 print("finished createLangCorpora")
 
-#if (mode == 5 || mode == 0){
-#     createLangCorpora(csvfolder,langgrp = TRUE)
-#     system(paste("rm -f ",csvfolder,"/*_ALL_*",sep=""))
-#     gc()
-#}
+if (mode == 5 || mode == 0){
+     createLangCorpora(csvfolder,langgrp = TRUE)
+     system(paste("rm -f ",csvfolder,"/*_ALL_*",sep=""))
+     gc()
+}
 print("finished createLangCorpora")
 
 ######################################################

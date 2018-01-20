@@ -9,9 +9,10 @@ fig_caption: yes
 - This program converts CHILDES XML files into CSV formatted files. Scroll down to the bottom for more information. Some files take a while to load, so please be patient. Click [here](../) to return to toolkit page.
 
 ```{r setup, include=FALSE}
-require(xml2)
+#require(xml2)
 library(shinycssloaders)
 ignore = "-----"
+#preread <- read.csv("../storage/actualcsv/Biling_Amsterdam_Utterance.csv",nrows=1000)
 preread <- read.csv("../storage/actualcsv/Chinese_Cantonese_HKU_Utterance.csv",nrows=1000)
 ```
 
@@ -42,7 +43,7 @@ ga('send', 'pageview');")),
     )
     ,mainPanel(
       textOutput("text1")
-      #,withSpinner(DT::dataTableOutput("parttable"))
+      ,withSpinner(DT::dataTableOutput("parttable"))
       ,withSpinner(DT::dataTableOutput("table", height = '400px'))
     )
   ),
@@ -57,8 +58,9 @@ ga('send', 'pageview');")),
     values$table<-preread
     
     dd <- readFileDir("Chinese","Cantonese","HKU")
+    
      observeEvent(values$table, once=T,{
-        createPartTable()
+       createPartTable()
         adjustTableCol()
     })
    
@@ -67,11 +69,11 @@ ga('send', 'pageview');")),
     })
 
      observeEvent(input$rowunit,  ignoreInit=T,{
-        searchForCorpusFile()      
+        searchForCorpusFile()   
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
-        searchForCorpusFile()     
+        searchForCorpusFile()    
     })
                                             
   }

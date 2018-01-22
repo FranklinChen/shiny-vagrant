@@ -5,6 +5,7 @@ echo "${0%/*}"
 cd "${0%/*}"
 
 source sock.sh
+/usr/bin/git stash
 /usr/bin/git pull origin master
 
 if [[ $1 = "skip" ]]; then

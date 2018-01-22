@@ -4,7 +4,7 @@ export USER=macw
 echo "${0%/*}"
 cd "${0%/*}"
 
-source sock.sh
+#source sock.sh
 /usr/bin/git stash
 /usr/bin/git pull origin master
 

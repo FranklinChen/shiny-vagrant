@@ -35,7 +35,7 @@ readFileDir <- function(lgrp,lg,corp){
 
 output$parttable <- DT::renderDataTable(DT::datatable({
   values$parttable
-},options = list(searching = FALSE,paging = TRUE,autoWidth = TRUE)))
+},options = list(searching = FALSE,paging = TRUE,pageLength = 4,autoWidth = TRUE)))
 
 output$table <- DT::renderDataTable(DT::datatable(values$table,fillContainer=TRUE
                       ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,

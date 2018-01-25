@@ -4,7 +4,8 @@ export USER=macw
 echo "${0%/*}"
 cd "${0%/*}"
 
-#source sock.sh
+keychain /Users/macw/.ssh/id_rsa
+source /Users/macw/.keychain/GANDALF.TALKBANK.ORG-sh
 /usr/bin/git stash
 /usr/bin/git pull origin master
 

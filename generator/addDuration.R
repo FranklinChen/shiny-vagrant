@@ -13,7 +13,8 @@ fl = list.files("csvfolderMake","^.+.rds",full.names=T)
 print(fl)
 
 saveDurations <- function(snddf,dname){
-   snddf = snddf[!is.na(df$w),]
+   snddf = snddf[!is.na(snddf$w),]
+   snddf = snddf[snddf$w!="",]
    snddf$one= 1
   snddf$role2 = as.character(snddf$role)
   snddf$role2[snddf$role %in% c("Mother","Father")] = "Parent"

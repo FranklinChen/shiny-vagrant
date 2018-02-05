@@ -17,3 +17,4 @@ else
 fi
 echo "done"
 date
+vagrant global-status

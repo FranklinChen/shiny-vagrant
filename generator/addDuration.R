@@ -2,17 +2,21 @@ require(stringr)
 require(reshape2)
 #options(encoding = 'UTF-8')
 
-durdf =readRDS("alldursec.rds")
-durdf$full = paste(durdf$langgrp, durdf$langtype, durdf$corpus, durdf$file,sep="/")
+durdf =read.csv("~/alldurations2.csv")
+durdf$full = paste(durdf$X1, durdf$X2, durdf$X3, durdf$X4,sep="/")
 durdf$full2 = str_replace(durdf$full,"[.][^ ][^ ][^ ]$","")
 durdf$full2 = str_replace(durdf$full2,"[/]+","/")
-durdf$dursecs=as.numeric(durdf$dursecs)
+durdf$duration=as.numeric(durdf$duration)
 dir.create("durations")
+
 dir.create("actualcsv")
 fl = list.files("csvfolderMake","^.+.rds",full.names=T)
-print(fl)
+
+mediadf = read.csv("media.csv",stringsAsFactors=F)
+print(head(mediadf))
 
 saveDurations <- function(snddf,dname){
+  print(dname)
    snddf = snddf[!is.na(snddf$w),]
    snddf = snddf[snddf$w!="",]
    snddf$one= 1
@@ -23,19 +27,27 @@ saveDurations <- function(snddf,dname){
        snddf$role2[snddf$role2=="Child"]="Target_Child"
     }
   }
+  
   snddf$role2[!snddf$role %in% c("Target_Child","Mother","Father")] = "Other"
-  print(head(snddf))
+#  print(head(snddf))
+   snddf$agemonth = as.numeric(snddf$agemonth)
+   snddf$agemonth = round(snddf$agemonth,3)
 
-  sumdf = aggregate(cbind(one) ~ role2 + duration + langgrp + langtype+ corpus + file, snddf, sum) 
-  sumdf2 = dcast(sumdf, langgrp + langtype + corpus + file + duration ~ role2,value.var="one")
-  if (!"Parent" %in% names(sumdf2)){
+ print(head(snddf))
+  sumdf = aggregate(cbind(one) ~ role2 + duration + langgrp + langtype+ corpus + file + agemonth, snddf, sum) 
+ print("sumdf")
+print(head(sumdf))
+sumdf2 = dcast(sumdf, langgrp + langtype + corpus + file + agemonth + duration ~ role2,value.var="one")
+ print(head(sumdf2))
+if (!"Parent" %in% names(sumdf2)){
     sumdf2$Parent = NA
   }
   if (!"Other" %in% names(sumdf2)){
      sumdf2$Other = NA
   }
   sumdf2$input = rowSums(sumdf2[,c("Parent","Other")],na.rm=T)
-  print(sumdf2)
+  sumdf2$agemonth[sumdf2$agemonth == -100]=NA
+#  print(sumdf2)
   write.csv(sumdf2,dname)
 }
 
@@ -56,14 +68,34 @@ for (i in 1:length(fl)){
     for (f in flist){
     	r = df$full2 == f
   	if (f %in% durdf$full2){
-    	   df$duration[r] = durdf$dursecs[durdf$full2 == f]
+    	   df$duration[r] = durdf$duration[durdf$full2 == f]
     	   durdf$used[durdf$full2 == f] = TRUE
-    	   print(durdf[durdf$full2 == f,])
+#    	   print(durdf[durdf$full2 == f,])
+
+	   agemonth = "-100"
+	   rdf = df[r,]
+	   if ("Target_Child" %in% rdf$role && "agemonth" %in% names(rdf)){
+	       agemonth = rdf$agemonth[rdf$role == "Target_Child"]
+  	   }
+	   df$agemonth[r] = agemonth
+	
+#	   print(f)
+	   mat = str_detect(mediadf$file,f)
+	   if (any(mat)){
+	     mdf = mediadf[mat,]
+#	     print(mdf)
+	     df$mediafile[r] = mdf$mediafile
+	     df$mediacode[r] = mdf$mcode
+	   }
         }
      }
-     if (sum(!is.na(df$duration)) > 0){
-          saveDurations(df[!is.na(df$duration),],durnfl[i])
+     sdf = df[!is.na(df$duration),]
+     if (length(sdf$duration) > 0){
+     	print(head(sdf))
+          saveDurations(sdf,durnfl[i])
     }
+    df$full = NULL
+    df$full2 = NULL
     write.csv(df,nfl[i],fileEncoding = "UTF-8",row.names = F)
     write.csv(durdf,"durtmp.csv",fileEncoding = "UTF-8",row.names = F)
   }

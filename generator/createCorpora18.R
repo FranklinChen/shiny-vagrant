@@ -64,16 +64,16 @@ safeSave <- function(df,namerds,namecsv){
   }, error = function(e) {
     print(paste("error rds",e))
   })
-  if (!is.null(namecsv)){
-    tryCatch({
-      write.csv(df,namecsv,fileEncoding = "UTF-8",row.names = F)
-      print(paste("safesave csv",namerds))
-    }, warning = function(w) {
-      print(paste("warning csv",w))
-    }, error = function(e) {
-      print(paste("error csv",e))
-    })
-  }
+#  if (!is.null(namecsv)){
+#    tryCatch({
+#      write.csv(df,namecsv,fileEncoding = "UTF-8",row.names = F)
+#      print(paste("safesave csv",namerds))
+#    }, warning = function(w) {
+#      print(paste("warning csv",w))
+#    }, error = function(e) {
+#      print(paste("error csv",e))
+#    })
+#  }
 }
 
 mergePartMain <- function(table,parttable){

@@ -15,4 +15,5 @@ else
   vagrant reload
   vagrant provision
 fi
-
+echo "done"
+date

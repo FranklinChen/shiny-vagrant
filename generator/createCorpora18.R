@@ -396,7 +396,7 @@ createCSVfromXML <- function(csvfolder){
   dir.create(csvfolder,showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
   flist = listFilesSortSize("data-xml",".+?xml")
-  print(paste("\n\n@@ create CSV from XML numfiles=",length(flist))
+  print(paste("\n\n@@ create CSV from XML numfiles=",length(flist)))
 #  flist = flist[1:14]
 #  print(flist)
   funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')

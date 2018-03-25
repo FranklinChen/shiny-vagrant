@@ -399,7 +399,7 @@ createCSVfromXML <- function(csvfolder){
   print(paste("\n\n@@ create CSV from XML numfiles=",length(flist)))
 #  flist = flist[1:14]
 #  print(flist)
-  funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop')
+  funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop','safeSave')
 #  for (i in 1:length(flist)){
   foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
     processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))

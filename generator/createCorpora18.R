@@ -404,7 +404,7 @@ createCSVfromXML <- function(csvfolder){
   foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
     processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))
   }
-  print(paste("found=",sum(foundFiles)))
+  print(paste("found=",length(foundFiles)))
 }
 #processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
 

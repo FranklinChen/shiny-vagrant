@@ -399,7 +399,8 @@ createCSVfromXML <- function(csvfolder){
   print(paste("\n\n@@ create CSV from XML numfiles=",length(flist)))
 #  flist = flist[1:14]
 #  print(flist)
-  funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML','processXMLFileList','readFileLoop','safeSave')
+  funclist = c('bind_rows','addattr','addtodf','mergePartMain','processParticipants','processXML',
+               'processXMLFileList','readFileLoop','safeSave')
 #  for (i in 1:length(flist)){
   foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","xml2")) %dopar% { 
     processXMLFileList(flist[i],csvfolder,verbose=F,label=paste(i,length(flist)))
@@ -543,7 +544,7 @@ combineFileCorpora <- function(csvfolder){
   foldname = str_replace(foldname,"[/]$","")
 #  print(foldname)
 #  for (i in 1:length(foldname)){
-  funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft')
+  funclist = c('combineCSVFiles','readFileLoop','shiftLessInterestingLeft','safeSave')
   x <- foreach(i=1:length(foldname),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineCSVFiles(csvfolder,foldname[i])
   }
@@ -626,7 +627,7 @@ writeUtteranceCorpora <- function(fname,force=FALSE){
 createUtteranceCorpora <- function(csvfolder){
   flist = listFilesSortSize(csvfolder,".+?_.+?_Word.rds", fn = T, rec = F)
   print(paste("\n\n@@ change Word To Utterance",length(flist)))
-  funclist = c('writeUtteranceCorpora','word2sent','pasteCol','readFileLoop')
+  funclist = c('writeUtteranceCorpora','word2sent','pasteCol','readFileLoop','safeSave')
   foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     writeUtteranceCorpora(flist[i])
   }
@@ -691,7 +692,7 @@ createLangCorpora <- function(csvfolder, langgrp=FALSE){
   fdf2 = data.frame(file = fparts3, type = "Utterance.rds",stringsAsFactors=F)
   fdf3 = rbind(fdf,fdf2,stringsAsFactors=F)
 #  for (i in 1:length(fdf3$file)){
-  funclist = c('combineLangCorpora','readFileLoop')
+  funclist = c('combineLangCorpora','readFileLoop','safeSave')
   x <- foreach(i=1:length(fdf3$file),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     combineLangCorpora(csvfolder,fdf3$file[i],fdf3$type[i])
   }

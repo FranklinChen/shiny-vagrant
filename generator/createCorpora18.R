@@ -672,14 +672,11 @@ combineLangCorpora <- function(csvfolder,name,type){
 createLangCorpora <- function(csvfolder, langgrp=FALSE){
   if (langgrp){
     print(paste("\n\n@@create Lang Group Corpora"))
-    flist = listFilesSortSize(csvfolder,"[^_]+?_[^_]+?_[^_]+?_Word.rds", fn = T, rec = F)
   }else{
     print(paste("\n\n@@create Lang Corpora"))
-    flist = listFilesSortSize(csvfolder,"[^_]+?_[^_]+?_Word.rds", fn = T, rec = F)
   }
-#  flist = list.files(path = csvfolder,paste(".+?_",type,sep=""), full.names = T, recursive = F)
+  flist = listFilesSortSize(csvfolder,"[^_]+?_[^_]+?_[^_]+?_Word.rds", fn = T, rec = F)
   fparts= basename(flist)
- # fparts = str_split_fixed(flist,"/",2)
   fparts2 = str_split_fixed(fparts,"_",4)
   if (langgrp){
     fparts3 = unique(fparts2[,1])

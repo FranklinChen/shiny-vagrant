@@ -631,7 +631,7 @@ createUtteranceCorpora <- function(csvfolder){
   foundFiles <- foreach(i=1:length(flist),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
     writeUtteranceCorpora(flist[i])
   }
-  print(paste("finished=",sum(foundFiles)))
+  print(paste("finished=",length(foundFiles)))
 }
 if (mode == 3 || mode == 0){
   system.time(createUtteranceCorpora(csvfolder))

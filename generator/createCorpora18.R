@@ -912,6 +912,90 @@ if (mode == 8 || mode == 0){
 }
 print("finished computeNgramsAll")
 
+
+combineNgrams <- function(ngramfolder,name,type){
+  newfname = paste(ngramfolder,"/",name,"_",type,sep="")
+              
+  if (!file.exists(newfname)){
+    print(paste("starting combineNGram ",newfname))
+    searchname = paste(name,"_[^_]+_",type,sep="")
+    flist2 = list.files(path = ngramfolder,searchname, full.names = T, recursive = F)
+    print(flist2)
+    if (length(flist2) > 0){
+      allcorpus=data.frame()
+      for (j in 1:length(flist2)){
+   #     print(paste("reading ",flist2[j]))
+        fdf = readFileLoop(flist2[j])
+        allcorpus= bind_rows(allcorpus,fdf)
+      }
+#      print(head(allcorpus))
+      newngram = aggregate(freq ~ ngrams,allcorpus,sum)
+      newngram = newngram[order(-newngram$freq),]
+              newngram$rank = 1:length(newngram$freq)
+              newngram$logrank = log( newngram$rank )
+              newngram$logfreq = log( newngram$freq )
+              newngram$ngrams=as.character(newngram$ngrams)
+              newngram$punct = ifelse(str_detect( newngram$ngrams, "[#](eee|ppp|qqq)" ),1,0)
+              rownames(newngram) <- 1:nrow(newngram)
+#      print(head(newngram))
+      safeSave(newngram,newfname,"")    
+      print(paste("made combineNgram ",newfname))
+      allcorpus = NULL
+      fdf = NULL
+      gc()
+    }else{
+      print(paste("no files found combineNgrams ",searchname))
+    }
+  }else{
+    print(paste("found ngram file ",newfname))
+  }
+}
+
+
+createNgramLang <- function(ngramfolder, langgrp=FALSE){
+  if (langgrp){
+    print(paste("\n\n@@create Lang Group Corpora"))
+#  }else{
+    print(paste("\n\n@@create Lang Corpora"))
+#    flist = listFilesSortSize(ngramfolder,"[^_]+?_[^_]+?_1.rds", fn = T, rec = F)
+  }
+  flist = listFilesSortSize(ngramfolder,"[^_]+?_[^_]+?_[^_]+?_1.rds", fn = T, rec = F)
+  fparts= basename(flist)
+  fparts2 = str_split_fixed(fparts,"_",4)
+  if (langgrp){
+    fparts3 = unique(fparts2[,1])
+  }else{
+    fparts3 = unique(paste(fparts2[,1],fparts2[,2],sep="_"))
+  }
+  fparts3 = fparts3[!str_detect(fparts3,".rds")]
+  print(fparts3)
+  fdf = data.frame(file = fparts3, type = "1.rds",stringsAsFactors=F)
+  fdf2 = data.frame(file = fparts3, type = "2.rds",stringsAsFactors=F)
+  fdf3 = data.frame(file = fparts3, type = "3.rds",stringsAsFactors=F)
+  fdf4 = data.frame(file = fparts3, type = "4.rds",stringsAsFactors=F)
+  fdfall = rbind(fdf,fdf2,fdf3,fdf4,stringsAsFactors=F)
+#   print(fdfall)
+  funclist = c('combineNgrams','readFileLoop','safeSave')
+  x <- foreach(i=1:length(fdf3$file),.export=funclist,.packages=c("stringr","dplyr")) %dopar% { 
+    combineNgrams(ngramfolder,fparts3[i],"4.rds")
+    combineNgrams(ngramfolder,fparts3[i],"3.rds")
+    combineNgrams(ngramfolder,fparts3[i],"2.rds")
+    combineNgrams(ngramfolder,fparts3[i],"1.rds")
+  }
+
+}
+if (mode == 10 || mode == 0){
+  system.time(createNgramLang("ngrams"))
+    gc()
+}
+print("finished createNgramLang")
+
+if (mode == 11 || mode == 0){
+  system.time(createNgramLang("ngrams",TRUE))
+    gc()
+}
+print("finished createNgramLangGrp")
+
 stopCluster(cl)
 print("done")
 

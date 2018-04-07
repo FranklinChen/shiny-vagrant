@@ -48,7 +48,7 @@ ga('send', 'pageview');")),
                 selectInput("col2", "Column2: ", choices=c(ignore),width='100%'))
         ,column(3,textInput("search3", "Expression3:", "[A-z]+?ed$"), 
                 selectInput("col3", "Column3: ", choices=c(ignore),width='100%'))
-        ,column(2, selectInput("preset", "Preset: ", choices=c(ignore,"U-shape Curve","Mean Length Utterance"))
+        ,column(2, selectInput("preset", "Preset: ", choices=c(ignore,"U-shape Curve","Mean Length Utterance","Age Word Freq"))
                 ,h5("Filtered CSV")
                 ,downloadButton('downloadFilter','Download Filtered')
                 ))
@@ -206,6 +206,27 @@ ga('send', 'pageview');")),
           updateSelectInput(session, "varB", selected="M")
           updateSelectInput(session, "rowunit", selected="Utterance")
 #          updateSelectInput(session, "maxsize", selected=10000000)
+          
+       }
+       if (input$preset == "Age Word Freq"){
+ #        values$load=FALSE
+ #         values$fulltable=readRDS("../storage/presets/mlu.rds")
+   #       values$table=values$fulltable
+   #       adjustTableCol()
+   #       resetTable()
+          updateSelectInput(session, "search1", selected="")
+          updateSelectInput(session, "search2", selected="")
+          updateSelectInput(session, "search3", selected="")
+         
+          updateSelectInput(session, "dv", selected = "ONE")
+          updateSelectInput(session, "comb", selected = "count")
+          updateSelectInput(session, "grp1", selected = "op_agemonth")
+          updateSelectInput(session, "grp2", selected = "role")
+          updateSelectInput(session, "grp3", selected = "w")
+          updateSelectInput(session, "varA", selected="agemonth")
+          updateTextInput(session, "operation", value="round(varA %% 12)")
+          updateSelectInput(session, "rowunit", selected="Word")
+          updateSelectInput(session, "maxsize", selected=10000000)
           
        }
         })

@@ -28,13 +28,13 @@ ga('send', 'pageview');")),
 
     sidebarPanel(selectInput("langGroup", "Language Group:", 
                              choices = c("Chinese"), width='90%')
-                 ,downloadButton('downloadDataLangGroup', 'Download')
+                 ,downloadButton('downloadDataLangGroup', 'Download Lang. Group')
                  ,selectInput("lang", "Language:", 
                               choices = c("Cantonese"),width='90%')
-                 ,downloadButton('downloadDataLang', 'Download')
+                 ,downloadButton('downloadDataLang', 'Download Language')
                  ,selectInput("corpus", "Corpus:", 
                               choices = c("HKU"),width='90%')
-                 ,downloadButton('downloadDataCorp', 'Download')
+                 ,downloadButton('downloadDataCorp', 'Download Corpus')
                  ,selectInput("rowunit", "Row Unit:", 
                               choices = c("Word","Utterance"), selected="Utterance",width='90%')
             ,selectInput("maxsize", "Max Size: ", 

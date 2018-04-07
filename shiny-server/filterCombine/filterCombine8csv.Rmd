@@ -210,7 +210,7 @@ ga('send', 'pageview');")),
        }
        if (input$preset == "Age Word Freq"){
          values$load=FALSE
-         values$fulltable= read.csv("../storage/actualcsv/Eng-NA_Brown_Sarah_Word.csv")
+         values$fulltable= read.csv("../storage/actualcsv/Eng-NA_Gleason_Dinner_Word.csv")
           values$table=values$fulltable
           values$table["op_agemonth"] = round(values$table["agemonth"] %% 12)
           adjustTableCol()

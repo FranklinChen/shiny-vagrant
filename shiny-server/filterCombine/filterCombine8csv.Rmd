@@ -273,20 +273,22 @@ ga('send', 'pageview');")),
         e1 <- new.env(parent = baseenv())  
         assign("VarA", NULL, envir = e1)
         assign("VarB", NULL, envir = e1)
+        newcol="op"
         if (input$varA %in% names(values$table)){
           print(input$varA)
           assign("VarA", values$table[input$varA], envir = e1)
           foundA = TRUE
+          newcol = paste(newcol,input$varA,sep="_")
         }
         if (input$varB %in% names(values$table)){
          assign("VarB", values$table[input$varB], envir = e1)
          foundB = TRUE
+         newcol = paste(newcol,input$varB,sep="_")
         }
  #      if (foundA && foundB){
           print("env")
           out = eval(parse(text=input$operation),envir=e1)
           print(out)
-          newcol = paste("op",input$varA,input$varB,sep="_")
           values$table[newcol] = out
           numcol = which(newcol == names(values$table))
           values$table = values$table[,c(numcol,setdiff(1:length(values$table), numcol))]

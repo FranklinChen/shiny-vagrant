@@ -288,7 +288,7 @@ ga('send', 'pageview');")),
                 applyOperation()
                 updateSelectInput(session, "dv", selected = "ONE")
                 updateSelectInput(session, "comb", selected = "count")
-                updateSelectInput(session, "grp1", selected = "op_agemonth")
+                updateSelectInput(session, "grp1", selected = "agemonth")
                 updateSelectInput(session, "grp2", selected = "role")
                 updateSelectInput(session, "grp3", selected = "w")
           }

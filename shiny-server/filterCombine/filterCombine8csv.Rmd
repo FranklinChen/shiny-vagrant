@@ -209,25 +209,20 @@ ga('send', 'pageview');")),
           
        }
        if (input$preset == "Age Word Freq"){
-         values$load=FALSE
+        values$load=FALSE
+           updateSelectInput(session, "rowunit", selected="Word")
+          updateSelectInput(session, "maxsize", selected=10000000)
          values$fulltable= read.csv("../storage/actualcsv/Eng-NA_Gleason_Dinner_Word.csv")
           values$table=values$fulltable
-          values$table["op_agemonth"] = round(values$table["agemonth"] %% 12)
           adjustTableCol()
           resetTable()
-#          updateSelectInput(session, "search1", selected="")
-#          updateSelectInput(session, "search2", selected="")
-#          updateSelectInput(session, "search3", selected="")
+#          values$table["op_agemonth"] = round(values$table["agemonth"] %% 12)
+          updateSelectInput(session, "search1", selected="")
+          updateSelectInput(session, "search2", selected="")
+          updateSelectInput(session, "search3", selected="")
          
-#          updateSelectInput(session, "dv", selected = "ONE")
-#          updateSelectInput(session, "comb", selected = "count")
-#          updateSelectInput(session, "grp1", selected = "op_agemonth")
-#          updateSelectInput(session, "grp2", selected = "role")
-#          updateSelectInput(session, "grp3", selected = "w")
-#          updateSelectInput(session, "varA", selected="agemonth")
-#          updateTextInput(session, "operation", value="round(varA %% 12)")
-#          updateSelectInput(session, "rowunit", selected="Word")
-#          updateSelectInput(session, "maxsize", selected=10000000)
+          updateSelectInput(session, "varA", selected="agemonth")
+          updateTextInput(session, "operation", value="round(varA %% 12)")
           
        }
         })
@@ -282,14 +277,21 @@ ga('send', 'pageview');")),
           if (input$varB %in% names(values$table)){
             newcol = paste(newcol,input$varB,sep="_")
           }
-         updateActionButton(session,"apply", label=paste("Create ",newcol,sep=""))
-              if (input$preset == "U-shape Curve"){
+          updateActionButton(session,"apply", label=paste("Create ",newcol,sep=""))
+          if (input$preset == "U-shape Curve"){
                 applyOperation()
-          updateSelectInput(session, "dv", selected = "new_w")
-          updateSelectInput(session, "comb", selected = "mean")
-          updateSelectInput(session, "grp1", selected = "op_Y_M")
-
-              }
+                updateSelectInput(session, "dv", selected = "new_w")
+                updateSelectInput(session, "comb", selected = "mean")
+                updateSelectInput(session, "grp1", selected = "op_Y_M")
+          }
+          if (input$preset == "Age Word Freq"){
+                applyOperation()
+                updateSelectInput(session, "dv", selected = "ONE")
+                updateSelectInput(session, "comb", selected = "count")
+                updateSelectInput(session, "grp1", selected = "op_agemonth")
+                updateSelectInput(session, "grp2", selected = "role")
+                updateSelectInput(session, "grp3", selected = "w")
+          }
 
          })
        })

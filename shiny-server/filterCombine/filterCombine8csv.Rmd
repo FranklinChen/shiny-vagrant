@@ -247,13 +247,19 @@ ga('send', 'pageview');")),
       recode()
 
       }})
-    
+           
        observe({
          input$varA
          input$varB
          input$operation
          isolate({
-         newcol = paste("op",input$varA,input$varB,sep="_")
+         newcol="op"
+          if (input$varA %in% names(values$table)){
+            newcol = paste(newcol,input$varA,sep="_")
+          }
+          if (input$varB %in% names(values$table)){
+            newcol = paste(newcol,input$varB,sep="_")
+          }
          updateActionButton(session,"apply", label=paste("Create ",newcol,sep=""))
               if (input$preset == "U-shape Curve"){
                 applyOperation()

@@ -214,6 +214,7 @@ ga('send', 'pageview');")),
    #       values$table=values$fulltable
    #       adjustTableCol()
    #       resetTable()
+          values$table["op_agemonth"] = round(values$table["agemonth"] %% 12)
           updateSelectInput(session, "search1", selected="")
           updateSelectInput(session, "search2", selected="")
           updateSelectInput(session, "search3", selected="")

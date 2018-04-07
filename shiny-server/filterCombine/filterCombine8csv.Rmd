@@ -276,32 +276,26 @@ ga('send', 'pageview');")),
         if (input$varA %in% names(values$table)){
           print(input$varA)
           assign("VarA", values$table[input$varA], envir = e1)
-     #     VarA = values$table[input$varA]
           foundA = TRUE
         }
-       if (input$varB %in% names(values$table)){
+        if (input$varB %in% names(values$table)){
          assign("VarB", values$table[input$varB], envir = e1)
-     #    VarB = values$table[input$varB]
          foundB = TRUE
-       }
- #       if (length(values$table[input$varB]) == length(values$table[input$varA]) && length(values$table[input$varA]) > 1){
-        if (foundA && foundB){
-   #     if (eval(length(VarA)==length(VarB), envir = e1)){
+        }
+ #      if (foundA && foundB){
           print("env")
- #       if (length(VarB) == length(VarA) && length(VarA) > 1){
           out = eval(parse(text=input$operation),envir=e1)
           print(out)
           newcol = paste("op",input$varA,input$varB,sep="_")
           values$table[newcol] = out
           numcol = which(newcol == names(values$table))
           values$table = values$table[,c(numcol,setdiff(1:length(values$table), numcol))]
-       #   saveRDS(values$table,"ThomasPastTense.rds")
-         cho = c(ignore,names( values$table))
+          cho = c(ignore,names( values$table))
           updateSelectInput(session, "dv", choices = cho,selected=newcol)
           updateSelectInput(session, "grp1", choices = cho)
           updateSelectInput(session, "grp2", choices = cho)
           updateSelectInput(session, "grp3", choices = cho)
-        }
+  #     }
       }
             
       observeEvent(input$apply, ignoreInit=T,applyOperation())

@@ -217,12 +217,12 @@ ga('send', 'pageview');")),
           adjustTableCol()
           resetTable()
 #          values$table["op_agemonth"] = round(values$table["agemonth"] %% 12)
-#          updateSelectInput(session, "search1", selected="")
-#          updateSelectInput(session, "search2", selected="")
-#          updateSelectInput(session, "search3", selected="")
+          updateSelectInput(session, "search1", selected="")
+          updateSelectInput(session, "search2", selected="")
+          updateSelectInput(session, "search3", selected="")
          
-#          updateSelectInput(session, "varA", selected="agemonth")
-#          updateTextInput(session, "operation", value="round(varA %% 12)")
+          updateSelectInput(session, "varA", selected="agemonth")
+          updateTextInput(session, "operation", value="round(varA %% 12)")
           
        }
         })
@@ -284,7 +284,7 @@ ga('send', 'pageview');")),
                 updateSelectInput(session, "comb", selected = "mean")
                 updateSelectInput(session, "grp1", selected = "op_Y_M")
           }
-          if (input$preset == "Age WWord Freq"){
+          if (input$preset == "Age Word Freq" && input$operation == "round(varA %% 12)"){
                 applyOperation()
                 updateSelectInput(session, "dv", selected = "ONE")
                 updateSelectInput(session, "comb", selected = "count")

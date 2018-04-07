@@ -290,7 +290,7 @@ ga('send', 'pageview');")),
                 updateSelectInput(session, "comb", selected = "count")
                 updateSelectInput(session, "grp1", selected = "agemonth")
                 updateSelectInput(session, "grp2", selected = "role")
-                updateSelectInput(session, "grp3", selected = "w")
+             #   updateSelectInput(session, "grp3", selected = "w")
           }
 
          })

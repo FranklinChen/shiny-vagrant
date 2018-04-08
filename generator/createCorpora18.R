@@ -15,7 +15,7 @@ if (is.na(mode)){
 }
 nc = 1
 if (Sys.getenv("RSTUDIO")!="1"){
-  nc = as.integer(detectCores()/2)
+  nc = as.integer(detectCores())-1
 }else{
   setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
   mode = -1

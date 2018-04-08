@@ -843,6 +843,7 @@ print("finished summarizeCorpora")
 computeNgrams <- function(f,csvdir,ngramdir){
   if (!str_detect(f,"untranscribe")){
     udf = readFileLoop(f)
+    print(f)
    # print(head(udf))
     if ("w" %in% names(udf)){
       udf = udf[udf$w!="",]
@@ -872,6 +873,8 @@ computeNgrams <- function(f,csvdir,ngramdir){
             if(length(udf2$utt) > 2){
               ng <- ngram (udf2$utt , n =g)
               ngdf = get.phrasetable ( ng )
+              print(paste("make ngdf",g))
+              print(length(ngdf$freq))
               ngdf$rank = 1:length(ngdf$freq)
               ngdf$logrank = log( ngdf$rank )
               ngdf$logfreq = log( ngdf$freq )

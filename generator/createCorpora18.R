@@ -876,6 +876,7 @@ computeNgrams <- function(f,csvdir,ngramdir){
               ngdf = get.phrasetable ( ng )
               print(paste("make ngdf",g))
               print(length(ngdf$freq))
+              if (length(ngdf$freq) > 1){
               ngdf$rank = 1:length(ngdf$freq)
               ngdf$logrank = log( ngdf$rank )
               ngdf$logfreq = log( ngdf$freq )
@@ -883,6 +884,7 @@ computeNgrams <- function(f,csvdir,ngramdir){
               ngdf$punct = ifelse(str_detect( ngdf$ngrams, "[#](eee|ppp|qqq)" ),1,0)
               print(paste("writing ",ngramfile2))
               saveRDS(ngdf, ngramfile2)
+              }
               ng=NULL
               ngdf=NULL
               gc()

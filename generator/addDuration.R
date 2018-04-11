@@ -2,7 +2,7 @@ require(stringr)
 require(reshape2)
 #options(encoding = 'UTF-8')
 
-durdf =readRDS("alldursec.rds")
+durdf =readRDS("../alldursec.rds")
 durdf$full = paste(durdf$langgrp, durdf$langtype, durdf$corpus, durdf$file,sep="/")
 durdf$full2 = str_replace(durdf$full,"[.][^ ][^ ][^ ]$","")
 durdf$full2 = str_replace(durdf$full2,"[/]+","/")

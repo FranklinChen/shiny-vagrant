@@ -848,10 +848,11 @@ computeNgrams <- function(f,csvdir,ngramdir){
     if ("w" %in% names(udf)){
       udf = udf[udf$w!="",]
       udf = udf[!is.na(udf$w),]
-      if (length(udf$w) > 10){
+      if (length(udf$w) > 3){
         udf$t_type = str_trim(udf$t_type)
         #        print(unique(udf$t_type))
         udf = udf[udf$t_type %in% c("p","e","q"),]
+        if (length(udf$w) > 3){
         udf$punct = "#ooo"
         udf$punct[udf$t_type == "p"] = "#ppp"
         udf$punct[udf$t_type == "e"] = "#eee"
@@ -889,6 +890,7 @@ computeNgrams <- function(f,csvdir,ngramdir){
             }
           }
         }
+          }
         #    print("done")
       }
     }

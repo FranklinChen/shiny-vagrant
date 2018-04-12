@@ -68,6 +68,8 @@ for (i in 1:length(fl)){
      if (sum(!is.na(df$duration)) > 0){
           saveDurations(df[!is.na(df$duration),],durnfl[i])
     }
+    df$full = NULL
+    df$full2 = NULL 
     write.csv(df,nfl[i],fileEncoding = "UTF-8",row.names = F)
     write.csv(durdf,"durtmp.csv",fileEncoding = "UTF-8",row.names = F)
   }

@@ -66,7 +66,7 @@ listFilesSortSize <- function(csvfolder,
 safeSave <- function(df, namerds, namecsv) {
   tryCatch({
     saveRDS(df, namerds)
-    print(paste("safesave rds", namerds))
+#    print(paste("safesave rds", namerds))
   }, warning = function(w) {
     print(paste("warning rds", w))
   }, error = function(e) {
@@ -392,7 +392,6 @@ processXMLFileList <-
         onefilelines = mergePartMain(alldf, partdf)
         names(onefilelines) <-
           str_replace_all(names(onefilelines), "-", "_")
-        print(paste("saving ", newfile))
         #      print(onefilelines)
         if (sum(onefilelines$uID == "u-1") > 0) {
           start = min(which(onefilelines$uID == "u-1")) - 2
@@ -406,6 +405,7 @@ processXMLFileList <-
           }
         }
         safeSave(onefilelines, newfile, NULL)
+        print(paste("process saving ", newfile))
         alldf = NULL
         partdf = NULL
         wdf = NULL
@@ -570,9 +570,9 @@ combineCSVFiles <- function(csvfolder, foldname) {
     }
     allcorpus$rownum = 1:length(allcorpus$who)
     #    print(head(allcorpus))
-    print(paste("writing combineCSVFiles ", newfnamerds))
     allcorpus = shiftLessInterestingLeft(allcorpus)
     safeSave(allcorpus, newfnamerds, newfnamecsv)
+    print(paste("combineCSVFiles saving ", newfnamerds))
     allcorpus = NULL
     fdf = NULL
     gc()
@@ -679,7 +679,7 @@ writeUtteranceCorpora <- function(fname, force = FALSE) {
       uttfdf = word2sent(fdf)
       uttfdf$rownum = 1:length(uttfdf$who)
       safeSave(uttfdf, uttfname, uttfnamecsv)
-      print(paste("writing writeUtteranceCorpora ", uttfname))
+      print(paste("writeUtteranceCorpora saving ", uttfname))
       uttfdf = NULL
       gc()
       return(1)

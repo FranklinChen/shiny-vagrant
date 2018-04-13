@@ -445,15 +445,15 @@ createCSVfromXML <- function(csvfolder) {
   )
   #  for (i in 1:length(flist)){
   foundFiles <-
-    foreach(
-      i = 1:length(flist),
-      .export = funclist,
-      .packages = c("stringr", "xml2")
+    foreach(i = 1:length(flist),.export = funclist,.packages = c("stringr", "xml2")
     ) %dopar% {
       processXMLFileList(flist[i],
                          csvfolder,
                          verbose = F,
                          label = paste(i, length(flist)))
+      if (i %% 100 == 0){
+        write(paste("process",i,"out of",length(flist)), file="../storage/timestamp.txt",append=FALSE)
+      }
     }
   print(paste("found=", length(foundFiles)))
 }
@@ -465,7 +465,7 @@ if (mode == 1 || mode == 0) {
 print("done createCSVfromXML XML -> rds")
 
 shiftLessInterestingLeft <- function(df) {
-  print("shift columns")
+#  print("shift columns")
   lgp = which(names(df) == "langgrp")
   dcol = which(names(df) == "role")
   if ("D" %in% names(df)) {

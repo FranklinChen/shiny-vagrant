@@ -425,10 +425,15 @@ processXMLFileList <-
 
 
 
-createCSVfromXML <- function(csvfolder) {
+createCSVfromXML <- function(csvfolder, doAll=T) {
   dir.create(csvfolder, showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
   flist = listFilesSortSize("data-xml", ".+?xml")
+  if (!doAll){
+    flist = flist[ !grepl("(Jakarta|Thomas)", flist) ]
+    print("doing shorter list")
+    print(flist[ grepl("(Jakarta|Thomas)", flist) ])
+  }
   print(paste("\n\n@@ create CSV from XML numfiles=", length(flist)))
   #  flist = flist[1:14]
   #  print(flist)
@@ -460,6 +465,7 @@ createCSVfromXML <- function(csvfolder) {
 #processXMLFileList("data-xml/German/Rigol/Pauline/000623.xml",csvfolder,verbose=T)
 
 if (mode == 1 || mode == 0) {
+  system.time(createCSVfromXML(csvfolder, doAll=F))
   system.time(createCSVfromXML(csvfolder))
 }
 print("done createCSVfromXML XML -> rds")

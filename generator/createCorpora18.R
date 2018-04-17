@@ -432,9 +432,9 @@ createCSVfromXML <- function(csvfolder, doAll=T) {
   if (!doAll){
     flist = flist[ !grepl("(Jakarta|Thomas)", flist) ]
     print("doing shorter list")
-    print(flist[ grepl("(Jakarta|Thomas)", flist) ])
   }
   print(paste("\n\n@@ create CSV from XML numfiles=", length(flist)))
+  print(flist[ grepl("(Jakarta|Thomas)", flist) ])
   #  flist = flist[1:14]
   #  print(flist)
   funclist = c(

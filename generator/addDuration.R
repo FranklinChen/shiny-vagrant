@@ -1,5 +1,17 @@
 require(stringr)
 require(reshape2)
+library(doParallel)
+
+nc = 1
+if (Sys.getenv("RSTUDIO") != "1") {
+  nc = as.integer(detectCores()) - 1
+} else{
+  setwd("/media/big/chang/rscripts/shiny-vagrant/generator/workfiles")
+  mode = -1
+}
+cl <- makeCluster(nc, outfile = "", type = "FORK")
+registerDoParallel(cl)
+
 #options(encoding = 'UTF-8')
 
 durdf =readRDS("../alldursec.rds")
@@ -48,25 +60,25 @@ durnfl = str_replace(durnfl,"rds","csv")
 nfl = str_replace(fl,"csvfolderMake","actualcsv")
 nfl = str_replace(nfl,"rds","csv")
 
-for (i in 1:length(fl)){
-  if (!file.exists(nfl[i])){
-    print(paste("reading ",fl[i]))
-    df = readRDS(fl[i])
+writeDuration <- function(fl,nfl,durnfl){
+  if (!file.exists(nfl)){
+    print(paste("reading ",fl))
+    df = readRDS(fl)
     df$full = paste(df$langgrp, df$langtype, df$corpus, df$file,sep="/")
     df$full2 = str_replace(df$full,"[.][^ ][^ ][^ ]$","")
     df$full2 = str_replace(df$full2,"[/]+","/")
     flist = unique(df$full2)
-
+    
     for (f in flist){
-    	r = df$full2 == f
-  	if (f %in% durdf$full2){
-    	   df$duration[r] = durdf$dursecs[durdf$full2 == f]
-    	   durdf$used[durdf$full2 == f] = TRUE
-    	   print(durdf[durdf$full2 == f,])
-        }
-     }
-     if (sum(!is.na(df$duration)) > 0){
-          saveDurations(df[!is.na(df$duration),],durnfl[i])
+      r = df$full2 == f
+      if (f %in% durdf$full2){
+        df$duration[r] = durdf$dursecs[durdf$full2 == f]
+        durdf$used[durdf$full2 == f] = TRUE
+        print(durdf[durdf$full2 == f,])
+      }
+    }
+    if (sum(!is.na(df$duration)) > 0){
+      saveDurations(df[!is.na(df$duration),],durnfl)
     }
     df$full = NULL
     df$full2 = NULL 
@@ -74,3 +86,22 @@ for (i in 1:length(fl)){
     write.csv(durdf,"durtmp.csv",fileEncoding = "UTF-8",row.names = F)
   }
 }
+
+#for (i in 1:length(fl)){
+#   writeDuration(fl[i],nfl[i],durnfl[i])
+#}
+
+funclist = c(
+  'readRDS',
+  'saveDurations',
+  'dcast'
+)
+#  for (i in 1:length(flist)){
+foundFiles <- foreach(i = 1:length(fl),.export = funclist,.packages = c("stringr", "reshape2")
+  ) %dopar% {
+    writeDuration(fl[i],nfl[i],durnfl[i])
+    if (i %% 100 == 0){
+      write(paste("write duration",i,"out of",length(fl)), file="../storage/timestamp.txt",append=FALSE)
+    }
+  }
+print(paste("found=", length(foundFiles)))

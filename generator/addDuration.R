@@ -60,7 +60,7 @@ durnfl = str_replace(durnfl,"rds","csv")
 nfl = str_replace(fl,"csvfolderMake","actualcsv")
 nfl = str_replace(nfl,"rds","csv")
 
-writeDuration <- function(fl,nfl,durnfl){
+writeDuration <- function(fl,nfl,durnfl,durdf){
   if (!file.exists(nfl)){
     print(paste("reading ",fl))
     df = readRDS(fl)
@@ -99,7 +99,7 @@ funclist = c(
 #  for (i in 1:length(flist)){
 foundFiles <- foreach(i = 1:length(fl),.export = funclist,.packages = c("stringr", "reshape2")
   ) %dopar% {
-    writeDuration(fl[i],nfl[i],durnfl[i])
+    writeDuration(fl[i],nfl[i],durnfl[i],durdf)
     if (i %% 100 == 0){
       write(paste("write duration",i,"out of",length(fl)), file="../storage/timestamp.txt",append=FALSE)
     }

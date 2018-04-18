@@ -616,12 +616,9 @@ combineFileCorpora <- function(csvfolder) {
                'shiftLessInterestingLeft',
                'safeSave')
   x <-
-    foreach(
-      i = 1:length(foldname),
-      .export = funclist,
-      .packages = c("stringr", "dplyr")
-    ) %dopar% {
+    foreach(i = 1:length(foldname),.export = funclist, .packages = c("stringr", "dplyr")) %dopar% {
       combineCSVFiles(csvfolder, foldname[i])
+      write(paste("combine",i,"out of",length(foldname)), file="../storage/timestamp.txt",append=FALSE)
     }
 }
 if (mode == 2 || mode == 0) {
@@ -717,6 +714,7 @@ createUtteranceCorpora <- function(csvfolder) {
       .packages = c("stringr", "dplyr")
     ) %dopar% {
       writeUtteranceCorpora(flist[i])
+      write(paste("writeutt",i,"out of",length(flist)), file="../storage/timestamp.txt",append=FALSE)
     }
   print(paste("finished=", length(foundFiles)))
 }
@@ -796,6 +794,7 @@ createLangCorpora <- function(csvfolder, langgrp = FALSE) {
       .packages = c("stringr", "dplyr")
     ) %dopar% {
       combineLangCorpora(csvfolder, fdf3$file[i], fdf3$type[i])
+      write(paste("combineLang",fdf3$type[i],i,"out of",length(fdf3$file)), file="../storage/timestamp.txt",append=FALSE)
     }
 }
 if (mode == 4 || mode == 0) {
@@ -1051,6 +1050,7 @@ computeNgramsAll <- function(csvdir, ngramdir) {
       .packages = c("stringr")
     ) %dopar% {
       computeNgrams(flist[i], csvdir, ngramdir)
+      write(paste("computeNgrams",i,"out of",length(flist)), file="../storage/timestamp.txt",append=FALSE)
     }
 }
 
@@ -1151,6 +1151,7 @@ createNgramLang <- function(ngramfolder, langgrp = FALSE) {
       combineNgrams(ngramfolder, fparts3[i], "3.rds")
       combineNgrams(ngramfolder, fparts3[i], "2.rds")
       combineNgrams(ngramfolder, fparts3[i], "1.rds")
+      write(paste("computeNgramsLang",i,"out of",length(fdf3$file)), file="../storage/timestamp.txt",append=FALSE)
     }
   
 }

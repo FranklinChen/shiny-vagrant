@@ -82,7 +82,7 @@ writeDuration <- function(fl,nfl,durnfl,durdf){
     }
     df$full = NULL
     df$full2 = NULL 
-    write.csv(df,nfl[i],fileEncoding = "UTF-8",row.names = F)
+    write.csv(df,nfl,fileEncoding = "UTF-8",row.names = F)
     write.csv(durdf,"durtmp.csv",fileEncoding = "UTF-8",row.names = F)
   }
 }

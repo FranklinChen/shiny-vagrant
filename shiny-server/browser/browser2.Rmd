@@ -52,6 +52,7 @@ ga('send', 'pageview');")),
                  ,helpText("percTarChild: percent of utterances that were by the target child")
                  ,helpText("percParent: percent of utterances that were by the mother or father")
                  ,helpText("percOthers: percent of utterances that were by other speakers")
+                 ,downloadButton('downloadData', 'Download')
                  ,width = 2
     )
     ,mainPanel(
@@ -88,6 +89,17 @@ ga('send', 'pageview');")),
                                                       ,options = list( autoWidth = TRUE, lengthMenu = c(5, 10, 20, 200))
                                                       #      ,  columnDefs = list(list(width = '80px', targets=1:3)))
     ))
+    
+    output$downloadData <- downloadHandler(
+      filename = function() { 
+        "childesBrowser.csv"
+      },
+      content <- function(file) {
+        write.csv(values$table, file =file,fileEncoding = "UTF-8",quote=T)
+      }
+      ,contentType = "text/csv"
+    )
+    
   }
   ,options = list(height=900, width = 1500)
 )

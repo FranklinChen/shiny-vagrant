@@ -1,3 +1,8 @@
+checkinstall <- function(lname){
+  if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname,repos = "http://cran.us.r-project.org")}
+}
+checkinstall("stringr")
+
 require(stringr)
 #options(encoding = 'UTF-8')
 

@@ -1,6 +1,6 @@
 #require(openxlsx)
 checkinstall <- function(lname){
-  if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname)}
+  if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname,repos = "http://cran.us.r-project.org")}
 }
 checkinstall("stringr")
 checkinstall("xml2")

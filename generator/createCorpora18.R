@@ -1,4 +1,13 @@
 #require(openxlsx)
+checkinstall <- function(lname){
+  if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname)}
+}
+checkinstall("stringr")
+checkinstall("xml2")
+checkinstall("dplyr")
+checkinstall("ngram")
+checkinstall("doParallel")
+
 library(stringr)
 require(xml2)
 require(dplyr)

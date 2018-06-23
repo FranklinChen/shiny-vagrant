@@ -1013,6 +1013,8 @@ computeNgrams <- function(f, csvdir, ngramdir) {
                                       1,
                                       0)
                   print(paste("writing ", ngramfile2))
+                 
+                  ngdf = ngdf[order(df$ngrams),]
                   saveRDS(ngdf, ngramfile2)
                 }
                 ng = NULL

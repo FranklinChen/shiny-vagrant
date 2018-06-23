@@ -1,3 +1,11 @@
+checkinstall <- function(lname){
+  if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname,repos = "http://cran.us.r-project.org")}
+}
+checkinstall("ggplot2")
+checkinstall("stringr")
+checkinstall("plyr")
+checkinstall("dplyr")
+
 require(ggplot2)
 require(stringr)
 require(plyr)

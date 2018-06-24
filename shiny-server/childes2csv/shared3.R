@@ -13,17 +13,19 @@ values$csvfile=""
 values$maxsize = 1000000000000
 fileinfo = readRDS("../storage/summaryChildes.rds")
 
-readFileDir <- function(lgrp,lg,corp){
+readFileDir <- function(lgrp,lg,corp,addignore=FALSE){
   dd <- readRDS("../storage/filesData-XML.rds")
   ignore = "-----"
   langgroup = unique(dd[,1])
   langgroup = langgroup[langgroup != ""]
   langlist = unique(dd[dd[,1]==lgrp ,2])
-#  langlist = c(ignore,langlist)
+#  
   corpuslist = unique(dd[dd[,1]==lgrp & dd[,2]==lg,3])
   corpuslist = corpuslist[corpuslist != ""]
-#  corpuslist = c(ignore,corpuslist)
-  
+  if (addignore){
+    langlist = c(ignore,langlist)
+    corpuslist = c(ignore,corpuslist)
+  }
   
   updateSelectInput(session, "langGroup", label="Language Group:",choices = langgroup,selected=lgrp)
   updateSelectInput(session, "lang", label="Language:",choices = langlist,selected=lg)

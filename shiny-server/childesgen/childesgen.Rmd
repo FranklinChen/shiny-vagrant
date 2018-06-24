@@ -1,0 +1,282 @@
+---
+title: "Childes Generator"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+- Generate Word Sequences using ngrams from CHILDES Corpora  Click [here](../) to return to toolkit page.
+- Select a corpus to use
+- Type a word sequence in the textbox
+- Use the checkboxes to select the next word.  Transitional probabilities are provided based on the context
+```{r setup, include=FALSE}
+library(shinycssloaders)
+require(ggplot2)
+ignore = "-----"
+
+ngramdir = "../storage/ngrams"
+
+
+```
+
+```{r, echo=FALSE}
+
+shinyApp(
+  ui =  fluidPage(
+     tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-7929639-6', 'auto');
+ga('set', 'contentGroup1', 'childesgen'); 
+ga('send', 'pageview');")),
+    tags$script(src='https://www.google-analytics.com/analytics.js'),
+        fluidRow(column(3,selectInput("langGroup", "Language Group: ", 
+                             choices = c("Eng-UK"), width='90%'))
+                 ,column(3,selectInput("lang", "Language: ",
+                              choices = c("Thomas"),width='90%'))
+                 ,column(3,selectInput("corpus", "Corpus: ", 
+                              choices = c(ignore),width='90%'))
+                 ,column(2,h1(" "),actionButton("reset", "Reset")))
+         ,fluidRow(column(7,textInput('wordseq',"Word Sequence","I want",width='1400px')))
+         ,fluidRow(column(7,textOutput("bigram"),textOutput("trigram")))
+         ,fluidRow(column(4,checkboxGroupInput("selectnextword", label = "Select the next word")))
+     ),
+  server = function(input, output, session) {
+    source('../childes2csv/shared3.R', local=TRUE)
+    values$updateFilter = TRUE
+    values$wordseq = c("I","want")
+    dd <- readFileDir("Eng-UK","Thomas","----")
+    values$n1 = "NULL"
+    values$n2 = "NULL"
+    values$n3 = "NULL"
+    values$n4 = "NULL"
+    values$bigram= ""
+    values$trigram = ""
+          
+    output$bigram <- renderText({ values$bigram })
+    output$trigram <- renderText({ values$trigram })
+  #  output$value <- renderText({ input$caption })
+   
+     observeEvent(input$corpus,ignoreInit=T, {
+        
+    })
+    
+    observeEvent(input$reset, {
+      print("reset")
+      isolate({
+       updateTextInput(session, "wordseq", value = "")
+    #  values$wordseq=c()
+      })
+    })
+    
+    observeEvent(input$selectnextword,{
+      values$wordseq=c(values$wordseq,input$selectnextword)
+      newstr = paste(values$wordseq,collapse = " ")
+        newstr = str_replace(newstr,"#ppp",".")
+        newstr = str_replace(newstr,"#qqq","?")
+      updateTextInput(session, "wordseq", value = newstr)
+    })
+    
+    getNgrams <- function(num){
+      if (num == 1){
+        if (!is.data.frame(values$n1)){
+          values$n1 = loadCorpora("1")
+        }
+        return(values$n1)
+      }
+      if (num == 2){
+        if (!is.data.frame(values$n2)){
+          values$n2 = loadCorpora("2")
+        }
+        return(values$n2)
+      }
+      if (num == 3){
+        if (!is.data.frame(values$n3)){
+          values$n3 = loadCorpora("3")
+        }
+        return(values$n3)
+      }
+      if (num == 4){
+        if (!is.data.frame(values$n4)){
+          values$n4 = loadCorpora("4")
+        }
+        return(values$n4)
+      }
+      return(NULL)
+    }
+    
+    observeEvent(values$wordseq,{
+      print("values")
+      n1 = getNgrams(1)
+  #    wordseq = c("I","want","to","buy")
+      wordseq = values$wordseq
+     # print(head(n1))
+      plus = paste(wordseq," ",sep="")
+      stat = n1[match(plus,n1$ngrams),]
+      
+      if (length(wordseq) > 1){
+      tdf = as.data.frame(t(mapply(list,wordseq[1:length(wordseq)-1], wordseq[2:length(wordseq)])))
+      tdf$bi = paste(tdf$V1,tdf$V2,"")
+ #     print(tdf)
+      n2 = getNgrams(2)
+      bigramfreq = n2$freq[match(tdf$bi,n2$ngrams)]
+      prop = bigramfreq / stat$freq[1:(length(wordseq)-1)]
+      stat$bigramfreq = c(NA,bigramfreq)
+      stat$bigram = c(NA,prop)
+      print(stat)
+      bigram = stat$bigram[!is.na(stat$bigram)]
+      values$bigram = paste("Product of bigram probabilities",paste(signif(bigram),collapse=" * "),"=", signif(prod(bigram, na.rm=F)))
+}
+
+      if (length(wordseq) > 2){
+      tdf = as.data.frame(t(mapply(list,wordseq[1:(length(wordseq)-2)],wordseq[2:(length(wordseq)-1)], wordseq[3:length(wordseq)] )))
+      tdf$tri = paste(tdf$V1,tdf$V2,tdf$V3,"")
+      print(tdf)
+      n3 = getNgrams(3)
+      print(head(n3))
+#      print(n2$freq[n2$ngrams %in% tdf$bi])
+      prop = n3$freq[match(tdf$tri,n3$ngrams)] / stat$bigramfreq[2:(length(wordseq)-1)]
+      stat$trigram = c(NA,NA,prop)
+      print(stat)
+      trigram = stat$bigram[!is.na(stat$trigram)]
+      values$trigram = paste("Product of trigram probabilities",paste(signif(trigram),collapse=" * "),"=", signif(prod(trigram, na.rm=F)))
+      }
+    })
+    
+    observeEvent(input$wordseq,{
+      values$wordseq=strsplit(input$wordseq," ")[[1]]
+       seqlen = length(values$wordseq)
+      bot = 1
+      if (seqlen > 3){
+        bot = seqlen - 2
+      }
+      contextseq = values$wordseq[bot:seqlen]
+      contextseq = str_replace(contextseq,"[.]", "#ppp")
+      contextseq = str_replace(contextseq,"[?]", "#qqq")
+      context = paste(contextseq,collapse=" ")
+      print(context)
+      contlen = length(contextseq)
+
+      ngramsmall = getNgrams(contlen)
+      n2freq = ngramsmall$freq[ngramsmall$ngrams==paste(context," ",sep="")]
+   #   print(n2freq)
+      ngramfull = getNgrams(contlen+1)
+  #    print(head(ngramfull))
+      #   paste(values$wordseq,collapse=" ")
+      df2 = subset(ngramfull,str_detect(ngramfull$ngrams,paste("^",context," .*",sep="")))
+ #     print(dim(df2))
+      if (dim(df2)[1] > 0){
+        df2 = df2[order(-df2$freq),]
+      lendf2 = length(df2$freq)
+      df2$final = str_match(df2$ngrams,paste("^",context," ([^ ]+)",sep=""))[,2]
+#      print(lendf2)
+#      print(head(df2))
+
+        if (length(unique(df2$freq)) > 7){
+          uniqval = unique(df2$freq)
+          med = uniqval[length(uniqval)/2]
+      #    print(med)
+          mid = which(df2$freq==med)
+     #     print(mid)
+          df3 = df2[c(1:3, (mid-1):(mid+1), (lendf2-2):lendf2),]
+        }else{
+          df3 = df2
+        }
+      #  print("df3")
+      #  print(df3)
+        if (length(n2freq) > 0){
+          df3$prop = df3$freq / n2freq
+        }else{
+          df3$prop = df3$freq
+        }
+        df3$label = paste("\"",df3$ngrams," ",df3$prop,"\"=\"",df3$final,"\"",sep="")
+        #          print(df3$label)
+        newstr = paste("list(",paste(df3$label,collapse=","),")")
+        newstr = str_replace(newstr,"#ppp",".")
+        newstr = str_replace(newstr,"#qqq","?")
+     #    print(newstr)
+        listparse = eval(parse(text=newstr))
+    #    print(listparse)
+        updateCheckboxGroupInput(session, "selectnextword",choices = listparse )
+      }else{
+        print("empty")
+        updateCheckboxGroupInput(session, "selectnextword",choices =character(0) )
+      }
+      if (input$wordseq==""){
+      ngramfull = getNgrams(1)
+      uniqval = unique(ngramfull$freq)
+      med = uniqval[length(uniqval)/2]
+    #  print(med)
+      mid = which(ngramfull$freq==med)
+     # print(mid)
+      s = 4
+      lendf2=length(ngramfull$freq)
+      df3 = ngramfull[c(1:2*s, (mid-s):(mid+s), (lendf2-2*s+1):lendf2),]
+      df3$prop = df3$freq 
+      df3$label = paste("\"",df3$ngrams," ",df3$prop,"\"=\"",df3$ngrams,"\"",sep="")
+   #   print(head(df3))
+      newstr = paste("list(",paste(df3$label,collapse=","),")")
+      listparse = eval(parse(text=newstr))
+      updateCheckboxGroupInput(session, "selectnextword",choices = listparse )
+      }
+  })
+    
+    getFileName <- function(nopath,gram){
+#      gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
+      fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,".rds",sep="")
+      if (input$lang == ignore | input$lang == ""){
+        fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
+      }else{
+        if (input$corpus == ignore | input$corpus == ""){
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
+        }
+      }
+      if (nopath){
+        fpath = str_replace(fpath,paste(ngramdir,"/",sep=""),"")
+      }
+      print(fpath)
+      return(fpath)
+    }
+    
+    loadCorpora <- function(gram){
+      fpath = getFileName(FALSE,gram)
+      print(fpath)
+      if (file.exists(fpath)){
+        print(paste("found",fpath))
+        df = readRDS(fpath)
+       # df = df[order(df$ngrams),]
+        return(df)
+      }
+    }
+    
+    output$logrank<-renderPlot({
+      if (length(values$table) > 2 & "rank" %in% names(values$table)){
+        ngdf = values$table
+        ngdf = ngdf[ngdf$punct == 0,]
+         ggplot(ngdf,aes(x=logrank,y=logfreq))+geom_point(colour='red')+stat_smooth(method="lm")
+      }
+      })
+    
+    output$downloadNgram <- downloadHandler(
+      filename = function() { 
+        ff= getFileName(TRUE)
+        ff=sub(".rds",".csv",ff)
+        ff
+      },
+      content <- function(file) {
+        fpath = getFileName(FALSE)
+        print(fpath)
+         wholecsv <- readRDS(fpath)
+           write.csv(wholecsv, file)
+
+      }
+      ,contentType = "text/csv"
+    )
+  }
+  ,options = list(width=1000,height = 560)
+)
+```
+
+- These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+

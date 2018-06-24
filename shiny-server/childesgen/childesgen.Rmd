@@ -37,7 +37,7 @@ ga('send', 'pageview');")),
                               choices = c("Thomas"),width='90%'))
                  ,column(3,selectInput("corpus", "Corpus: ", 
                               choices = c(ignore),width='90%'))
-                 ,column(2,actionButton("reset", "Reset"),actionButton("back", "Back")))
+                 ,column(1,actionButton("reset", "Reset"),br(),br(),actionButton("back", "Back")))
          ,fluidRow(column(10,textInput('wordseq',"Word Sequence","I want",width='1400px')))
          ,fluidRow(column(10,textOutput("bigram"),textOutput("trigram")))
          ,fluidRow(column(10,checkboxGroupInput("selectnextword", label = "Select the next word")))

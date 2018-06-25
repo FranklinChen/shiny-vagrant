@@ -312,9 +312,13 @@ ga('send', 'pageview');")),
   ,options = list(width=1000,height = 560)
 )
 ```
+
 - The transitional probabilities are computed by taking the frequency of the last three words and diving by the frequency of the bigram composed of the first two words.  For the utterance "I want a drink", the frequency of "want a drink" will be divided by the frequency of "want a".  This tells us out of all of the case of "want a", what proportion were followed by "drink".  If the sequence is only two words, then bigram frequency is divided by the unigram frequency of the first word.
+
 - The first few clicks will be slow to update, because files need to be loaded, but it will be faster later.
+
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
+
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
 - To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
 

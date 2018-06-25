@@ -9,8 +9,5 @@ rm -rf workfiles
 /bin/bash makeCorp.sh >> hist
 /bin/bash makeSPA.sh >> hist
 /bin/bash copyStorage.sh >> hist
-ls -la storage/*/*UK_Thomas* > storagesum
-du -sh storage/* >> storagesum
-cat storagesum | mail -s childesgen chang.franklin@gmail.com 
 #/bin/ls -lha workfiles | awk '{print $6,$7,$8,$5,$9}' | mail -s childesgen chang.franklin@gmail.com 
 #rm -rf workfiles

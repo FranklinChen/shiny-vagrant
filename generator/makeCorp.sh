@@ -8,5 +8,5 @@ nice -n 19 Rscript ../createCorpora18.R 2 > out1
 nice -n 19 Rscript ../createCorpora18.R 3 >> out1 
 nice -n 19 Rscript ../createCorpora18.R 4 >> out1 
 nice -n 19 Rscript ../createCorpora18.R 5 >> out1 
-nice -n 19 Rscript ../createCorpora18.R 0 >> out1 
+nice -n 19 Rscript ../createCorpora18.R 0 > out1b 
 /bin/ls -lhad csvfolderMake | awk '{print $6,$7,$8,$5,$9}' > ../storage/timestamp.txt

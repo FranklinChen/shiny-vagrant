@@ -44,6 +44,7 @@ ga('send', 'pageview');")),
   server = function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
+    values$changeSearch = FALSE
     dd <- readFileDir("Eng-NA","Bates","Free20")
     
     observeEvent(input$ngram, {

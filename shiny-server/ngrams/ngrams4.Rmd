@@ -45,7 +45,8 @@ ga('send', 'pageview');")),
     source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
     values$changeSearch = FALSE
-    dd <- readFileDir("Eng-NA","Bates","Free20")
+    values$addignore=TRUE
+    dd <- readFileDir("Eng-NA","Bates","Free20",addignore=TRUE)
     
     observeEvent(input$ngram, {
       if (!is.null(input$ngram)){

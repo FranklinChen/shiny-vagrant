@@ -1009,7 +1009,7 @@ computeNgrams <- function(f, csvdir, ngramdir) {
               #      print(g)
               udf2 = subset(udf, wordlen >= g)
               if (length(udf2$utt) > 2) {
-                ng <- ngram (udf2$utt , n = g)
+                ng <- ngram(udf2$utt , n = g)
                 ngdf = get.phrasetable (ng)
                 print(paste("make ngdf", g))
                 print(length(ngdf$freq))
@@ -1018,13 +1018,11 @@ computeNgrams <- function(f, csvdir, ngramdir) {
                   ngdf$logrank = log(ngdf$rank)
                   ngdf$logfreq = log(ngdf$freq)
                   ngdf$ngrams = as.character(ngdf$ngrams)
-                  ngdf$punct = ifelse(str_detect(ngdf$ngrams, "[#](eee|ppp|qqq)"),
-                                      1,
-                                      0)
-                  print(paste("writing ", ngramfile2))
-                 
+                  ngdf$punct = ifelse(str_detect(ngdf$ngrams, "[#](eee|ppp|qqq)"),1,0)
+                  print(head(ngdf))                  
           #        ngdf = ngdf[order(df$ngrams),]
-                  saveRDS(ngdf, ngramfile2)
+                  safeSave(ngdf, ngramfile2,NULL)
+                  print(paste("writing ", ngramfile2))
                 }
                 ng = NULL
                 ngdf = NULL
@@ -1052,7 +1050,7 @@ computeNgramsAll <- function(csvdir, ngramdir) {
     full.names = T,
     recursive = T
   )
-  funclist = c('computeNgrams', 'readFileLoop', 'ngram', 'get.phrasetable')
+  funclist = c('computeNgrams', 'readFileLoop', 'ngram', 'get.phrasetable','safeSave')
   #   for (i in 1:length(flist)){
   x <-
     foreach(

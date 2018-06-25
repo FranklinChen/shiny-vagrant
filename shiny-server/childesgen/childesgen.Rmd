@@ -45,15 +45,16 @@ ga('send', 'pageview');")),
   server = function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
-    values$wordseq = c("I","want")
-    dd <- readFileDir("Eng-UK","Thomas","----",addignore=TRUE)
+    values$changeSearch = FALSE
     values$n1 = "NULL"
     values$n2 = "NULL"
     values$n3 = "NULL"
     values$n4 = "NULL"
     values$bigram= ""
     values$trigram = ""
-          
+    values$wordseq = c("I","want")
+    dd <- readFileDir("Eng-UK","Thomas","----",addignore=TRUE)
+  
     output$bigram <- renderText({ values$bigram })
     output$trigram <- renderText({ values$trigram })
   #  output$value <- renderText({ input$caption })

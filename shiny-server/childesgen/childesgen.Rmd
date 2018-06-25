@@ -32,11 +32,11 @@ ga('set', 'contentGroup1', 'childesgen');
 ga('send', 'pageview');")),
     tags$script(src='https://www.google-analytics.com/analytics.js'),
         fluidRow(column(3,selectInput("langGroup", "Language Group: ", 
-                             choices = c("Eng-UK"), width='90%'))
+                             choices = c("Japanese"), width='90%'))
                  ,column(3,selectInput("lang", "Language: ",
-                              choices = c("Thomas"),width='90%'))
+                              choices = c("Miyata"),width='90%'))
                  ,column(3,selectInput("corpus", "Corpus: ", 
-                              choices = c(ignore),width='90%'))
+                              choices = c("Tai"),width='90%'))
                  ,column(1,actionButton("reset", "Reset"),br(),br(),actionButton("back", "Back")))
          ,fluidRow(column(10,textInput('wordseq',"Word Sequence","I want",width='1400px')))
          ,fluidRow(column(10,textOutput("bigram"),textOutput("trigram")))
@@ -46,6 +46,7 @@ ga('send', 'pageview');")),
     source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
     values$changeSearch = FALSE
+    values$addignore=TRUE
     values$n1 = "NULL"
     values$n2 = "NULL"
     values$n3 = "NULL"
@@ -53,7 +54,7 @@ ga('send', 'pageview');")),
     values$bigram= ""
     values$trigram = ""
     values$wordseq = c("I","want")
-    dd <- readFileDir("Eng-UK","Thomas","----",addignore=TRUE)
+    dd <- readFileDir("Japanese","Miyata","Tai",addignore=TRUE)
   
     output$bigram <- renderText({ values$bigram })
     output$trigram <- renderText({ values$trigram })

@@ -11,6 +11,7 @@ values$longcol = c()
 values$fulltable = NULL
 values$csvfile=""
 values$changeSearch = TRUE
+values$addignore=FALSE
 values$maxsize = 1000000000000
 fileinfo = readRDS("../storage/summaryChildes.rds")
 
@@ -115,6 +116,9 @@ observeEvent(input$langGroup,  ignoreInit=T,{
   if (defval == ignore && len > 1){
     defval = langlist[2]
   }
+  if (values$addignore){
+    langlist = c(ignore,langlist)
+  }
   updateSelectInput(session, "lang", label=paste("Languages (",len,"):"),
                     choices = langlist,selected=defval)
 })
@@ -132,7 +136,7 @@ updateLangSelect <- function(){
   if (input$lang != ""){
     corpuslist = unique(dd[dd[,1]==input$langGroup & dd[,2]==input$lang,3])
     corpuslist = corpuslist[corpuslist != ""]
-    if (length(corpuslist) < 1){
+    if (length(corpuslist) < 1 || values$addignore){
       corpuslist = c(ignore)
     }
     len = length(corpuslist)

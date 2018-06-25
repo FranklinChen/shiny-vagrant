@@ -10,6 +10,7 @@ values$parttable = NULL
 values$longcol = c()
 values$fulltable = NULL
 values$csvfile=""
+values$changeSearch = TRUE
 values$maxsize = 1000000000000
 fileinfo = readRDS("../storage/summaryChildes.rds")
 
@@ -121,7 +122,7 @@ observeEvent(input$langGroup,  ignoreInit=T,{
 observeEvent(input$lang, ignoreInit=T,{
     prevCorp = input$corpus
   updateLangSelect()
-  if (input$corpus == prevCorp){
+  if (input$corpus == prevCorp && values$changeSearch){
     searchForCorpusFile()
   }
 })

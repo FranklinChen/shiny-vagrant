@@ -384,7 +384,7 @@ processXMLFileList <-
           if (length(alldf) <= 0) {
             print(paste("EMPTY ", newfile))
             alldf = alldf3
-            print(head(alldf))
+           print(head(alldf))
           }
         }
         
@@ -836,7 +836,7 @@ makeDirList <- function() {
     fparts2[fparts2[, 3] == "Word.rds", 3] = ""
     fparts2[fparts2[, 2] == "Word.rds", 2] = ""
     #   print(head(dd))
-    print(fparts2)
+   # print(fparts2)
     saveRDS(fparts2, file = "filesData-XML.rds")
   }
 }
@@ -928,7 +928,7 @@ summarizeOne <- function(f) {
           cdf$percOthers = counts$Freq[counts$role2 == "Others"]
         }
         
-        print(cdf)
+    #    print(cdf)
         #       cordf = rbind(cordf,cdf)
       }
     }
@@ -1023,7 +1023,7 @@ computeNgrams <- function(f, csvdir, ngramdir) {
                                       0)
                   print(paste("writing ", ngramfile2))
                  
-                  ngdf = ngdf[order(df$ngrams),]
+          #        ngdf = ngdf[order(df$ngrams),]
                   saveRDS(ngdf, ngramfile2)
                 }
                 ng = NULL
@@ -1084,7 +1084,7 @@ combineNgrams <- function(ngramfolder, name, type) {
       full.names = T,
       recursive = F
     )
-    print(flist2)
+ #   print(flist2)
     if (length(flist2) > 0) {
       allcorpus = data.frame()
       for (j in 1:length(flist2)) {
@@ -1127,7 +1127,7 @@ createNgramLang <- function(ngramfolder, langgrp = FALSE) {
                             "[^_]+?_[^_]+?_[^_]+?_1.rds",
                             fn = T,
                             rec = F)
-  print(flist)
+#  print(flist)
   fparts = basename(flist)
   fparts2 = str_split_fixed(fparts, "_", 4)
   if (langgrp) {
@@ -1136,7 +1136,7 @@ createNgramLang <- function(ngramfolder, langgrp = FALSE) {
     fparts3 = unique(paste(fparts2[, 1], fparts2[, 2], sep = "_"))
   }
   fparts3 = fparts3[!str_detect(fparts3, ".rds")]
-  print(fparts3)
+  #print(fparts3)
   fdf = data.frame(file = fparts3,
                    type = "1.rds",
                    stringsAsFactors = F)

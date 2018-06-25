@@ -1046,7 +1046,7 @@ computeNgramsAll <- function(csvdir, ngramdir) {
   dir.create(ngramdir)
   flist = list.files(
     path = csvdir,
-    pattern = "[^_]+_[^_]+_[^_]+_Utterance.rds",
+    pattern = ".+?_Utterance.rds",
     full.names = T,
     recursive = T
   )

@@ -136,8 +136,11 @@ updateLangSelect <- function(){
   if (input$lang != ""){
     corpuslist = unique(dd[dd[,1]==input$langGroup & dd[,2]==input$lang,3])
     corpuslist = corpuslist[corpuslist != ""]
-    if (length(corpuslist) < 1 || values$addignore){
+    if (length(corpuslist) < 1){
       corpuslist = c(ignore)
+    }
+    if (values$addignore){
+      corpuslist = c(ignore,corpuslist)
     }
     len = length(corpuslist)
     defval = corpuslist[1]

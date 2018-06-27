@@ -7,9 +7,9 @@ fig_caption: yes
 ---
 
 - Generate Word Sequences using ngrams from CHILDES Corpora.  Click [here](../) to return to toolkit page.
-- Select a corpus to use by changing language group, language, and corpora.
+- Select a corpus to use by changing language group, language, and corpora. 
 - Use the checkboxes to select the next word in the sentence.
-- Transitional probabilities for the last word based on the previous context are shown. The choices are ordered by probabilities, so the top choice is the most likely continuation.
+- Transitional probabilities for the last word based on the previous context are shown. The choices are ordered by probabilities, so the top choice is the most likely continuation.  You will see a selection of some high probability, middle probability, and low probability items.
 - The reset button will remove the sentence and it will show you some unigrams from the corpus.  You can also type your own words in the textbox.
 - If you do not select a particular language or corpus, you will get all of the ngrams from all of the corpora under that language group or language. 
 ```{r setup, include=FALSE}

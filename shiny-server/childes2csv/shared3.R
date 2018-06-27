@@ -138,9 +138,10 @@ updateLangSelect <- function(){
     corpuslist = corpuslist[corpuslist != ""]
     if (length(corpuslist) < 1){
       corpuslist = c(ignore)
-    }
+    }else{
     if (values$addignore){
       corpuslist = c(ignore,corpuslist)
+    }
     }
     len = length(corpuslist)
     defval = corpuslist[1]

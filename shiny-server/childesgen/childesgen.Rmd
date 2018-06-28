@@ -205,7 +205,7 @@ server = function(input, output, session) {
     #   paste(values$wordseq,collapse=" ")
     df2 = subset(ngramfull,str_detect(ngramfull$ngrams,paste("^",context," .*",sep="")))
     #     print(dim(df2))
-    if (dim(df2)[1] > 0){
+    if (is.data.frame(df2) && nrow(df2)>0){
       n2freq = ngramsmall$freq[ngramsmall$ngrams==paste(context," ",sep="")]
       df2 = df2[order(-df2$freq),]
       lendf2 = length(df2$freq)

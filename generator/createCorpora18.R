@@ -432,12 +432,37 @@ processXMLFileList <-
 #processXMLFileList("data-xml/Biling/Singapore/e3d5b.xml",csvfolder,verbose=F,force=TRUE)
 #processXMLFileList("data-xml/Slavic/Slovenian/Zagar/group2/01pop.xml",csvfolder,verbose=TRUE,force=TRUE)
 
+greppid <- function(f){
+  f = gsub(" ","\\\\ ",f)
+  pid = system(paste("grep PID= ",f,sep=" "), intern = TRUE)
+  pid = str_replace(pid[1],"\\s+PID=\"","")
+  pid = str_replace(pid[1],"\"","")
+  return(data.frame(name=f,pid=pid))
+}
 
+getUniqueFiles <- function(folder,pat){
+  flist = listFilesSortSize(folder, pat)
+  finfo = file.info(flist)["mtime"]
+  finfo$name = gsub("^./","", rownames(finfo))
+  
+#  pidfile = do.call("rbind",lapply(flist,greppid)) 
+  system(paste0("grep -R PID= ",folder," |  perl -nle 's/xml:\\s+PID=\"/xml,/;s/\"//g;print' > pidlist.csv"))
+#  ), intern = TRUE)
+  pidfile = read.csv("pidlist.csv",header=FALSE)
+  both = merge(finfo,pidfile,by.x="name",by.y="V1",all.x=TRUE)
+  
+  both2= both[order(both$V2,both$mtime, decreasing=TRUE),]
+  
+  both3 <- both2[!duplicated(both2$V2),]
+  both4 <- both3[order(both3$name),]
+  return(both4$name)
+}
 
 createCSVfromXML <- function(csvfolder, doAll=T) {
   dir.create(csvfolder, showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
-  flist = listFilesSortSize("data-xml", ".+?xml")
+#  flist = listFilesSortSize("data-xml", ".+?xml")
+  flist = getUniqueFiles("data-xml", ".+?xml")
   if (!doAll){
     flist = flist[ !grepl("(Jakarta|Thomas)", flist) ]
     print("doing shorter list")

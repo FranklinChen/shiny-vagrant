@@ -6,5 +6,5 @@ mv workfiles/actualcsv/*.csv storage/actualcsv/
 mv workfiles/ngramdir/*.rds storage/ngrams/
 ls -la storage/*/*UK_Thomas* > storagesum
 du -sh storage/* >> storagesum
-cat storagesum | mail -s childesgen chang.franklin@gmail.com 
+#cat storagesum | mail -s childesgen chang.franklin@gmail.com 
 

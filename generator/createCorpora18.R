@@ -461,8 +461,8 @@ getUniqueFiles <- function(folder,pat){
 createCSVfromXML <- function(csvfolder, doAll=T) {
   dir.create(csvfolder, showWarnings = F)
   #  flist = list.files(path = "data-xml",".+?xml", full.names = T, recursive = T)
-#  flist = listFilesSortSize("data-xml", ".+?xml")
-  flist = getUniqueFiles("data-xml", ".+?xml")
+  flist = listFilesSortSize("data-xml", ".+?xml")
+#  flist = getUniqueFiles("data-xml", ".+?xml")
   if (!doAll){
     flist = flist[ !grepl("(Jakarta|Thomas)", flist) ]
     print("doing shorter list")

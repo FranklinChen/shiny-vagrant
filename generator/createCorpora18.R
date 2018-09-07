@@ -506,6 +506,9 @@ print("done createCSVfromXML XML -> rds")
 
 shiftLessInterestingLeft <- function(df) {
 #  print("shift columns")
+  if (length(names(df)) < 30){
+     return(df)
+  }
   lgp = which(names(df) == "langgrp")
   dcol = which(names(df) == "role")
   if ("D" %in% names(df)) {

@@ -47,6 +47,7 @@ ga('send', 'pageview');")),
                  ,helpText("numWords: number of words in the corpus")
                  ,helpText("numUtt: number of utterances in the corpus")
                  ,helpText("wordsPerUtt: average number of words per utterance")
+                 ,helpText("mored: proportion of words that have mor-line tags")
                  ,helpText("minAge: lowest age in months for that corpus")
                  ,helpText("maxAge: highest age in months for that corpus")
                  ,helpText("percTarChild: percent of utterances that were by the target child")

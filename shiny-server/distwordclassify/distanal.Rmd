@@ -56,7 +56,7 @@ ga('send', 'pageview');")),
     values$cadf=NULL
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
-    values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_ALL_2.rds",sep="/"))
+    values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_2.rds",sep="/"))
 
     
     observeEvent(input$ngram, ignoreInit=T,{

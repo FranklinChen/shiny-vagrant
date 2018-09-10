@@ -45,6 +45,7 @@ ga('send', 'pageview');")),
                               choices = c("Dim1")))
     ,column(2,selectInput("yaxis", "Y-axis",
                               choices = c("Dim2")))
+    ,actionButton("doca", "Generate CA")
     ,column(2,downloadButton('downloadFit', 'Download CA Table'))
     )
     ,plotOutput("logrank")
@@ -67,10 +68,6 @@ ga('send', 'pageview');")),
         loadCorpora()
       }
    })
-    
-    observeEvent(input$corpus, ignoreInit=T,{
-        loadCorpora()
-    })
     
     getFileName <- function(nopath){
       gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
@@ -128,7 +125,11 @@ ga('send', 'pageview');")),
      }
     
     observeEvent(input$pos, ignoreInit=T,{
-     #   loadCorpora()
+        loadCorpora()
+    })
+    
+    observeEvent(input$doca, ignoreInit=T,{
+        loadCorpora()
         searchWords()
     })
     

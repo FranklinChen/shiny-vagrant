@@ -294,7 +294,7 @@ class UnigramLearner(Learner):
     def computeActivationForCandidates(self,bag,blen,ind):
         candact = [self.unigram[i] for i in bag]
         maxact = max(candact)
-        candact = [x / (maxact+1) for x in candact]
+        candact = [x * 1.0 / (maxact+1) for x in candact]
         return(candact)
 
 class BigramLearner(UnigramLearner):
@@ -312,7 +312,7 @@ class BigramLearner(UnigramLearner):
         bigrams = [self.bigram[self.lastword+"_"+w] for w in bag]
         # to avoid division by zero, we just add 1
         unigrams = [self.unigram[self.lastword]+1 for w in bag]
-        candact = [bigrams[i]/unigrams[i] for i in range(blen)]
+        candact = [bigrams[i] * 1.0/unigrams[i] for i in range(blen)]
         return(candact)
     
     def postProcess(self,word):
@@ -345,7 +345,7 @@ class BackwardBigramLearner(UnigramLearner):
         bigrams = [self.bigram[self.lastword+"_"+w] for w in bag]
         # to avoid division by zero, we just add 1
         unigrams = [self.unigram[w]+1 for w in bag]
-        candact = [bigrams[i]/unigrams[i] for i in range(blen)]
+        candact = [bigrams[i] * 1.0/unigrams[i] for i in range(blen)]
         return(candact)
     
     def postProcess(self,word):
@@ -386,7 +386,7 @@ class TrigramLearner(BigramLearner):
         trigrams = [self.trigram[self.lastword2 + "_" + self.lastword + "_" + w] for w in bag]
         # to avoid division by zero, we just add 1
         bigrams = [self.bigram[self.lastword2 + "_" + self.lastword]+1 for w in bag]
-        candact = [trigrams[i]/bigrams[i] for i in range(blen)]
+        candact = [trigrams[i] * 1.0/bigrams[i] for i in range(blen)]
         return(candact)
 
 # adjacency learner uses prom stats to compute how often
@@ -408,7 +408,7 @@ class AdjLearner(BigramLearner):
         candbefore = [self.promstats[w + ">" + self.lastword] for w in bag]
         bigrams = [self.bigram[self.lastword+"_"+w] for w in bag]
         # to avoid division by zero, we just add 1
-        candact = [bigrams[i]/(candbefore[i]+candafter[i]+1) for i in range(blen)]
+        candact = [bigrams[i] * 1.0/(candbefore[i]+candafter[i]+1) for i in range(blen)]
         return(candact)
 
 class ProminenceLearner(AdjLearner):
@@ -422,8 +422,8 @@ class ProminenceLearner(AdjLearner):
             candafter = [self.promstats[w2 + ">" + w] for w in bag]
             candbefore = [self.promstats[w + ">" + w2] for w in bag]
         # to avoid division by zero, we just add 1
-            candact = [candact[i]+ candbefore[i]/(candbefore[i]+candafter[i]+1) for i in range(blen)]
-        candact = [c*1.0/blen for c in candact]
+            candact = [candact[i]+ candbefore[i] * 1.0/(candbefore[i]+candafter[i]+1) for i in range(blen)]
+        candact = [c * 1.0/blen for c in candact]
         return(candact)
 
 
@@ -442,7 +442,7 @@ class AdjPromLearner(ProminenceLearner):
         candbefore = [self.promstats[w + ">" + self.lastword] for w in bag]
         bigrams = [self.bigram[self.lastword+"_"+w]+1 for w in bag]
         # to avoid division by zero, we just add 1
-        candact = [bigrams[i]/(candbefore[i]+candafter[i]+1) for i in range(blen)]
+        candact = [bigrams[i] * 1.0/(candbefore[i]+candafter[i]+1) for i in range(blen)]
         return(candact)
 
     def computeActivationForCandidatesProm(self,bag,blen,ind):
@@ -451,8 +451,8 @@ class AdjPromLearner(ProminenceLearner):
             candafter = [self.promstats[w2 + ">" + w] for w in bag]
             candbefore = [self.promstats[w + ">" + w2] for w in bag]
         # to avoid division by zero, we just add 1
-            candact = [candact[i]+ candbefore[i]/(candbefore[i]+candafter[i]+1) for i in range(blen)]
-        candact = [c*1.0/blen for c in candact]
+            candact = [candact[i]+ candbefore[i]* 1.0/(candbefore[i]+candafter[i]+1) for i in range(blen)]
+        candact = [c * 1.0/blen for c in candact]
         return(candact)
 
     def computeActivationForCandidates(self,bag,blen,ind):
@@ -528,5 +528,5 @@ class LearnerIterator:
 
 learnIter = LearnerIterator()
 learnIter.setClassNames(globals())
-langlist = glob.glob('actualcsv/*_*_*_Utterance.csv')  # list of csv files
+langlist = glob.glob('actualcsv/*_*_Utterance.csv')  # list of csv files
 learnIter.runAllModelsLanguages(langlist,outcsv="bigspa.csv")

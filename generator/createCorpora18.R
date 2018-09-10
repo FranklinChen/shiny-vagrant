@@ -663,6 +663,139 @@ if (mode == 2 || mode == 0) {
 }
 print("finished combineFileCorpora Word")
 
+
+################################
+
+summarizeOne <- function(f) {
+  parts = str_split_fixed(f, "[_/]", 5)
+  cdf = data.frame(
+    lg = parts[2],
+    langtype = parts[3],
+    corpus = parts[4],
+    numWords = NA,
+    numUtt = NA,
+    wordsPerUtt = NA,
+    mored = 0,
+    minAge = NA,
+    maxAge = NA,
+    percTarChild = NA,
+    percParent = NA,
+    percOthers = NA
+  )
+  #  worddf = read.csv(f,stringsAsFactors = F)
+  #  print(f)
+  worddf =  readFileLoop(f)
+  if (length(worddf$w) > 0) {
+    #    length(worddf$w)
+    worddf$w = str_trim(worddf$w)
+    worddf = worddf[worddf$w != "", ]
+    worddf = worddf[!is.na(worddf$w), ]
+    if ("mor_type" %in% names(worddf)) {
+      cdf$mored = round(sum(!is.na(worddf$mor_type)) / length(worddf$mor_type), 3)
+    }
+    #   length(worddf$w)
+    if (length(worddf$w) > 1) {
+      fhead = str_replace(f, "Word.rds", "")
+      f2 = paste(fhead, "Utterance.rds", sep = "")
+      #     print(f2)
+      uttdf =  readFileLoop(f2)
+      #  uttdf = read.csv(,stringsAsFactors = F)
+      if (length(uttdf$w) > 1 && !str_detect(fhead, "untranscribe")) {
+        # length(uttdf$w)
+        uttdf$w = str_trim(uttdf$w)
+        uttdf = uttdf[uttdf$w != "", ]
+        uttdf = uttdf[!is.na(uttdf$w), ]
+        #length(uttdf$w)
+        uttdf$wordlength = sapply(strsplit(uttdf$w, "\\s+"), length)
+        
+        cdf$numWords = length(worddf$w)
+        cdf$numUtt = length(uttdf$w)
+        cdf$wordsPerUtt = mean(uttdf$wordlength, na.rm = T)
+        
+        if ("Y" %in% names(uttdf)) {
+          #print(uttdf$Y)
+          uttdf$Y = as.numeric(uttdf$Y)
+          uttdf$agemonths = uttdf$Y * 12
+          if ("M" %in% names(uttdf)) {
+            uttdf$M = as.numeric(uttdf$M)
+            uttdf$agemonths = rowSums(uttdf[, c("agemonths", "M")], na.rm =
+                                        T)
+          }
+          uttdf$agemonths = as.numeric(uttdf$agemonths)
+          #  print(head(uttdf[,c("Y","agemonths","M","w")]))
+          cdf$minAge = min(uttdf$agemonths, na.rm = T)
+          cdf$maxAge = max(uttdf$agemonths, na.rm = T)
+        }
+        #    print(unique(uttdf$role))
+        
+        uttdf$role2 = "Others"
+        uttdf$role2[uttdf$role %in% c("Father", "Mother")] = "Parent"
+        uttdf$role2[uttdf$role %in% c("Target_Child")] = "Target_Child"
+        
+        if (!("Target_Child" %in% unique(uttdf$role))) {
+          uttdf$role2[uttdf$role %in% c("Child")] = "Target_Child"
+        }
+        
+        counts = data.frame(xtabs( ~ role2, uttdf) / length(uttdf$w))
+        if ("Target_Child" %in% uttdf$role2) {
+          cdf$percTarChild = counts$Freq[counts$role2 == "Target_Child"]
+        }
+        if ("Parent" %in% uttdf$role2) {
+          cdf$percParent = counts$Freq[counts$role2 == "Parent"]
+        }
+        if ("Others" %in% uttdf$role2) {
+          cdf$percOthers = counts$Freq[counts$role2 == "Others"]
+        }
+        
+    #    print(cdf)
+        #       cordf = rbind(cordf,cdf)
+      }
+    }
+    
+  } else{
+    print(paste("Empty file", f))
+  }
+  return(cdf)
+}
+#summarizeOne("csvfolderMake/Chinese_Mandarin_ZhouNarratives_Word.rds")
+
+summarizeCorpora <- function(csvfolder) {
+  print("\n\n@@ summarize Corpora")
+  if (!file.exists("summaryChildes.rds")) {
+    flist = list.files(
+      path = csvfolder,
+      pattern = "[^ ]+_Word.rds",
+      full.names = T,
+      recursive = T
+    )
+    cordf2 = data.frame()
+    funclist = c('summarizeOne', 'readFileLoop')
+    #   for (i in 1:length(flist)){
+    cordf <-
+      foreach(
+        i = 1:length(flist),
+        .export = funclist,
+        .packages = c("stringr", "dplyr")
+      ) %dopar% {
+        cdf = summarizeOne(flist[i])
+        #      cordf2 = rbind(cordf2,cdf)
+        cdf
+      }
+    cordf2 = do.call("rbind", cordf)
+    # print(tail(cordf2))
+    cordf2 = cordf2[order(cordf2$lg, cordf2$langtype, cordf2$corpus), ]
+    saveRDS(cordf2, "summaryChildes.rds")
+    cordf2 = NULL
+    gc()
+  }
+}
+if (mode == 2 || mode == 0) {
+  summarizeCorpora(csvfolder)
+}
+print("finished summarizeCorpora")
+
+###################
+
 pasteCol <- function(v) {
   return(paste0(v, collapse = " "))
 }
@@ -872,136 +1005,6 @@ if (mode == 6 || mode == 0) {
   makeDirList()
 }
 print("finished makeDirList")
-
-################################
-
-summarizeOne <- function(f) {
-  parts = str_split_fixed(f, "[_/]", 5)
-  cdf = data.frame(
-    lg = parts[2],
-    langtype = parts[3],
-    corpus = parts[4],
-    numWords = NA,
-    numUtt = NA,
-    wordsPerUtt = NA,
-    mored = 0,
-    minAge = NA,
-    maxAge = NA,
-    percTarChild = NA,
-    percParent = NA,
-    percOthers = NA
-  )
-  #  worddf = read.csv(f,stringsAsFactors = F)
-  #  print(f)
-  worddf =  readFileLoop(f)
-  if (length(worddf$w) > 0) {
-    #    length(worddf$w)
-    worddf$w = str_trim(worddf$w)
-    worddf = worddf[worddf$w != "", ]
-    worddf = worddf[!is.na(worddf$w), ]
-    if ("mor_type" %in% names(worddf)) {
-      cdf$mored = round(sum(!is.na(worddf$mor_type)) / length(worddf$mor_type), 3)
-    }
-    #   length(worddf$w)
-    if (length(worddf$w) > 1) {
-      fhead = str_replace(f, "Word.rds", "")
-      f2 = paste(fhead, "Utterance.rds", sep = "")
-      #     print(f2)
-      uttdf =  readFileLoop(f2)
-      #  uttdf = read.csv(,stringsAsFactors = F)
-      if (length(uttdf$w) > 1 && !str_detect(fhead, "untranscribe")) {
-        # length(uttdf$w)
-        uttdf$w = str_trim(uttdf$w)
-        uttdf = uttdf[uttdf$w != "", ]
-        uttdf = uttdf[!is.na(uttdf$w), ]
-        #length(uttdf$w)
-        uttdf$wordlength = sapply(strsplit(uttdf$w, "\\s+"), length)
-        
-        cdf$numWords = length(worddf$w)
-        cdf$numUtt = length(uttdf$w)
-        cdf$wordsPerUtt = mean(uttdf$wordlength, na.rm = T)
-        
-        if ("Y" %in% names(uttdf)) {
-          #print(uttdf$Y)
-          uttdf$Y = as.numeric(uttdf$Y)
-          uttdf$agemonths = uttdf$Y * 12
-          if ("M" %in% names(uttdf)) {
-            uttdf$M = as.numeric(uttdf$M)
-            uttdf$agemonths = rowSums(uttdf[, c("agemonths", "M")], na.rm =
-                                        T)
-          }
-          uttdf$agemonths = as.numeric(uttdf$agemonths)
-          #  print(head(uttdf[,c("Y","agemonths","M","w")]))
-          cdf$minAge = min(uttdf$agemonths, na.rm = T)
-          cdf$maxAge = max(uttdf$agemonths, na.rm = T)
-        }
-        #    print(unique(uttdf$role))
-        
-        uttdf$role2 = "Others"
-        uttdf$role2[uttdf$role %in% c("Father", "Mother")] = "Parent"
-        uttdf$role2[uttdf$role %in% c("Target_Child")] = "Target_Child"
-        
-        if (!("Target_Child" %in% unique(uttdf$role))) {
-          uttdf$role2[uttdf$role %in% c("Child")] = "Target_Child"
-        }
-        
-        counts = data.frame(xtabs( ~ role2, uttdf) / length(uttdf$w))
-        if ("Target_Child" %in% uttdf$role2) {
-          cdf$percTarChild = counts$Freq[counts$role2 == "Target_Child"]
-        }
-        if ("Parent" %in% uttdf$role2) {
-          cdf$percParent = counts$Freq[counts$role2 == "Parent"]
-        }
-        if ("Others" %in% uttdf$role2) {
-          cdf$percOthers = counts$Freq[counts$role2 == "Others"]
-        }
-        
-    #    print(cdf)
-        #       cordf = rbind(cordf,cdf)
-      }
-    }
-    
-  } else{
-    print(paste("Empty file", f))
-  }
-  return(cdf)
-}
-#summarizeOne("csvfolderMake/Chinese_Mandarin_ZhouNarratives_Word.rds")
-
-summarizeCorpora <- function(csvfolder) {
-  print("\n\n@@ summarize Corpora")
-  if (!file.exists("summaryChildes.rds")) {
-    flist = list.files(
-      path = csvfolder,
-      pattern = "[^_]+_[^_]+_[^_]+_Word.rds",
-      full.names = T,
-      recursive = T
-    )
-    cordf2 = data.frame()
-    funclist = c('summarizeOne', 'readFileLoop')
-    #   for (i in 1:length(flist)){
-    cordf <-
-      foreach(
-        i = 1:length(flist),
-        .export = funclist,
-        .packages = c("stringr", "dplyr")
-      ) %dopar% {
-        cdf = summarizeOne(flist[i])
-        #      cordf2 = rbind(cordf2,cdf)
-        cdf
-      }
-    cordf2 = do.call("rbind", cordf)
-    # print(tail(cordf2))
-    cordf2 = cordf2[order(cordf2$lg, cordf2$langtype, cordf2$corpus), ]
-    saveRDS(cordf2, "summaryChildes.rds")
-    cordf2 = NULL
-    gc()
-  }
-}
-if (mode == 7 || mode == 0) {
-  summarizeCorpora(csvfolder)
-}
-print("finished summarizeCorpora")
 
 #### NGRAMS
 

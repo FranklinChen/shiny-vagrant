@@ -123,6 +123,10 @@ ga('send', 'pageview');")),
          print("done")
       }
      }
+     
+    observeEvent(input$corpus, ignoreInit=T,{
+        loadCorpora()
+    })
     
     observeEvent(input$pos, ignoreInit=T,{
         loadCorpora()

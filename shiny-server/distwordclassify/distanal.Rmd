@@ -58,7 +58,7 @@ ga('send', 'pageview');")),
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
     values$fulltable = readRDS(paste(ngramdir,"Eng-UK_Thomas_2.rds",sep="/"))
-
+    values$table = values$fulltable
     
     observeEvent(input$ngram, ignoreInit=T,{
       if (!is.null(input$ngram)){
@@ -76,7 +76,7 @@ ga('send', 'pageview');")),
         fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
       }else{
         if (input$corpus == ignore | input$corpus == ""){
-          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,".rds",sep="")
         }
       }
       if (nopath){
@@ -191,7 +191,7 @@ ga('send', 'pageview');")),
 - Word distributions have been used extensively to create syntactic or semantic dimensions that cab be used for classification.  This page allows you to apply a correspondence analysis (CA) which is a standard technique for classifying items using the frequency of co-occurrence with other items.
 - When you load the page, it will load a file with the bigrams from the English Thomas corpus.
 There is a list of words in the Words text field and a position field with the number 2.
-This will cause the program to search for bigrams with the target words in the second position.
+By pressing the Generate CA button, the program will search for bigrams with the target words in the second position.
 Then it will create a table of frequencies that represent how often each word occur with other words.  For example, the words _a_, _the_, and _little_ occur before nouns and this causes these words to cluster together. The CA will have various dimensions that encode these co-occurence relations.  In the example above, Dim1 seems to distinguish between verbs (negative values) and nouns (positive values).  Dim2 might encode age, because the children are more positive and adults are more negative.
 - This program uses the R library (ca).  To see an application of correspondence analysis to the classification of verb bias for locative verbs, please see [Twomey, Chang, and Ambridge (2014)](https://sites.google.com/site/sentenceproductionmodel/cv/twomey%2Cchang%2Cambridge%2C2014.pdf?attredirects=0&d=1).
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  

@@ -132,7 +132,7 @@ ga('send', 'pageview');")),
         loadCorpora()
     })
     
-    observeEvent(input$doca, ignoreInit=T,{
+    observeEvent(input$doca, {
         loadCorpora()
         searchWords()
     })

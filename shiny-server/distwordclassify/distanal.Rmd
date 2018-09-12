@@ -36,8 +36,6 @@ ga('send', 'pageview');")),
                  ,selectInput("ngram", "N-gram type", 
                               choices = c("2-gram" = 2,"3-gram" = 3,"4-gram"= 4), selected="2-gram",width='90%')
                  ,downloadButton('downloadNgram', 'Download Ngrams')
-                 ,tags$h4("  ")
-                 ,actionButton("doca", "Generate CA")
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px', width='400px')))
     ,textInput("wordsearch","Words", value="man woman boy girl jumped sang gave ate",width='90%')
@@ -47,7 +45,8 @@ ga('send', 'pageview');")),
                               choices = c("Dim1")))
     ,column(2,selectInput("yaxis", "Y-axis",
                               choices = c("Dim2")))
-    ,column(2,downloadButton('downloadFit', 'Download CA Table'))
+    ,column(2,tags$h4("  "),actionButton("doca", "Generate CA") )
+    ,column(2,tags$h4("  "),downloadButton('downloadFit', 'Download CA'))
     )
     ,plotOutput("logrank")
      ),

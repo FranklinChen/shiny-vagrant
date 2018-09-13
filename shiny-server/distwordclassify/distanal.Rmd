@@ -125,16 +125,20 @@ ga('send', 'pageview');")),
       }
      }
      
- #   observeEvent(input$corpus, ignoreInit=T,{
- #       loadCorpora()
- #   })
-    
-    observeEvent(input$pos, ignoreInit=F,{
+    observeEvent(input$corpus, ignoreInit=T,{
         loadCorpora()
     })
     
-    observeEvent(input$doca, {
+    observeEvent(input$lang, ignoreInit=T,{
         loadCorpora()
+    })
+    
+ #   observeEvent(input$pos, ignoreInit=F,{
+ #       loadCorpora()
+ #   })
+    
+    observeEvent(input$doca, {
+      #  loadCorpora()
         searchWords()
     })
     

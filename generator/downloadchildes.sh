@@ -10,4 +10,4 @@ rm -rf workfiles
 /bin/bash makeSPA.sh >> hist
 /bin/bash copyStorage.sh >> hist
 #/bin/ls -lha workfiles | awk '{print $6,$7,$8,$5,$9}' | mail -s childesgen chang.franklin@gmail.com 
-#rm -rf workfiles
+rm -rf workfiles

@@ -35,22 +35,12 @@ ga('send', 'pageview');")),
                               choices = c("Word","Utterance"), selected="Utterance",width='90%')
                  ,selectInput("maxsize", "Max Size: ", 
                               choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%',selected=1000)
-                 ,column(3 ,textInput("search1", "Expression1:", " goed ")
-                 ,selectInput("col1", "Column1: ", choices=c(ignore), width='100%'))
-                 ,width = 3)
+                 ,textInput("search1", "Expression1:", " goed ")
+                 ,selectInput("col1", "Column1: ", choices=c(ignore), width='100%')
+                 ,width = 4)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
-    ,fluidRow(column(11,h4("Filter: Put a search string in the expression box and then selecting a column to filter on.  Strings and regular expressions are acceptable.")))
- #   ,tags$td("")
-      ,fluidRow(
-        column(3,textInput("search2", "Expression2:", "Target_Child"), 
-                selectInput("col2", "Column2: ", choices=c(ignore),width='100%'))
-        ,column(3,textInput("search3", "Expression3:", "[A-z]+?ed$"), 
-                selectInput("col3", "Column3: ", choices=c(ignore),width='100%'))
-        ,column(2, selectInput("preset", "Preset: ", choices=c(ignore,"U-shape Curve","Mean Length Utterance","Age Word Freq"))
-                ,h5("Filtered CSV")
-                ,downloadButton('downloadFilter','Download Filtered')
-                ))
-      ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
+    ,fluidRow(column(11,h4("Context")))
+    ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
      ),
   server = function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
@@ -65,8 +55,6 @@ ga('send', 'pageview');")),
     # results data at bottom
     output$results <- DT::renderDataTable(DT::datatable(values$results))
   
-    
-
     observeEvent(input$corpus,  ignoreInit=T,{
          searchForCorpusFile() 
     })

@@ -58,6 +58,11 @@ ga('send', 'pageview');")),
     observeEvent(input$corpus,  ignoreInit=T,{
          searchForCorpusFile() 
     })
+    
+    observeEvent(input$table_rows_selected,ignoreInit=T,{
+        onerow=values$table[input$table_rows_selected,]
+        values$results = values$fulltable[values$fulltable$file == onerow$file,]
+    })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
        if (values$load){
@@ -83,9 +88,14 @@ ga('send', 'pageview');")),
       isolate({
         values$table <- values$fulltable
         
+#itai = targetroles2[grepl("tsukue itaku ",targetroles2$w,),]
+#print(head(itai[,c("w","role","interloc","name","file")]))
+#print(length(shichadame$who))
+#file20618 = subset(targetroles2,file == "20618.xml")
+
         if (input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
-          values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),]
+          values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),c(input$col1,"role","file", "corpus","langtype","langgrp","uID")]
         }
       })
     })

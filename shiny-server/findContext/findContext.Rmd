@@ -59,9 +59,12 @@ ga('send', 'pageview');")),
          searchForCorpusFile() 
     })
     
+     proxy = DT::dataTableProxy('results',session = session)
+ 
     observeEvent(input$table_rows_selected,ignoreInit=T,{
         onerow=values$table[input$table_rows_selected,]
         values$results = values$fulltable[values$fulltable$file == onerow$file,]
+        DT::selectRows(proxy, which(values$results[,input$col1]==onerow[,input$col1]))  
     })
      
      observeEvent(input$maxsize,  ignoreInit=T,{

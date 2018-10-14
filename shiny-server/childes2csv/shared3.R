@@ -41,7 +41,7 @@ output$parttable <- DT::renderDataTable(DT::datatable({
   values$parttable
 },options = list(searching = FALSE,paging = TRUE,pageLength = 4,autoWidth = TRUE)))
 
-output$table <- DT::renderDataTable(DT::datatable(values$table,fillContainer=TRUE
+output$table <- DT::renderDataTable(DT::datatable(values$table,,selection = 'single',fillContainer=TRUE
                       ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,
                       columnDefs = list(list(width = '300px', targets = values$longcol)))
 ))

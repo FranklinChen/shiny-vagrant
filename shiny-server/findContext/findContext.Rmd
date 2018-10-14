@@ -35,9 +35,9 @@ ga('send', 'pageview');")),
                               choices = c("Word","Utterance"), selected="Utterance",width='90%')
                  ,selectInput("maxsize", "Max Size: ", 
                               choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%',selected=1000)
-                 ,textInput("search1", "Expression1:", " goed ")
+                 ,textInput("search1", "Expression1:", ".+?one's.+")
                  ,selectInput("col1", "Column1: ", choices=c(ignore), width='100%')
-                 ,width = 4)
+                 ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
     ,fluidRow(column(11,h4("Context")))
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
@@ -71,9 +71,18 @@ ga('send', 'pageview');")),
        values$load=TRUE
      })
      
+     resetTable <- function(){
+    if (!"ONE" %in% names(values$table) ){
+      values$table$ONE = 1
+    }
+    cho = c(ignore,names( values$table))
+    updateSelectInput(session, "col1", choices = cho,selected=ignore)
+  }
+  
       observeEvent(input$rowunit,{
         if (values$load){
         searchForCorpusFile()
+        resetTable()
         }
         values$load=TRUE
      })
@@ -95,7 +104,8 @@ ga('send', 'pageview');")),
 
         if (input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
-          values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),c(input$col1,"role","file", "corpus","langtype","langgrp","uID")]
+          values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),c("role",input$col1,"file", "corpus","langgrp","uID")]
+          #"langtype",
         }
       })
     })

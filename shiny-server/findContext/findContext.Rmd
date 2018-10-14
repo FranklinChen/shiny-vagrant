@@ -37,6 +37,7 @@ ga('send', 'pageview');")),
                               choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%',selected=1000)
                  ,textInput("search1", "Expression1:", ".+?one's.+")
                  ,selectInput("col1", "Column1: ", choices=c(ignore), width='100%')
+                 ,actionButton("gotorow", "Goto Row")
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
     ,fluidRow(column(11,h4("Context")))
@@ -49,11 +50,12 @@ ga('send', 'pageview');")),
     values$maxsize = 1000
     values$load = TRUE
     values$forcepush=FALSE
+    values$matchrows=c(1)
  #   values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
-    # results data at bottom
-    output$results <- DT::renderDataTable(DT::datatable(values$results))
+   output$results <- DT::renderDataTable(DT::datatable(values$results,options = list(pageLength = 100,lengthMenu = c(10, 100, 1000))))
+  
   
     observeEvent(input$corpus,  ignoreInit=T,{
          searchForCorpusFile() 
@@ -64,8 +66,16 @@ ga('send', 'pageview');")),
     observeEvent(input$table_rows_selected,ignoreInit=T,{
         onerow=values$table[input$table_rows_selected,]
         values$results = values$fulltable[values$fulltable$file == onerow$file,]
-        DT::selectRows(proxy, which(values$results[,input$col1]==onerow[,input$col1]))  
+       values$matchrows = which(values$results[,input$col1]==onerow[,input$col1])
+    #   print(values$matchrows)
+        DT::selectRows(proxy, values$matchrows)  
     })
+    
+    observeEvent(input$gotorow,ignoreInit=T,{
+    pg = floor(first(values$matchrows-1)/100)+1
+    print(pg)
+    DT::selectPage(proxy, pg)
+  })
      
      observeEvent(input$maxsize,  ignoreInit=T,{
        if (values$load){

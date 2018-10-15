@@ -35,13 +35,14 @@ ga('send', 'pageview');")),
                               choices = c("Word","Utterance"), selected="Utterance",width='90%')
                  ,selectInput("maxsize", "Max Size: ", 
                               choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%',selected=1000)
-                 ,textInput("search1", "Expression1:", ".+?one's.+")
-                 ,selectInput("col1", "Column1: ", choices=c(ignore), width='100%')
+                 ,textInput("search1", "Find:", ".+?one's.+")
+                 ,selectInput("col1", "Column: ", choices=c(ignore), width='100%')
                  ,actionButton("gotorow", "Goto Row")
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
     ,fluidRow(column(11,h4("Context")))
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
+    ,verbatimTextOutput("debug")
      ),
   server = function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
@@ -51,11 +52,13 @@ ga('send', 'pageview');")),
     values$load = TRUE
     values$forcepush=FALSE
     values$matchrows=c(1)
+    values$debug = "start"
  #   values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
    output$results <- DT::renderDataTable(DT::datatable(values$results,options = list(pageLength = 100,lengthMenu = c(10, 100, 1000))))
   
+    output$summary <- renderPrint({ values$debug })
   
     observeEvent(input$corpus,  ignoreInit=T,{
          searchForCorpusFile() 
@@ -112,7 +115,10 @@ ga('send', 'pageview');")),
       
         if (input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
-          values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),c("role",input$col1,"file", "corpus","langgrp","uID")]
+          check = str_detect(values$table[,input$col1],input$search1)
+          values$debug <- sum(check)
+          values$table = values$table[!is.na(values$table[,input$col1]) & check,]
+          #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }
       })
@@ -151,12 +157,9 @@ ga('send', 'pageview');")),
 )
 ```
 
-- This program filters CHILDES corpora.  You first select the language group, language, corpus, and row unit that you want to use.  Max size determines the maximum size of the corpus (the server is too slow for some analyses when using the whole corpus).
-- To see how this could be used to examine the u-shape curve for production of overregularized past-tense forms, go to the preset field and select U-shape Curve.  The regular expression _^(goed|went|comed|came)$_ in Expression1 is applied Column1 _w_ and that filters the Thomas corpus for cases when the four words goed, went, comed, and came were produced in the _w_ column.  Expression2 is applied to the role column and this filters all cases which the _Target_Child_ produced these words.  
-- The Recode source column is _w_ and there is a list of the four words in the _w_ column.  By clicking on the Create new_w button, we can create a new column called _new_w_ with a 1 for _came_ and _went_, and 0 for overregularized _goed_ and _comed_.  You can set these values to whatever you want in order to code the distinctions that you are interested in.
-- The Operate section allows us to create a variable _op_Y_M_, which has the number of months that the target child has been alive.  This is created by selecting VarA (Years variable _Y_) and VarB (Month variable _M_) and then placing _12 * VarA + VarB_ in the Equation field.
-- The Combine section uses the _new_w_ variable as the dependent variable (1=irregular past tense, 0 = overregularize past tense), the Combine field is set to _mean_, and Group1 is set to age in month variable _op_Y_M_.  So the figure shows the mean proportion correct irregular past tense production over age in months of the target child.  You can see that there is a U-shape curve with an early period of correct production of irregulars, followed by overgeneralization of _-ed_, followed by correct production of irregulars.
-- There is a second preset called Mean Length Utterance, which will plot the mean length in words for the Target_Child and Mother in the Thomas corpus.  It is slow to load.
+- This program allows you to find particular words/utterances in CHILDES corpora and then see the context around those utterances to better understand how they are used.  You first select the language group, language, corpus, and row unit that you want to use.  Max size determines the maximum size of the corpus (the server is too slow for some analyses when using the whole corpus).
+- In the Find box, put a regular expression that you want to search for.  You can search for dog by putting dog in the box.  Then you need to select the column that you want to search.  Normally, you would select w to search the words/utterances.  The data frame on the right top will update to show the items that match your search.
+- If you find an item that you want to see the context for, just click on that row in the table and a new table will appear below showing the file that the utterance comes from.
 - To learn more about regular expressions, look [here](https://regexone.com/lesson/introduction_abcs).  
 - You can download the results or the original table using the download buttons.
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  

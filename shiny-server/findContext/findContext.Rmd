@@ -108,13 +108,8 @@ ga('send', 'pageview');")),
       input$col1
  #     print("observe")
       isolate({
-        values$table <- values$fulltable
-        
-#itai = targetroles2[grepl("tsukue itaku ",targetroles2$w,),]
-#print(head(itai[,c("w","role","interloc","name","file")]))
-#print(length(shichadame$who))
-#file20618 = subset(targetroles2,file == "20618.xml")
-
+        values$table <- values$fulltable[input$maxsize,]
+      
         if (input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
           values$table = values$table[!is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1),c("role",input$col1,"file", "corpus","langgrp","uID")]

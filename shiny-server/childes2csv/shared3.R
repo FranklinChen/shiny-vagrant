@@ -247,7 +247,7 @@ processParticipants <- function(one){
 
 output$downloadDataLangGroup <- downloadHandler(
   filename = function() { 
-    paste(input$langGroup,"_",input$rowunit,".csv",sep="")
+    paste(input$langGroup,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
   },
   content <- function(file) {
     geturl = paste(gstorage,input$langGroup,"_",input$rowunit,".csv",sep="")
@@ -264,37 +264,24 @@ output$downloadDataLangGroup <- downloadHandler(
 
 output$downloadDataLang <- downloadHandler(
   filename = function() { 
-    paste(input$langGroup,"_",input$lang,"_",input$rowunit,".csv",sep="")
+    paste(input$langGroup,"_",input$lang,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
   },
   content <- function(file) {
     geturl = paste(gstorage,input$langGroup,"_",input$lang,"_",input$rowunit,".csv",sep="")
-#    wholecsv <- readRDS(geturl)
         print(geturl)
     file.copy(geturl,file)
-#    write.csv.utf8.BOM(wholecsv, file)
- #   write.csv(wholecsv, file, fileEncoding = "UTF-8",quote=T,row.names = F)
-    
-    #        download.file(geturl, destfile=file, method="auto")
   }
   ,contentType = "text/csv"
 )
 
 output$downloadDataCorp <- downloadHandler(
   filename = function() { 
-    paste(input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,".csv",sep="")
+    paste(input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
   },
   content <- function(file) {
     geturl = paste(gstorage,input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,".csv",sep="")
-#    wholecsv <- readRDS(geturl)
-  #  print("read wholecsv")
-       print(geturl)
-    #    file.copy(geturl,file)
-#    write.csv.utf8.BOM(wholecsv, file)
-    #print(geturl)
+    print(geturl)
     file.copy(geturl,file)
-    #  download.file(geturl, destfile=file, method="auto")
-#    write.csv(wholecsv, file, fileEncoding = "UTF-8",quote=T,row.names = F)
-    
   }
   ,contentType = "text/csv"
 )

@@ -35,14 +35,14 @@ ga('send', 'pageview');")),
                               choices = c("Word","Utterance"), selected="Utterance",width='90%')
                  ,selectInput("maxsize", "Max Size: ", 
                               choices = c(1000,10000,100000,1000000,10000000,1000000000000),width='90%',selected=1000)
-                 ,textInput("search1", "Find:", ".+?one's.+")
+                 ,textInput("search1", "Find:", "shall")
                  ,selectInput("col1", "Column: ", choices=c(ignore), width='100%')
                  ,actionButton("gotorow", "Goto Row")
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
+    ,verbatimTextOutput("debug")
     ,fluidRow(column(11,h4("Context")))
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
-    ,verbatimTextOutput("debug")
      ),
   server = function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
@@ -58,7 +58,7 @@ ga('send', 'pageview');")),
 
    output$results <- DT::renderDataTable(DT::datatable(values$results,options = list(pageLength = 100,lengthMenu = c(10, 100, 1000))))
   
-    output$summary <- renderPrint({ values$debug })
+    output$debug <- renderPrint({ values$debug })
   
     observeEvent(input$corpus,  ignoreInit=T,{
          searchForCorpusFile() 
@@ -111,13 +111,14 @@ ga('send', 'pageview');")),
       input$col1
  #     print("observe")
       isolate({
-        values$table <- values$fulltable[input$maxsize,]
+        values$table <- values$fulltable
+        values$debug <-"searching"
       
         if (input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
           check = str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)
-          values$table = values$table[!is.na(values$table[,input$col1]) & check,]
+          values$table = values$table[!is.na(values$table[,input$col1]) && check,]
           #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }

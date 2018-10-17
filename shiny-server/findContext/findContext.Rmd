@@ -40,8 +40,8 @@ ga('send', 'pageview');")),
                  ,actionButton("gotorow", "Goto Row")
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
-    ,verbatimTextOutput("debug")
     ,fluidRow(column(11,h4("Context")))
+    ,verbatimTextOutput("debug")
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
      ),
   server = function(input, output, session) {
@@ -118,7 +118,8 @@ ga('send', 'pageview');")),
           values$table[,input$col1]=as.character(values$table[,input$col1])
           check = str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)
-          values$table = values$table[!is.na(values$table[,input$col1]) && check,]
+ #         values$table = values$table[!is.na(values$table[,input$col1]) && check,]
+          values$table <- values$table[check,]
           #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }

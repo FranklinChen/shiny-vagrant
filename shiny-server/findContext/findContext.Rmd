@@ -70,12 +70,16 @@ ga('send', 'pageview');")),
     observeEvent(input$table_rows_selected,ignoreInit=T,{
         onerow=values$table[input$table_rows_selected,]
         values$results = values$fulltable[values$fulltable$file == onerow$file,]
-       values$matchrows = which(values$results[,input$col1]==onerow[,input$col1])
+        if (input$col1 != ignore){
+          values$matchrows = which(values$results[,input$col1]==onerow[,input$col1])
+        }else{
+          values$matchrows = which(values$results$w==onerow$w)
+        }
     #   print(values$matchrows)
-        DT::selectRows(proxy, values$matchrows)
-        pg = floor(first(values$matchrows-1)/values$pagelen)+1
-        values$debug <- paste("gotorow ",pg)
-        DT::selectPage(proxy, pg)
+          DT::selectRows(proxy, values$matchrows)
+          pg = floor(first(values$matchrows-1)/values$pagelen)+1
+          values$debug <- paste("gotorow ",pg)
+          DT::selectPage(proxy, pg)
     })
     
     observeEvent(input$gotorow,ignoreInit=T,{

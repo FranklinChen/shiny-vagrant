@@ -39,7 +39,7 @@ ga('send', 'pageview');")),
                  ,selectInput("col1", "Column: ", choices=c(ignore), width='100%')
                  ,actionButton("gotorow", "Goto Row")
                  ,width = 3)
-    ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
+    ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '600px')))
     ,fluidRow(column(11,h4("Context")))
     ,verbatimTextOutput("debug")
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
@@ -52,11 +52,12 @@ ga('send', 'pageview');")),
     values$load = TRUE
     values$forcepush=FALSE
     values$matchrows=c(1)
+    values$pagelen = 20
     values$debug = "start"
  #   values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
-   output$results <- DT::renderDataTable(DT::datatable(values$results,options = list(pageLength = 100,lengthMenu = c(10, 100, 1000))))
+   output$results <- DT::renderDataTable(DT::datatable(values$results,options = list(pageLength = values$pagelen,lengthMenu = c(10,20,50, 100, 1000))))
   
     output$debug <- renderPrint({ values$debug })
   
@@ -71,12 +72,15 @@ ga('send', 'pageview');")),
         values$results = values$fulltable[values$fulltable$file == onerow$file,]
        values$matchrows = which(values$results[,input$col1]==onerow[,input$col1])
     #   print(values$matchrows)
-        DT::selectRows(proxy, values$matchrows)  
+        DT::selectRows(proxy, values$matchrows)
+        pg = floor(first(values$matchrows-1)/values$pagelen)+1
+        values$debug <- paste("gotorow ",pg)
+        DT::selectPage(proxy, pg)
     })
     
     observeEvent(input$gotorow,ignoreInit=T,{
-    pg = floor(first(values$matchrows-1)/100)+1
-    print(pg)
+    pg = floor(first(values$matchrows-1)/values$pagelen)+1
+    values$debug <- paste("gotorow ",pg)
     DT::selectPage(proxy, pg)
   })
      

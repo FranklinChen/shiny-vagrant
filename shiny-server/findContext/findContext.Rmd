@@ -54,6 +54,7 @@ ga('send', 'pageview');")),
     values$matchrows=c(1)
     values$pagelen = 20
     values$debug = "start"
+    values$results = NULL
  #   values$fulltable<-preread
     dd <- readFileDir("Eng-UK","Thomas",ignore)
 
@@ -71,15 +72,25 @@ ga('send', 'pageview');")),
         onerow=values$table[input$table_rows_selected,]
         values$results = values$fulltable[values$fulltable$file == onerow$file,]
         if (input$col1 != ignore){
-          values$matchrows = which(values$results[,input$col1]==onerow[,input$col1])
+          values$matchrows <- which(values$results[,input$col1]==onerow[,input$col1])
         }else{
-          values$matchrows = which(values$results$w==onerow$w)
+          values$matchrows <- which(values$results$w==onerow$w)
         }
     #   print(values$matchrows)
-          DT::selectRows(proxy, values$matchrows)
+        values$debug <- paste(values$matchrows)
+        DT::selectRows(proxy, values$matchrows)
+          
+    })
+    
+    session$onFlushed(function() {
+      if (length(values$results) > 1){
+        values$debug <- "results set"
+        if (length(values$matchrows) > 0){
           pg = floor(first(values$matchrows-1)/values$pagelen)+1
           values$debug <- paste("gotorow ",pg)
           DT::selectPage(proxy, pg)
+        }
+      }
     })
     
     observeEvent(input$gotorow,ignoreInit=T,{
@@ -127,7 +138,7 @@ ga('send', 'pageview');")),
           check = str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)
  #         values$table = values$table[!is.na(values$table[,input$col1]) && check,]
-          values$table <- values$table[check,]
+          values$table <- values$table[check,c("role",input$col1,"file", "corpus","langgrp","uID")]
           #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }

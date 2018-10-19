@@ -79,19 +79,18 @@ ga('send', 'pageview');")),
     #   print(values$matchrows)
         values$debug <- paste(values$matchrows)
         DT::selectRows(proxy, values$matchrows)
-          
-    })
-    
-    session$onFlushed(function() {
-      if (length(values$results) > 1){
-        values$debug <- "results set"
         if (length(values$matchrows) > 0){
           pg = floor(first(values$matchrows-1)/values$pagelen)+1
           values$debug <- paste("gotorow ",pg)
           DT::selectPage(proxy, pg)
         }
-      }
     })
+    
+#    session$onFlushed(function() {
+#      if (length(values$results) > 1){
+#        values$debug <- "results set"
+#      }
+#    })
     
     observeEvent(input$gotorow,ignoreInit=T,{
     pg = floor(first(values$matchrows-1)/values$pagelen)+1

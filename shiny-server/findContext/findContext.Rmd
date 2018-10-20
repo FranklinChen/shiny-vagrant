@@ -137,7 +137,7 @@ ga('send', 'pageview');")),
           check = str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)
  #         values$table <- values$table[!is.na(values$table[,input$col1]) && check,]
-          values$table <- values$table[,c("role",input$col1,"file", "corpus","langgrp","uID")]
+          values$table <- values$table[!is.na(values$table[,input$col1]) && check,c("role",input$col1,"file", "corpus","langgrp","uID")]
           #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }

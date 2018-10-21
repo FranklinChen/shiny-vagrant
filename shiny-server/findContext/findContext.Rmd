@@ -132,7 +132,7 @@ ga('send', 'pageview');")),
         values$table <- values$fulltable
         values$debug <-input$col1
       
-        if (input$col1 %in% names(values$table) ){
+        if (input$col1 != ignore && input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
           check = !is.na(values$table[,input$col1]) && str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)

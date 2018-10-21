@@ -17,8 +17,7 @@ ignore = "-----"
 
 ```{r, echo=FALSE}
 
-shinyApp(
-  ui =  fluidPage(
+ui <-  fluidPage(
        tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 ga('create', 'UA-7929639-6', 'auto');
 ga('set', 'contentGroup1', 'findContext'); 
@@ -43,8 +42,9 @@ ga('send', 'pageview');")),
     ,fluidRow(column(11,h4("Context")))
     ,verbatimTextOutput("debug")
     ,withSpinner(DT::dataTableOutput("results", width='800px',height = '400px'))
-     ),
-  server = function(input, output, session) {
+ )
+     
+server <- function(input, output, session) {
     source('../childes2csv/shared3.R', local=TRUE)
     values$updateFilter = TRUE
     values$recodeUI = NULL
@@ -117,6 +117,7 @@ ga('send', 'pageview');")),
         if (values$load){
         searchForCorpusFile()
         resetTable()
+        values$debug <- "startrow"
         }
         values$load=TRUE
      })
@@ -134,13 +135,14 @@ ga('send', 'pageview');")),
       
         if (input$col1 != ignore && input$col1 %in% names(values$table) ){
           values$table[,input$col1]=as.character(values$table[,input$col1])
-          check = !is.na(values$table[,input$col1]) && str_detect(values$table[,input$col1],input$search1)
+          check = !is.na(values$table[,input$col1]) & str_detect(values$table[,input$col1],input$search1)
           values$debug <- sum(check)
  #         values$table <- values$table[!is.na(values$table[,input$col1]) && check,]
           values$table <- values$table[check,c("role","w","file")]
           #c("role",input$col1,"file", "corpus","langgrp","uID")]
           #"langtype",
         }
+        values$debug <- "reset"
       })
     })
     
@@ -172,9 +174,11 @@ ga('send', 'pageview');")),
       }
       ,contentType = "text/csv"
     )
-  }
-  ,options = list(width=1000,height = 1200)
-)
+}
+
+
+shinyApp(ui = ui, server = server ,options = list(width=1000,height = 1200))
+
 ```
 
 - This program allows you to find particular words/utterances in CHILDES corpora and then see the context around those utterances to better understand how they are used.  You first select the language group, language, corpus, and row unit that you want to use.  Max size determines the maximum size of the corpus (the server is too slow for some analyses when using the whole corpus).

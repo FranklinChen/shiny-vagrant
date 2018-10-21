@@ -276,10 +276,18 @@ output$downloadDataLang <- downloadHandler(
 
 output$downloadDataCorp <- downloadHandler(
   filename = function() { 
-    paste(input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
+    if (input$corpus == ignore || input$corpus == ""){
+        paste(input$langGroup,"_",input$lang,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
+    }else{
+      paste(input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,"_",Sys.Date(),".csv",sep="")
+    }
   },
   content <- function(file) {
-    geturl = paste(gstorage,input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,".csv",sep="")
+    if (input$corpus == ignore || input$corpus == ""){
+        geturl = paste(gstorage,input$langGroup,"_",input$lang,"_",input$rowunit,".csv",sep="")
+    }else{
+      geturl = paste(gstorage,input$langGroup,"_",input$lang,"_",input$corpus,"_",input$rowunit,".csv",sep="")
+    }
     print(geturl)
     file.copy(geturl,file)
   }

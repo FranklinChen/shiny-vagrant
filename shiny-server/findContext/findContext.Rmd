@@ -142,6 +142,7 @@ server <- function(input, output, session) {
   
     values$results
     formatResultTable()
+    values$pagelen <- length(input$results_rows_current)
   })
   
   observeEvent(input$maxsize,  ignoreInit=T,{

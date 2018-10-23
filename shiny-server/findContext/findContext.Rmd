@@ -58,7 +58,7 @@ server <- function(input, output, session) {
   values$load = TRUE
   values$forcepush=FALSE
   values$matchrows=c(1)
-  values$pagelen = 20
+  values$pagelen = 10
   values$debug = ""
   values$results = NULL
   values$resultlongcol = c()
@@ -138,6 +138,8 @@ server <- function(input, output, session) {
   })
   
   observe({
+    invalidateLater(2000)
+  
     values$results
     formatResultTable()
   })

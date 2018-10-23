@@ -6,7 +6,7 @@ html_document:
 fig_caption: yes
 ---
 
-- This program allows you to find utterances that match some criteria and see the context associated with them.
+- This program allows you to find utterances that match some criteria and then check what they mean in context.
 - Type a regular expression in the find box and select the column that you want to search (to try it out, go to the Column selector and choose w).
 - You should see the matching utterances in the Find Table on the top right
 - Select an utterance and you should see the whole file that it appeared in below in the Context Table

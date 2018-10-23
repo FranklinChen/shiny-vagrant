@@ -7,7 +7,7 @@ fig_caption: yes
 ---
 
 - This program allows you to find utterances that match some criteria and see the context associated with them.
-- Type a regular expression in the find box and select the column that you want to search (select w for the word/utterance).
+- Type a regular expression in the find box and select the column that you want to search (to try it out, go to the Column selector and choose w).
 - You should see the matching utterances in the Find Table on the top right
 - Select an utterance and you should see the whole file that it appeared in below in the Context Table
 - The row with the target utterance should be highlighted (click again if it doesn't show up)
@@ -65,57 +65,67 @@ server <- function(input, output, session) {
   #   values$fulltable<-preread
   dd <- readFileDir("Eng-UK","Thomas",ignore)
   
-  output$results <- DT::renderDataTable(DT::datatable(values$results,
-                            options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,
+  proxy = DT::dataTableProxy('results', session = session)
+  
+  output$results <- DT::renderDataTable(DT::datatable(values$results
+                            ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,
                                            pageLength = values$pagelen,lengthMenu = c(10,20,50, 100, 1000)
                                           ,columnDefs = list(list(width = '1000px', targets = values$resultlongcol))
-                                           )  ))
+                                           )  ),server = TRUE)
 
   output$debug <- renderPrint({ values$debug })
   
   observeEvent(input$corpus,  ignoreInit=T,{
     searchForCorpusFile() 
+    updateFindTable()
   })
-  
-  proxy = DT::dataTableProxy('results',session = session)
-  
-  observeEvent(input$table_rows_selected,ignoreInit=T,{
-    onerow=values$table[input$table_rows_selected,]
-    values$results = values$fulltable[values$fulltable$file == onerow$file,]
     
-    if (nrow(values$results) > 4){ 
-    print("adjust rescol")
-    vdf1 = values$results
-    head(vdf1)
-    if (length(vdf1[,1]) > 1000){
-      vdf1 = values$results[1:1000,]
-    }
-    collength = data.frame(apply(apply(vdf1,1,nchar),1,max))
-#    print(unique(vdf$t_type))
-    print(collength)
-    if ("rowunit" %in% input && input$rowunit == "Utterance"){
-      values$resultlongcol = union(which(names(vdf1)=="w"),which(collength > 40))
-      # values$text = paste(values$longcol)
-    }else{ # word
-      values$resultlongcol = which(collength > 12)
-    }
-    print(values$resultlongcol)
+  selectFile <- function() {
+    onerow = values$table[input$table_rows_selected, ]
+    values$results = values$fulltable[values$fulltable$file == onerow$file, ]
+    
+    if (input$col1 != ignore) {
+        values$matchrows <-
+          which(values$results[, input$col1] == onerow[, input$col1])
+      } else{
+        values$matchrows <- which(values$results$w == onerow$w)
+      }
+      
   }
-    
-    if (input$col1 != ignore){
-      values$matchrows <- which(values$results[,input$col1]==onerow[,input$col1])
-    }else{
-      values$matchrows <- which(values$results$w==onerow$w)
+  
+  formatResultTable <- function(){
+    if (!is.null(values$results )){
+      if (nrow(values$results) > 4) {
+        print("adjust rescol")
+        vdf1 = values$results
+        head(vdf1)
+        if (length(vdf1[, 1]) > 1000) {
+          vdf1 = values$results[1:1000, ]
+        }
+        collength = data.frame(apply(apply(vdf1, 1, nchar), 1, max))
+        #    print(unique(vdf$t_type))
+        print(collength)
+        if ("rowunit" %in% input && input$rowunit == "Utterance") {
+          values$resultlongcol = union(which(names(vdf1) == "w"), which(collength > 40))
+          # values$text = paste(values$longcol)
+        } else{
+          # word
+          values$resultlongcol = which(collength > 12)
+        }
+        print(values$resultlongcol)
+      }
+      
+      
+      #   print(values$matchrows)
+      #  values$debug <- paste(values$matchrows)
+      DT::selectRows(proxy, values$matchrows)
+      if (length(values$matchrows) > 0) {
+        pg = floor(first(values$matchrows - 1) / values$pagelen) + 1
+        #   values$debug <- paste("gotorow ",pg)
+        DT::selectPage(proxy, pg)
+      }
     }
-    #   print(values$matchrows)
-  #  values$debug <- paste(values$matchrows)
-    DT::selectRows(proxy, values$matchrows)
-    if (length(values$matchrows) > 0){
-      pg = floor(first(values$matchrows-1)/values$pagelen)+1
-   #   values$debug <- paste("gotorow ",pg)
-      DT::selectPage(proxy, pg)
-    }
-  })
+  }
   
   #    session$onFlushed(function() {
   #      if (length(values$results) > 1){
@@ -123,10 +133,13 @@ server <- function(input, output, session) {
   #      }
   #    })
   
-  observeEvent(input$gotorow,ignoreInit=T,{
-    pg = floor(first(values$matchrows-1)/values$pagelen)+1
-    values$debug <- paste("gotorow ",pg)
-    DT::selectPage(proxy, pg)
+  observeEvent(input$table_rows_selected, ignoreInit = T, {
+    selectFile()
+  })
+  
+  observe({
+    values$results
+    formatResultTable()
   })
   
   observeEvent(input$maxsize,  ignoreInit=T,{
@@ -148,23 +161,16 @@ server <- function(input, output, session) {
     if (values$load){
       searchForCorpusFile()
       resetTable()
-      values$debug <- "startrow"
+      updateFindTable()
+      values$debug <- ""
     }
     values$load=TRUE
   })
   
-  
-  observe({
-    #      input$search1
-    #      input$search2
-    #      input$search3
-    input$col1
-    #     print("observe")
+  updateFindTable <- function(){
     isolate({
-      values$table <- values$fulltable
-   #   values$debug = paste(input$col1,"__",input$search1,"__",sep="")
-      
-      if (input$col1 %in% names(values$table) ){
+       if (input$col1 %in% names(values$fulltable) ){
+        values$table <- values$fulltable
         col1=as.character(values$table[,input$col1])
         check =  str_detect(col1,input$search1)
     #    values$debug <- sum(check)
@@ -173,12 +179,25 @@ server <- function(input, output, session) {
        # values$debug = newname
         values$table <- values$table[check,]
         values$table <- values$table[newname]
-         adjustTableCol()
+        
         #c("role",input$col1,"file", "corpus","langgrp","uID")]
         #"langtype",
       }
-      #values$debug <- "reset"
     })
+  }
+  
+  observe({
+    #      input$search1
+    #      input$search2
+    #      input$search3
+    input$col1
+    #     print("observe")
+    updateFindTable()
+  })
+  
+  observe({
+    values$table
+     adjustTableCol()
   })
   
   roundTwo <- function(x){

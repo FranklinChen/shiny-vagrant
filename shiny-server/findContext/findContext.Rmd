@@ -60,6 +60,7 @@ server <- function(input, output, session) {
   values$matchrows=c(1)
   values$pagelen = 10
   values$debug = ""
+  values$tableupdated = TRUE
   values$results = NULL
   values$resultlongcol = c()
   #   values$fulltable<-preread
@@ -68,8 +69,8 @@ server <- function(input, output, session) {
   proxy = DT::dataTableProxy('results', session = session)
   
   output$results <- DT::renderDataTable(DT::datatable(values$results
-                            ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,
-                                           pageLength = values$pagelen,lengthMenu = c(10,20,50, 100, 1000)
+                            ,options = list(searching = FALSE,autoWidth = TRUE,processing = TRUE,stateSave = TRUE
+                                          ,pageLength = values$pagelen,lengthMenu = c(10,20,50, 100, 1000)
                                           ,columnDefs = list(list(width = '1000px', targets = values$resultlongcol))
                                            )  ),server = TRUE)
 
@@ -83,6 +84,7 @@ server <- function(input, output, session) {
   selectFile <- function() {
     onerow = values$table[input$table_rows_selected, ]
     values$results = values$fulltable[values$fulltable$file == onerow$file, ]
+    values$tableupdated = FALSE
     
     if (input$col1 != ignore) {
         values$matchrows <-
@@ -90,7 +92,6 @@ server <- function(input, output, session) {
       } else{
         values$matchrows <- which(values$results$w == onerow$w)
       }
-      
   }
   
   formatResultTable <- function(){
@@ -118,12 +119,19 @@ server <- function(input, output, session) {
       
       #   print(values$matchrows)
       #  values$debug <- paste(values$matchrows)
-      DT::selectRows(proxy, values$matchrows)
-      if (length(values$matchrows) > 0) {
-        values$pagelen <- length(input$results_rows_current)
-        pg = floor(first(values$matchrows - 1) / values$pagelen) + 1
-        #   values$debug <- paste("gotorow ",pg)
-        DT::selectPage(proxy, pg)
+#      DT::selectRows(proxy, values$matchrows)
+#      if (length(values$matchrows) > 0) {
+#        values$pagelen <- length(input$results_rows_current)
+#        pg = floor(first(values$matchrows - 1) / values$pagelen) + 1
+#        #   values$debug <- paste("gotorow ",pg)
+#        DT::selectPage(proxy, pg)
+#      }
+
+      DT::dataTableProxy("results") %>%
+      DT::selectRows(values$matchrows) %>%
+      DT::selectPage(first(values$matchrows) %/% input$results_state$length + 1)
+      if (first(values$matchrows) %in% input$results_rows_current){
+        values$tableupdated = TRUE
       }
     }
   }
@@ -139,7 +147,9 @@ server <- function(input, output, session) {
   })
   
   observe({
-    invalidateLater(2000)
+    if (!values$tableupdated){
+      invalidateLater(2000)
+    }
   
     values$results
     isolate({

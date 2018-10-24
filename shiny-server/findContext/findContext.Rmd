@@ -120,6 +120,7 @@ server <- function(input, output, session) {
       #  values$debug <- paste(values$matchrows)
       DT::selectRows(proxy, values$matchrows)
       if (length(values$matchrows) > 0) {
+        values$pagelen <- length(input$results_rows_current)
         pg = floor(first(values$matchrows - 1) / values$pagelen) + 1
         #   values$debug <- paste("gotorow ",pg)
         DT::selectPage(proxy, pg)
@@ -141,8 +142,9 @@ server <- function(input, output, session) {
     invalidateLater(2000)
   
     values$results
-    formatResultTable()
-    values$pagelen <- length(input$results_rows_current)
+    isolate({
+       formatResultTable()
+    })
   })
   
   observeEvent(input$maxsize,  ignoreInit=T,{

@@ -88,7 +88,14 @@ ga('send', 'pageview');")),
 
 #       values$text1 = paste(capture.output(print(unique(values$selectdf$corpus))),collapse=",") 
        values$selectdf$modelname=factor(values$selectdf$modelname,levels=c("ChanceLearner","BigramLearner","TrigramLearner", "AdjLearner", "ProminenceLearner","AdjPromLearner" ))
-     p = ggplot(values$selectdf,aes(x=corpus,y=SPA,group=modelname,shape=modelname,colour=modelname,label=numTrain))
+       
+       meanacc = aggregate(SPA ~ modelname + testRole + trainRole, values$selectdf, mean)
+       oneset = subset(values$selectdf,corpus == unique(values$selectdf$corpus)[1])
+       oneset$SPA = meanacc$SPA
+       oneset$corpus="ALLCORPORA"
+       values$selectdf2 = rbind(values$selectdf,oneset)
+       
+     p = ggplot(values$selectdf2,aes(x=corpus,y=SPA,group=modelname,shape=modelname,colour=modelname,label=numTrain))
      p=p+geom_point()
      p=p+geom_line()
      p=p+facet_wrap(~ testRole,ncol=1) 

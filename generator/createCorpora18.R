@@ -733,7 +733,7 @@ summarizeOne <- function(f) {
         uttdf$role2[uttdf$role %in% c("Target_Child")] = "Target_Child"
         
         if (!("Target_Child" %in% unique(uttdf$role))) {
-          uttdf$role2[uttdf$role %in% c("Child")] = "Target_Child"
+            uttdf$role2[uttdf$who %in% c("CHI")] = "Target_Child"
         }
         
         counts = data.frame(xtabs( ~ role2, uttdf) / length(uttdf$w))
@@ -1033,7 +1033,7 @@ computeNgrams <- function(f, csvdir, ngramdir) {
           udf$role2[udf$role %in% c("Target_Child")] = "Target_Child"
         
           if (!("Target_Child" %in% unique(udf$role))) {
-            udf$role2[udf$role %in% c("Child")] = "Target_Child"
+              udf$role2[udf$who %in% c("CHI")] = "Target_Child"
           }
 
           udfboth = udf

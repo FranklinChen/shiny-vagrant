@@ -35,7 +35,9 @@ ga('send', 'pageview');")),
                  ,selectInput("corpus", "Corpus: ", 
                               choices = c(ignore),width='90%')
                  ,selectInput("ngram", "N-gram type", 
-                              choices = c("1-gram","2-gram","3-gram","4-gram"), selected="unigram",width='90%')
+                              choices = c("1-gram","2-gram","3-gram","4-gram"), selected="1-gram",width='90%')
+                 ,selectInput("speaker", "Speaker", 
+                              choices = c("Target_Child","Others"), selected="Others",width='90%')          
                  ,downloadButton('downloadNgram', 'Download')
                  ,width = 3)
     ,mainPanel(withSpinner(DT::dataTableOutput("table", height = '400px')))
@@ -58,8 +60,9 @@ ga('send', 'pageview');")),
         loadCorpora()
     })
     
-    getFileName <- function(nopath){
+    getFileName <- function(nopath,extra=""){
       gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
+      gram = paste(gram,extra,sep="")
       fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,".rds",sep="")
       if (input$lang == ignore | input$lang == ""){
         fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
@@ -82,6 +85,13 @@ ga('send', 'pageview');")),
       if (file.exists(fpath)){
         print("found")
         values$table = readRDS(fpath)
+      }else{
+        fpath = getFileName(FALSE,paste("_",input$speaker,sep=""))
+        print(fpath)
+        if (file.exists(fpath)){
+          print("found")
+          values$table = readRDS(fpath)
+        }
       }
     }
     

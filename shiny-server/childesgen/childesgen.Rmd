@@ -37,6 +37,8 @@ fluidRow(column(3,selectInput("langGroup", "Language Group: ",
                                choices = c("Thomas"),width='90%'))
          ,column(3,selectInput("corpus", "Corpus: ", 
                                choices = c("-----"),width='90%'))
+         ,column(3,selectInput("speaker", "Speaker", 
+                              choices = c("Target_Child","Others"), selected="Others",width='90%'))        
          ,column(1,actionButton("reset", "Reset"),br(),br(),actionButton("back", "Back")))
 ,fluidRow(column(10,textInput('wordseq',"Word Sequence","I want",width='1400px')))
 ,fluidRow(column(10,textOutput("bigram"),textOutput("trigram")))
@@ -255,15 +257,13 @@ server = function(input, output, session) {
     }
   }
   
-  getFileName <- function(nopath,gram){
-    #      gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
-    fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,".rds",sep="")
+  getFileName <- function(nopath,gram,extra=""){
+    fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,extra,".rds",sep="")
     if (input$lang == ignore | input$lang == ""){
-      fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
+      fpath = paste(ngramdir, "/",input$langGroup,"_",gram,extra,".rds",sep="")
     }else{
       if (input$corpus == ignore | input$corpus == ""){
-        fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,".rds",sep="")
-        #        fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
+        fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,extra,".rds",sep="")
       }
     }
     if (nopath){
@@ -274,7 +274,7 @@ server = function(input, output, session) {
   }
   
   loadCorpora <- function(gram){
-    fpath = getFileName(FALSE,gram)
+    fpath = getFileName(FALSE,gram,paste("_",input$speaker,sep=""))
     print(fpath)
     if (file.exists(fpath)){
       print(paste("found",fpath))

@@ -468,7 +468,7 @@ createCSVfromXML <- function(csvfolder, doAll=T) {
     print("doing shorter list")
   }
   print(paste("\n\n@@ create CSV from XML numfiles=", length(flist)))
-  print(flist[ grepl("(Jakarta|Thomas)", flist) ])
+#  print(flist[ grepl("(Jakarta|Thomas)", flist) ])
   #  flist = flist[1:14]
   #  print(flist)
   funclist = c(
@@ -925,7 +925,7 @@ combineLangCorpora <- function(csvfolder, name, type) {
       print(paste("no files found combineLangCorpora ", searchname))
     }
   } else{
-    print(paste("found combineLangCorpora ", newfname))
+#    print(paste("found combineLangCorpora ", newfname))
   }
 }
 
@@ -1029,12 +1029,26 @@ computeNgrams <- function(f, csvdir, ngramdir) {
           udf$utt = paste(udf$punct, udf$w, udf$punct)
           udf$wordlen = sapply(strsplit(udf$w, "\\s+"), length)
           
+          udf$role2 = "Others"
+          udf$role2[udf$role %in% c("Target_Child")] = "Target_Child"
+        
+          if (!("Target_Child" %in% unique(udf$role))) {
+            udf$role2[udf$role %in% c("Child")] = "Target_Child"
+          }
+
+          udfboth = udf
+          useroles = c("Target_Child","Others") 
+          for (r in useroles){
+          print(paste("only ",r))
+          udf = udfboth[udfboth$role2 == r,]
+          print(head(udf))          
+
           #    print("wordlen")
           ngramfile = str_replace(f, csvdir, ngramdir)
           #    print(head(ngramfile))
           
           for (g in 1:4) {
-            ngramfile2 = str_replace(ngramfile, "Utterance", paste("", g, sep = ""))
+            ngramfile2 = str_replace(ngramfile, "Utterance", paste("", g,"_",r, sep = ""))
             #     print(ngramfile2)
             if (!file.exists(ngramfile2)) {
               #      print(g)
@@ -1062,6 +1076,7 @@ computeNgrams <- function(f, csvdir, ngramdir) {
               }
             }
           }
+            }
         }
         #    print("done")
       }
@@ -1148,50 +1163,38 @@ combineNgrams <- function(ngramfolder, name, type) {
 createNgramLang <- function(ngramfolder, langgrp = FALSE) {
   if (langgrp) {
     print(paste("\n\n@@create Lang Group Corpora"))
-    #  }else{
+  }else{
     print(paste("\n\n@@create Lang Corpora"))
-    #    flist = listFilesSortSize(ngramfolder,"[^_]+?_[^_]+?_1.rds", fn = T, rec = F)
   }
   flist = listFilesSortSize(ngramfolder,
-                            "[^_]+?_[^_]+?_[^_]+?_1.rds",
+                            "[^_]+?_[^_]+?_[^_]+?_1_[^.]+?.rds",
                             fn = T,
                             rec = F)
 #  print(flist)
   fparts = basename(flist)
-  fparts2 = str_split_fixed(fparts, "_", 4)
+  fparts2 = str_split_fixed(fparts, "_", 5)
   if (langgrp) {
     fparts3 = unique(fparts2[, 1])
   } else{
     fparts3 = unique(paste(fparts2[, 1], fparts2[, 2], sep = "_"))
   }
   fparts3 = fparts3[!str_detect(fparts3, ".rds")]
-  #print(fparts3)
-  fdf = data.frame(file = fparts3,
-                   type = "1.rds",
-                   stringsAsFactors = F)
-  fdf2 = data.frame(file = fparts3,
-                    type = "2.rds",
-                    stringsAsFactors = F)
-  fdf3 = data.frame(file = fparts3,
-                    type = "3.rds",
-                    stringsAsFactors = F)
-  fdf4 = data.frame(file = fparts3,
-                    type = "4.rds",
-                    stringsAsFactors = F)
-  fdfall = rbind(fdf, fdf2, fdf3, fdf4, stringsAsFactors = F)
-  #   print(fdfall)
+  speaker = fparts2[,5]
+#  print(paste("speaker",speaker))
+  print(head(fparts3))
+  
   funclist = c('combineNgrams', 'readFileLoop', 'safeSave')
   x <-
     foreach(
-      i = 1:length(fdf3$file),
+      i = 1:length(fparts3),
       .export = funclist,
       .packages = c("stringr", "dplyr")
     ) %dopar% {
-      combineNgrams(ngramfolder, fparts3[i], "4.rds")
-      combineNgrams(ngramfolder, fparts3[i], "3.rds")
-      combineNgrams(ngramfolder, fparts3[i], "2.rds")
-      combineNgrams(ngramfolder, fparts3[i], "1.rds")
-      write(paste("computeNgramsLang",i,"out of",length(fdf3$file)), file="../storage/timestamp.txt",append=FALSE)
+      combineNgrams(ngramfolder, fparts3[i], paste("4_",speaker,sep=""))
+      combineNgrams(ngramfolder, fparts3[i], paste("3_",speaker,sep=""))
+      combineNgrams(ngramfolder, fparts3[i], paste("2_",speaker,sep=""))
+      combineNgrams(ngramfolder, fparts3[i], paste("1_",speaker,sep=""))
+      write(paste("computeNgramsLang",i,"out of",length(fparts3)), file="../storage/timestamp.txt",append=FALSE)
     }
   
 }

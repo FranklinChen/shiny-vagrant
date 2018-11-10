@@ -64,16 +64,15 @@ ga('send', 'pageview');")),
         loadCorpora()
     })
     
-    getFileName <- function(nopath,extra=""){
+    getFileName <- function(nopath){
       gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
-      gram = paste(gram,extra,sep="")
-      fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,".rds",sep="")
+
+      fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,"_",input$speaker,".rds",sep="")
       if (input$lang == ignore | input$lang == ""){
-        fpath = paste(ngramdir, "/",input$langGroup,"_",gram,".rds",sep="")
+        fpath = paste(ngramdir, "/",input$langGroup,"_",gram,"_",input$speaker,".rds",sep="")
       }else{
         if (input$corpus == ignore | input$corpus == ""){
-          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,".rds",sep="")
-  #       fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_ALL_",gram,".rds",sep="")
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,"_",input$speaker,".rds",sep="")
         }
       }
       if (nopath){
@@ -84,7 +83,7 @@ ga('send', 'pageview');")),
     }
     
     loadCorpora <- function(){
-      fpath = getFileName(FALSE,paste("_",input$speaker,sep=""))
+      fpath = getFileName(FALSE)
       print(fpath)
       if (file.exists(fpath)){
         print("found")

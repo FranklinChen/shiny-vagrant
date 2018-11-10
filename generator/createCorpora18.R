@@ -1063,6 +1063,12 @@ computeNgrams <- function(f, csvdir, ngramdir) {
                   ngdf$logrank = log(ngdf$rank)
                   ngdf$logfreq = log(ngdf$freq)
                   ngdf$ngrams = as.character(ngdf$ngrams)
+                  if (g > 1){
+                    ngramlist = str_split_fixed(ngdf$ngrams," ",g)
+                    for (gg in 1:g){
+                      ngdf[paste("g",gg,sep="")]=ngramlist[,gg]
+                    }
+                  }
                   ngdf$punct = ifelse(str_detect(ngdf$ngrams, "[#](eee|ppp|qqq)"),1,0)
                   print(head(ngdf))                  
           #        ngdf = ngdf[order(df$ngrams),]

@@ -1041,7 +1041,7 @@ computeNgrams <- function(f, csvdir, ngramdir) {
           for (r in useroles){
           print(paste("only ",r))
           udf = udfboth[udfboth$role2 == r,]
-          print(head(udf))          
+          print(head(udf[,c("who","role2","w")]))   
 
           #    print("wordlen")
           ngramfile = str_replace(f, csvdir, ngramdir)

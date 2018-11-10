@@ -84,6 +84,16 @@ server = function(input, output, session) {
           updateSelection()
   })
   
+  observeEvent(input$speaker, ignoreInit=T,{
+    values$n1 = "NULL"
+    values$n2 = "NULL"
+    values$n3 = "NULL"
+    values$n4 = "NULL"
+    values$bigram= ""
+    values$trigram = ""
+    updateSelection()
+  })
+  
   observeEvent(input$reset, {
     print("reset")
     isolate({

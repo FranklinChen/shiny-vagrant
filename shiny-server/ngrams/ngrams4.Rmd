@@ -80,13 +80,13 @@ ga('send', 'pageview');")),
     }
     
     loadCorpora <- function(){
-      fpath = getFileName(FALSE)
+      fpath = getFileName(FALSE,paste("_",input$speaker,sep=""))
       print(fpath)
       if (file.exists(fpath)){
         print("found")
         values$table = readRDS(fpath)
       }else{
-        fpath = getFileName(FALSE,paste("_",input$speaker,sep=""))
+        fpath = getFileName(FALSE)
         print(fpath)
         if (file.exists(fpath)){
           print("found")

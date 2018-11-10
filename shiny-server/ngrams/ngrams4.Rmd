@@ -110,7 +110,7 @@ ga('send', 'pageview');")),
     output$downloadNgram <- downloadHandler(
       filename = function() { 
         ff= getFileName(TRUE)
-        ff=sub(".rds",paste(Sys.Date(),".csv",sep=""),ff)
+        ff=sub(".rds",paste("_",Sys.Date(),".csv",sep=""),ff)
         ff
       },
       content <- function(file) {

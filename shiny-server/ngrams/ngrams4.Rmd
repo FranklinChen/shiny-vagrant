@@ -60,6 +60,10 @@ ga('send', 'pageview');")),
         loadCorpora()
     })
     
+    observeEvent(input$speaker, {
+        loadCorpora()
+    })
+    
     getFileName <- function(nopath,extra=""){
       gram = as.integer(str_split_fixed(input$ngram,"-",2)[1])
       gram = paste(gram,extra,sep="")

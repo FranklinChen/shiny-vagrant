@@ -50,13 +50,13 @@ ga('send', 'pageview');")),
     values$addignore=TRUE
     dd <- readFileDir("Eng-NA","Bates","Free20",addignore=TRUE)
     
-    observeEvent(input$ngram, {
+    observeEvent(input$ngram, ignoreInit=T,{
       if (!is.null(input$ngram)){
         loadCorpora()
       }
    })
     
-    observeEvent(input$corpus, {
+    observeEvent(input$corpus,ignoreInit=T, {
         loadCorpora()
     })
     

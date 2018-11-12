@@ -1150,6 +1150,12 @@ combineNgrams <- function(ngramfolder, name, type) {
       newngram$logfreq = log(newngram$freq)
       newngram$ngrams = as.character(newngram$ngrams)
       newngram$punct = ifelse(str_detect(newngram$ngrams, "[#](eee|ppp|qqq)"), 1, 0)
+      if (g > 1){
+                    ngramlist = str_split_fixed(newngram$ngrams," ",g)
+                    for (gg in 1:g){
+                      newngram[paste("g",gg,sep="")]=ngramlist[,gg]
+                    }
+      }
       rownames(newngram) <- 1:nrow(newngram)
       #      print(head(newngram))
       safeSave(newngram, newfname, "")

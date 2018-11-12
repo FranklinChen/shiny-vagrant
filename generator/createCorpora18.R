@@ -1122,12 +1122,12 @@ if (mode == 8 || mode == 0) {
 print("finished computeNgramsAll")
 
 
-combineNgrams <- function(ngramfolder, name, type) {
-  newfname = paste(ngramfolder, "/", name, "_", type, sep = "")
+combineNgrams <- function(ngramfolder, name, type,speaker) {
+  newfname = paste(ngramfolder, "/", name, "_", type,"_",speaker, sep = "")
   
   if (!file.exists(newfname)) {
     print(paste("starting combineNGram ", newfname))
-    searchname = paste(name, "_[^_]+_", type, sep = "")
+    searchname = paste(name, "_[^_]+_", type,"_",speaker, sep = "")
     flist2 = list.files(
       path = ngramfolder,
       searchname,
@@ -1150,9 +1150,9 @@ combineNgrams <- function(ngramfolder, name, type) {
       newngram$logfreq = log(newngram$freq)
       newngram$ngrams = as.character(newngram$ngrams)
       newngram$punct = ifelse(str_detect(newngram$ngrams, "[#](eee|ppp|qqq)"), 1, 0)
-      if (g > 1){
-                    ngramlist = str_split_fixed(newngram$ngrams," ",g)
-                    for (gg in 1:g){
+      if (type > 1){
+                    ngramlist = str_split_fixed(newngram$ngrams," ",type)
+                    for (gg in 1:type){
                       newngram[paste("g",gg,sep="")]=ngramlist[,gg]
                     }
       }
@@ -1202,10 +1202,10 @@ createNgramLang <- function(ngramfolder, langgrp = FALSE) {
       .export = funclist,
       .packages = c("stringr", "dplyr")
     ) %dopar% {
-      combineNgrams(ngramfolder, fparts3[i], paste("4_",speaker,sep=""))
-      combineNgrams(ngramfolder, fparts3[i], paste("3_",speaker,sep=""))
-      combineNgrams(ngramfolder, fparts3[i], paste("2_",speaker,sep=""))
-      combineNgrams(ngramfolder, fparts3[i], paste("1_",speaker,sep=""))
+      combineNgrams(ngramfolder, fparts3[i], 4,speaker)
+      combineNgrams(ngramfolder, fparts3[i], 3,speaker)
+      combineNgrams(ngramfolder, fparts3[i], 2,speaker)
+      combineNgrams(ngramfolder, fparts3[i], 1,speaker)
       write(paste("computeNgramsLang",i,"out of",length(fparts3)), file="../storage/timestamp.txt",append=FALSE)
     }
   

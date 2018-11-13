@@ -126,6 +126,8 @@ ga('send', 'pageview');")),
 )
 ```
 
+- You can select the language group, language, and corpora (these are based on the directory structure in CHILDES)
+- Then select the type of n-grams that you want and whether you want them for the target child or all other speakers (mostly the parents)
 - Zipf (1949) found that there was a negative linear relationship between log frequency and log rank in written texts, but larger natural spoken corpora do no always exhibit this relationship.  Punctuation words (e.g., #ppp = declarative, #qqq = questions, #eee = exclamation).
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.

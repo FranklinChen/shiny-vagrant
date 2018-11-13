@@ -99,8 +99,12 @@ server = function(input, output, session) {
      thiscontextfreq = sum(df2$freq)
      df2$prop = df2$freq/thiscontextfreq
      df2 = df2[order(-df2$freq),]
-     df2$order = 1:length(df2$freq)
-     updateSliderInput(session, "size", max = length(df2$freq))
+     df2$rank = 1:length(df2$freq)
+     maxlen = length(df2$freq)
+     if (maxlen > 500){
+       maxlen = 500
+     }
+     updateSliderInput(session, "size", max = maxlen)
      values$table = df2
   }
   
@@ -132,7 +136,6 @@ server = function(input, output, session) {
     if (file.exists(fpath)){
       print(paste("found",fpath))
       df = readRDS(fpath)
-      # df = df[order(df$ngrams),]
       return(df)
     }
     return(NULL)
@@ -144,8 +147,8 @@ server = function(input, output, session) {
 
       tokenfreqcontext = sum(values$table$freq)
       subsetfreq = sum(ngdf$freq)
-      values$descript=paste("There are ",values$totalfreq," word tokens in this corpus by the above speaker.\nThere are ",length(values$table$freq)," unique words that follow the search context (",tokenfreqcontext ," token freq).\nRestricted to the top ",input$size," words, we capture ",100*subsetfreq/tokenfreqcontext,"% of the possible words in this context." ,sep="")
-      ggplot(ngdf,aes(x=order,y=prop,label=g2))+geom_text(colour='red')+stat_smooth(method="lm")+coord_flip()
+      values$descript=paste("There are ",values$totalfreq," word tokens in this corpus by the above speaker.\nThere are ",length(values$table$freq)," unique words that follow the search context (",tokenfreqcontext ," token freq).\nThe top ",input$size," words cover ",100*subsetfreq/tokenfreqcontext,"% of the possible words." ,sep="")
+      ggplot(ngdf,aes(x=rank,y=prop,label=g2))+geom_text(colour='red')+stat_smooth(method="lm")+coord_flip()
     }
   })
   
@@ -169,9 +172,7 @@ server = function(input, output, session) {
 )
 ```
 
-- The transitional probabilities are computed by taking the frequency of the last three words and dividing by the frequency of the bigram composed of the first two words within the trigram.  For the utterance "I want a drink", the frequency of "want a drink" will be divided by the frequency of "want a".  This tells us out of all of the cases of "want a", what proportion were followed by "drink".  If the sequence is only two words, then bigram frequency is divided by the unigram frequency of the first word.
-
-- The first few clicks will be slow to update, because files need to be loaded.
+- Cameron-Faulkner, Lieven, and Tomasello (2003) found that 17 words could explain 45% of the maternal utterances.  The above analysis shows a similar result with the Thomas corpus, since it analyzes all of the words that appear at the start of an utterance.
 
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
 

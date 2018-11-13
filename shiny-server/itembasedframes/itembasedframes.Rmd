@@ -1,0 +1,173 @@
+---
+title: "Item-based frames"
+runtime: shiny
+output: 
+html_document: 
+fig_caption: yes
+---
+
+- Item-based frames uses ngrams from CHILDES Corpora.  Click [here](../) to return to toolkit page.
+- Various researchers have shown that language use is restricted and only a relatively few items occur in any context.
+- This analysis allows you to examine that claim in various CHILDES corpora
+- Select a corpus to use by changing language group, language, corpora, and speaker. 
+- Create a search context.  The default Context "\^\[#](qqq|eee|ppp)" is a regular expression that finds all words that can start a sentence.
+- Click apply to create a figure that shows the proportion of the frequency explained by each word in this context.
+- The slider allows you to examine how much of the frequency can be explained by a subset of the words in this context.
+```{r setup, include=FALSE}
+library(shinycssloaders)
+require(ggplot2)
+ignore = "-----"
+ngramdir = "../storage/ngrams"
+```
+
+```{r, echo=FALSE}
+shinyApp(
+  ui =  fluidPage(
+    tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-7929639-6', 'auto');
+ga('set', 'contentGroup1', 'itembasedframes'); 
+ga('send', 'pageview');")),
+tags$script(src='https://www.google-analytics.com/analytics.js'),
+fluidRow(column(3,selectInput("langGroup", "Language Group: ", 
+                              choices = c("Eng-UK"), width='90%'))
+         ,column(3,selectInput("lang", "Language: ",
+                               choices = c("Thomas"),width='90%'))
+         ,column(3,selectInput("corpus", "Corpus: ", 
+                               choices = c("-----"),width='90%'))
+         ,column(3,selectInput("speaker", "Speaker", 
+              choices = c("Target_Child","Others"), selected="Others",width='90%'))
+)
+,fluidRow(column(3,textInput("search1", "Context:", "^[#](qqq|eee|ppp)"))
+         ,column(1,actionButton("apply", "Apply")))
+,fluidRow(column(10,
+sliderInput("size", "Size:", min = 2, max = 100,value = 17,width="100%")))
+,verbatimTextOutput("descript")
+,plotOutput("freqplot")
+,withSpinner(DT::dataTableOutput("table", width='400px',height = '400px'))
+  ),
+server = function(input, output, session) {
+  source('../childes2csv/shared3.R', local=TRUE)
+  values$updateFilter = TRUE
+  values$changeSearch = FALSE
+  values$addignore=TRUE
+  values$n1 = "NULL"
+  values$n2 = "NULL"
+  values$n3 = "NULL"
+  values$n4 = "NULL"
+  values$descript= "Nothing"
+  values$trigram = ""
+  values$totalfreq = 1
+  values$wordseq = c("I","want")
+  dd <- readFileDir("Eng-UK","Thomas","-----",addignore=TRUE)
+  
+  output$descript <- renderText({ values$descript })
+  output$trigram <- renderText({ values$trigram })
+  #  output$value <- renderText({ input$caption })
+  
+  observeEvent(input$langGroup,  ignoreInit=T,{
+    updateCorpus()
+  })
+  
+  observeEvent(input$lang,  ignoreInit=T,{
+    updateCorpus()
+  })
+  
+  observeEvent(input$corpus,  ignoreInit=T,{
+    updateCorpus()
+  })
+  
+   observeEvent(input$speaker,  {
+    updateCorpus()
+  })
+ observeEvent(input$apply, ignoreInit=T,{
+              print("apply")
+   updateCorpus()
+   
+ })
+ 
+ updateCorpus <- function(){
+     values$fulltable = loadCorpora("2")
+     values$totalfreq = sum(values$fulltable$freq)
+     df = values$fulltable[str_detect(values$fulltable$ngrams, input$search1),]
+     df2 = aggregate(cbind(freq) ~ g2,df,sum)
+     thiscontextfreq = sum(df2$freq)
+     df2$prop = df2$freq/thiscontextfreq
+     df2 = df2[order(-df2$freq),]
+     df2$rank = 1:length(df2$freq)
+     maxlen = length(df2$freq)
+     if (maxlen > 500){
+       maxlen = 500
+     }
+     updateSliderInput(session, "size", max = maxlen)
+     values$table = df2
+  }
+  
+  
+  getFileName <- function(nopath,gram,extra=""){
+    fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,extra,".rds",sep="")
+    if (input$lang == ignore | input$lang == ""){
+      fpath = paste(ngramdir, "/",input$langGroup,"_",gram,extra,".rds",sep="")
+    }else{
+      if (input$corpus == ignore | input$corpus == ""){
+        fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,extra,".rds",sep="")
+      }
+    }
+    if (nopath){
+      fpath = str_replace(fpath,paste(ngramdir,"/",sep=""),"")
+    }
+    print(fpath)
+    return(fpath)
+  }
+  
+  loadCorpora <- function(gram){
+#    df = read.csv("../storage/ngrams/Eng-NA_Bates_Free20_2_Others_2018-11-11.csv")
+#    print(head(df))
+   # df$ninput$search1
+#    return(df)
+    
+    fpath = getFileName(FALSE,gram,paste("_",input$speaker,sep=""))
+    print(fpath)
+    if (file.exists(fpath)){
+      print(paste("found",fpath))
+      df = readRDS(fpath)
+      return(df)
+    }
+    return(NULL)
+  }
+  
+  output$freqplot<-renderPlot({
+    if (length(values$table) > 2){
+      ngdf = head(values$table,input$size)
+      tokenfreqcontext = sum(values$table$freq)
+      subsetfreq = sum(ngdf$freq)
+      values$descript=paste("There are ",values$totalfreq," word tokens in this corpus by the above speaker.\nThere are ",length(values$table$freq)," unique words that follow the search context (",tokenfreqcontext ," token freq).\nThe top ",input$size," words cover ",100*subsetfreq/tokenfreqcontext,"% of the possible words." ,sep="")
+      ggplot(ngdf,aes(x=rank,y=prop,label=g2))+geom_text(colour='red')+stat_smooth(method="lm")+coord_flip()
+    }
+  })
+  
+  output$downloadNgram <- downloadHandler(
+    filename = function() { 
+      ff= getFileName(TRUE)
+      ff=sub(".rds",".csv",ff)
+      ff
+    },
+    content <- function(file) {
+      fpath = getFileName(FALSE)
+      print(fpath)
+      wholecsv <- readRDS(fpath)
+      write.csv(wholecsv, file)
+      
+    }
+    ,contentType = "text/csv"
+  )
+}
+,options = list(width=800,height = 800)
+)
+```
+
+- Cameron-Faulkner, Lieven, and Tomasello (2003) found that 17 words could explain 45% of the maternal utterances.  The above analysis shows a similar result with the Thomas corpus, since it analyzes all of the words that appear at the start of an utterance.
+
+- These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
+
+- This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/

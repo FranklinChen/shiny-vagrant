@@ -141,7 +141,9 @@ server = function(input, output, session) {
       tokenfreqcontext = sum(values$table$freq)
       subsetfreq = sum(ngdf$freq)
       values$descript=paste("There are ",values$totalfreq," word tokens in this corpus by the above speaker.\nThere are ",length(values$table$freq)," unique words that follow the search context (",tokenfreqcontext ," token freq).\nThe top ",input$size," words cover ",100*subsetfreq/tokenfreqcontext,"% of the possible words." ,sep="")
-      ggplot(ngdf,aes(x=rank,y=prop,label=g2))+geom_text(colour='red')+stat_smooth(method="lm")+coord_flip()
+      if ("g2" %in% names(ngdf)){
+        ggplot(ngdf,aes(x=rank,y=prop,label=g2))+geom_text(colour='red')+stat_smooth(method="lm")+coord_flip()
+      }
     }
   })
   

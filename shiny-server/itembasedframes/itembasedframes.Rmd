@@ -89,9 +89,7 @@ server = function(input, output, session) {
     fpath = getFileName(FALSE)
     print(fpath)
     if (file.exists(fpath)){
-      print(paste("found",fpath))
-      df = readRDS(fpath)
-  
+      print(paste("found",fpath))  
      values$fulltable = readRDS(fpath)
      values$totalfreq = sum(values$fulltable$freq)
      df = values$fulltable[str_detect(values$fulltable$ngrams, input$search1),]

@@ -103,21 +103,22 @@ server = function(input, output, session) {
   }
   
   
-  getFileName <- function(nopath,gram,extra=""){
-    fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,extra,".rds",sep="")
-    if (input$lang == ignore | input$lang == ""){
-      fpath = paste(ngramdir, "/",input$langGroup,"_",gram,extra,".rds",sep="")
-    }else{
-      if (input$corpus == ignore | input$corpus == ""){
-        fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,extra,".rds",sep="")
+ getFileName <- function(nopath){
+      gram = 2
+      fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",input$corpus, "_",gram,"_",input$speaker,".rds",sep="")
+      if (input$lang == ignore | input$lang == ""){
+        fpath = paste(ngramdir, "/",input$langGroup,"_",gram,"_",input$speaker,".rds",sep="")
+      }else{
+        if (input$corpus == ignore | input$corpus == ""){
+          fpath = paste(ngramdir, "/",input$langGroup,"_",input$lang,"_",gram,"_",input$speaker,".rds",sep="")
+        }
       }
-    }
-    if (nopath){
-      fpath = str_replace(fpath,paste(ngramdir,"/",sep=""),"")
-    }
-    print(fpath)
-    return(fpath)
-  }
+      if (nopath){
+        fpath = str_replace(fpath,paste(ngramdir,"/",sep=""),"")
+      }
+      print(fpath)
+      return(fpath)
+ }
   
   loadCorpora <- function(gram){
 #    df = read.csv("../storage/ngrams/Eng-NA_Bates_Free20_2_Others_2018-11-11.csv")
@@ -125,7 +126,7 @@ server = function(input, output, session) {
    # df$ninput$search1
 #    return(df)
     
-    fpath = getFileName(FALSE,gram,paste("_",input$speaker,sep=""))
+    fpath = getFileName(FALSE)
     print(fpath)
     if (file.exists(fpath)){
       print(paste("found",fpath))

@@ -86,7 +86,13 @@ server = function(input, output, session) {
  })
  
  updateCorpus <- function(){
-     values$fulltable = loadCorpora("2")
+    fpath = getFileName(FALSE)
+    print(fpath)
+    if (file.exists(fpath)){
+      print(paste("found",fpath))
+      df = readRDS(fpath)
+  
+     values$fulltable = readRDS(fpath)
      values$totalfreq = sum(values$fulltable$freq)
      df = values$fulltable[str_detect(values$fulltable$ngrams, input$search1),]
      df2 = aggregate(cbind(freq) ~ g2,df,sum)
@@ -100,6 +106,7 @@ server = function(input, output, session) {
      }
      updateSliderInput(session, "size", max = maxlen)
      values$table = df2
+     }
   }
   
   

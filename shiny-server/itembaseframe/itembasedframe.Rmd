@@ -44,7 +44,7 @@ fluidRow(column(3,selectInput("langGroup", "Language Group: ",
 ,fluidRow(column(3,textInput("search1", "Context:", "^[#](qqq|eee|ppp)"))
          ,column(1,actionButton("apply", "Apply")))
 ,fluidRow(column(10,
-sliderInput("size", "Size:", min = 2, max = 1000,value = 500,width="100%")))
+sliderInput("size", "Size:", min = 2, max = 100,value = 17,width="100%")))
 ,verbatimTextOutput("descript")
 ,plotOutput("freqplot")
 ,withSpinner(DT::dataTableOutput("table", width='400px',height = '400px'))
@@ -100,7 +100,7 @@ server = function(input, output, session) {
      df2$prop = df2$freq/thiscontextfreq
      df2 = df2[order(-df2$freq),]
      df2$order = 1:length(df2$freq)
-     updateSliderInput(session, "size", max = length(df2$freq),value = as.integer(length(df2$freq)/2))
+     updateSliderInput(session, "size", max = length(df2$freq))
      values$table = df2
   }
   

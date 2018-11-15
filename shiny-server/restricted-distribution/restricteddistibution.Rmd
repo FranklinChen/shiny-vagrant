@@ -8,10 +8,10 @@ fig_caption: yes
 
 - Restricted distribution uses ngrams from CHILDES Corpora.  Click [here](../) to return to toolkit page.
 - Various researchers have shown that the items that occur in various contexts are restricted.
-- Cameron-Faulkner, Lieven, and Tomasello (2003) found that 17 words could explain 45% of the maternal utterances.  
+- Cameron-Faulkner, Lieven, and Tomasello (2003) found that 17 words could cover 45% of the words that start maternal utterances.  
 - This analysis allows you to examine that claim in various CHILDES corpora
 - Select a corpus to use by changing language group, language, corpora, and speaker. 
-- Create a search context.  The default Context "\^\[#](qqq|eee|ppp)" is a regular expression that finds all words that can start a sentence.
+- Create a search context.  The default Context "\^\[#](qqq|eee|ppp)" is a regular expression that finds all words that can start an utterance.
 - Click apply to create a figure that shows the proportion of the frequency explained by each word in this context.
 - The slider allows you to examine how much of the frequency can be explained by a subset of the words in this context.
 ```{r setup, include=FALSE}
@@ -40,7 +40,7 @@ fluidRow(column(3,selectInput("langGroup", "Language Group: ",
 )
 ,fluidRow(column(3,textInput("search1", "Context:", "^[#](qqq|eee|ppp)"))
          ,column(1,actionButton("apply", "Apply")))
-,fluidRow(column(10,
+,fluidRow(column(12,
 sliderInput("size", "Size:", min = 2, max = 100,value = 17,width="100%")))
 ,verbatimTextOutput("descript")
 ,plotOutput("freqplot")

@@ -26,7 +26,7 @@ shinyApp(
   ui =  fluidPage(
     tags$script(HTML("window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 ga('create', 'UA-7929639-6', 'auto');
-ga('set', 'contentGroup1', 'itembasedframes'); 
+ga('set', 'contentGroup1', 'restricteddist'); 
 ga('send', 'pageview');")),
 tags$script(src='https://www.google-analytics.com/analytics.js'),
 fluidRow(column(3,selectInput("langGroup", "Language Group: ", 

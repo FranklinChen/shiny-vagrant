@@ -91,7 +91,7 @@ adjustTableCol <- function(){
     if (length(vdf[,1]) > 1000){
       vdf = values$table[1:1000,]
     }
-    collength = data.frame(apply(apply(vdf,1,nchar),1,max))
+    collength = data.frame(apply(apply(vdf,1,nchar,keepNA=F),1,max))
 #    print(unique(vdf$t_type))
 #    print(collength)
     if ("rowunit" %in% input && input$rowunit == "Utterance"){

@@ -476,7 +476,7 @@ ga('send', 'pageview');")),
 - You can download the results or the original table using the download buttons.
 - These tools are still a work in progress and you should check any results with the original CHILDES corpora.  
 - This work is part of the toolkit project within the ESRC International Centre for Language and Communicative Development (LuCiD) (http://www.lucid.ac.uk/, ESRC grant [ES/L008955/1]).  Please contact [Franklin Chang](https://sites.google.com/site/sentenceproductionmodel/cv) with any questions.
-- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher's toolkit [Computer software]. Retrieved from http://www.lucid.ac.uk/resources/for-researchers/toolkit/
+- To cite these tools, please use this reference: Chang, F. (2017) The LuCiD language researcher’s toolkit [Computer software]. Retrieved from http://gandalf.talkbank.org:8080/
 
 
 

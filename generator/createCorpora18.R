@@ -178,12 +178,12 @@ processParticipants <- function(one) {
     # partdf$Y = as.character(partdf$Y)
     # partdf$M = as.character(partdf$M)
     # partdf$D = as.character(partdf$D)
-    ages = which(!is.na(partdf$age))
-    if (length(ages) == 1) {
-      partdf$agemonth = partdf$agemonth[ages]
-      partdf$Y = partdf$Y[ages]
-      partdf$M = partdf$M[ages]
-      partdf$D = partdf$D[ages]
+    tarchild = which(partdf$role=="Target_Child")
+    if (length(tarchild) == 1) {
+      partdf$agemonth = partdf$agemonth[tarchild]
+      partdf$Y = partdf$Y[tarchild]
+      partdf$M = partdf$M[tarchild]
+      partdf$D = partdf$D[tarchild]
     }
   }
   return(partdf)

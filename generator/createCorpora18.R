@@ -14,6 +14,8 @@ require(dplyr)
 require(ngram)
 library(doParallel)
 
+sys.source("../addMorJapanese5.R")
+
 options(encoding = 'UTF-8')
 csvfolder = "csvfolderMake"
 
@@ -413,6 +415,12 @@ processXMLFileList <-
             print(head(onefilelines))
           }
         }
+        
+        if (fnameparts[2] == "Japanese"){
+          print("add Japanese mor")
+          onefilelines = addMorJapanese(onefilelines)
+        }
+        
         safeSave(onefilelines, newfile, NULL)
         print(paste("process saving ", newfile))
         alldf = NULL

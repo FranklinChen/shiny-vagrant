@@ -68,6 +68,7 @@ addMorJapanese <- function(jdf){
       }
     }
   }
+  return(jdf)
 }
 
 #jdforig <- read.csv("~/Desktop/Japanese_Miyata_Tai_Word_2019-09-05.csv")

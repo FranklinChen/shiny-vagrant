@@ -10,7 +10,7 @@ $ nohup /bin/bash downloadchildes.sh &
 ```
 ## Automatic
 
-Program is run once a month
+To run it, you need to edit your crontab and put the above command in there.
 
 ```
 $ crontab -l   # to list present settings

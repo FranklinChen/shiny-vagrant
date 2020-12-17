@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
 
    # install apache R
     apt-get update
-    apt-get install -y apache2 r-base r-cran-rcpp r-cran-httpuv r-cran-htmltools r-cran-sourcetools r-cran-digest r-cran-stringr r-cran-dplyr r-cran-ggplot2 r-cran-rcurl r-cran-xml2 libpoppler-cpp-dev poppler-utils pandoc libcurl4-openssl-dev libxml2-dev libssl-dev emacs gdebi-core
+    apt-get install -y apache2 r-base r-cran-rcpp r-cran-httpuv r-cran-htmltools r-cran-sourcetools r-cran-digest r-cran-stringr r-cran-dplyr r-cran-ggplot2 r-cran-rcurl r-cran-xml2 libpoppler-cpp-dev poppler-utils pandoc libcurl4-openssl-dev libxml2-dev libssl-dev emacs gdebi-core libgit2-dev 
 
    # install shiny server
    SHINY=shiny-server-1.5.3.838-amd64.deb

@@ -3,7 +3,8 @@
 
 # this is the vagrant file to use if you want to create the databases within a vagrant ubuntu instance.
 # It loads additional stuff and increases memory for better performance.
-# you can cd to this direactory: /vagrant_data/generator 
+# you can vagrant ssh to login
+# you can cd to this directory: /vagrant_data/generator 
 # then run this command: nohup /bin/bash downloadchildes.sh & 
 
 

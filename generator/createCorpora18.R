@@ -61,6 +61,7 @@ readFileLoop <- function(fname) {
 
 
 addMorJapanese <- function(jdf){
+ if (!("a" %in% names(jdf))) return(jdf)
   
   jdf$uID=as.character(jdf$uID)
   jdf$mor = ""  # create a new column for results

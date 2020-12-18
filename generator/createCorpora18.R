@@ -32,8 +32,7 @@ if (Sys.getenv("RSTUDIO") != "1") {
 cl <- makeCluster(nc, outfile = "", type = "FORK")
 registerDoParallel(cl)
 
-print("mode")
-print(mode)
+print(paste("mode",mode," number of cores ",nc))
 
 #setwd("~/big/rscripts/corpus/childes/workfiles")
 #write("start",file="myfile",append=FALSE)

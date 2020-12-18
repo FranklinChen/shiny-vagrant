@@ -2,11 +2,11 @@
 checkinstall <- function(lname){
   if(lname %in% rownames(installed.packages()) == FALSE) {install.packages(lname,repos = "http://cran.us.r-project.org")}
 }
-checkinstall("stringr")
-checkinstall("xml2")
-checkinstall("dplyr")
-checkinstall("ngram")
-checkinstall("doParallel")
+#checkinstall("stringr")
+#checkinstall("xml2")
+#checkinstall("dplyr")
+#checkinstall("ngram")
+#checkinstall("doParallel")
 
 library(stringr)
 require(xml2)
